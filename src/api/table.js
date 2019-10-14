@@ -3,7 +3,7 @@ import Vue from 'vue'
 import http from '@/utils/http'
 
 /**
- *
+ * 
  * 同功能，在不同环境时请求接口路径不同时，分两个对象存储路径
  */
 
@@ -167,23 +167,8 @@ export function produckTree(data) {
   return http.post('/product/category/tree', data, 'formData')
 }
 
-// 增加商品分类
-export function saveCategory(data) {
-  return http.post('/product/category/saveCategory', data, 'formData')
-}
-
 // 标签场景查询接口
 export function produckTabel(data) {
-  return http.post('/product/label/list', data, 'formData')
-}
-
-// 删除商品分类
-export function deleteCategory(data) {
-  return http.post('/product/category/deleteCategory', data, 'formData')
-}
-
-// 标签场景查询接口
-export function produckLabel(data) {
   return http.post('/product/label/list', data, 'formData')
 }
 
@@ -197,7 +182,7 @@ export function produckBatchUp(data) {
   return http.post('/product/info/batchUpDown', data, 'formData')
 }
 
-// 商品推荐
+// 商品推荐 
 export function produckRecommend(data) {
   return http.post('/product/recommend/recommend', data, 'formData')
 }
@@ -237,18 +222,6 @@ export function produckInfoDetails(data) {
 export function produckBatchAdd(data) {
   return http.post('/product/details/batchAdd', data, 'formData')
 }
-//删除产品
-export function productDelete(data){
-  return http.post('/product/info/deleteRecover', data,'formData')
-}
-//删除产品记录列表
-export function productDeleteRecordList(data){
-  return http.post('/productDeleteRecord/info/deleteRecordList', data,'formData')
-}
-//下载产品信息表
-export function productDownLoad(data){
-  return http.post('/product/info/table', data,'formData')
-}
 
 
 
@@ -271,11 +244,6 @@ export function produckAddAttribute(data) {
   return http.post('/product/attribute/name/add', data, 'formData')
 }
 
-// 编辑分类属性
-export function produckEditAttribute(data) {
-  return http.post('/product/attribute/name/edit', data, 'formData')
-}
-
 // 查看全部属性
 export function produckAllAttribute(data) {
   return http.post('/product/attribute/name/attributes', data, 'formData')
@@ -284,11 +252,6 @@ export function produckAllAttribute(data) {
 // 删除属性
 export function produckDelAttribute(data) {
   return http.post('/product/attribute/name/delete', data, 'formData')
-}
-
-// 修改分类排序
-export function setCoefficient(data) {
-  return http.post('/product/category/setCoefficient', data, 'formData')
 }
 
 // 商品标签
@@ -309,51 +272,6 @@ export function productLabelSave(data) {
 // 商品标签删除
 export function productLabelDelete(data) {
   return http.post('/product/label/delete', data, 'formData')
-}
-
-// 商品标签详情
-export function productLabelDetail(data) {
-  return http.post('/product/label/detail', data, 'formData')
-}
-
-// 商品标签详情
-export function labelShowHomePage(data) {
-  return http.post('/product/label/showHomePage', data, 'formData')
-}
-
-// 新增场景
-export function productScenelSave(data) {
-  return http.post('/product/scene/save', data, 'formData')
-}
-
-// 场景列表
-export function productScenelList(data) {
-  return http.post('/product/scene/list', data, 'formData')
-}
-
-// 删除场景
-export function productScenelDel(data) {
-  return http.post('/product/scene/delete', data, 'formData')
-}
-
-// 场景排序
-export function productScenelSort(data) {
-  return http.post('/product/scene/sort', data, 'formData')
-}
-
-// 场景详情
-export function productScenelDetail(data) {
-  return http.post('/product/scene/detail', data, 'formData')
-}
-
-// 场景编辑
-export function productScenelEdit(data) {
-  return http.post('/product/scene/edit', data, 'formData')
-}
-
-// 场景编辑
-export function sceneShowHomePage(data) {
-  return http.post('/product/scene/showHomePage', data, 'formData')
 }
 
 
@@ -486,101 +404,6 @@ export function getHistorys(data) {
 // 获取绑定商品
 export function getHistoryDetail(data) {
   return http.post('/coupon/bind/record/detail', data, 'formData')
-}
-//获取客户列表
-export function getCustomerList(data) {
-  return http.post('/customer/info/list', data, 'formData')
-}
-//删除客户
-export function customerDel(data) {
-  return http.post('/customer/info/del', data, 'formData')
-}
-//添加客户
-export function customerAdd(data) {
-  return http.post('/customer/info/customerAdd', data, 'formData')
-}
-//客户信息编辑
-export function customerEdit(data) {
-  return http.post('/customer/info/edit', data, 'formData')
-}
-//获取客户详情
-export function getCustomerDetail(data) {
-  return http.post('/customer/info/detail', data, 'formData')
-}
-//绑定时获取客户名单
-export function customerForBand(data) {
-  return http.post('/customer/info/customerForBand', data, 'formData')
-}
-//批量删除客户信息
-export function customerDelAll(data) {
-  return http.post('/customer/info/delAll', data, 'formData')
-}
-
-
-/**
- *文章
- */
-// 发布文章
-export function postArticleRelease(data) {
-  return http.post('/article/info/release', data, 'formData')
-}
-//编辑/修改文章
-export function articleEdit(data){
-  return http.post('/article/info/edit', data, 'formData')
-}
-// 文章列表
-export function articleList(data) {
-  return http.post('/article/info/articleList', data, 'formData')
-}
-//删除文章
-export function articleDel(data) {
-  return http.post('/article/info/del', data, 'formData')
-}
-//文章详情
-export function articleDetail(data){
-  return http.post('/article/info/detail', data, 'formData')
-}
-//文章预览所需的商品信息
-export function forArticlePreview(data){
-  return http.post('/product/info/forArticlePreview', data, 'formData')
-}
-//批量删除文章
-export function articleDelAll(data) {
-  return http.post('/article/info/delAll', data, 'formData')
-}
-//批量上下架文章
-export function articleChangeStatus(data) {
-  return http.post('/article/info/changeStatus', data, 'formData')
-}
-
-
-//建行20191223新年活动订单列表
-export function convertInfoList(data) {
-  return http.post('/convert/info/list', data, 'formData')
-}
-//建行20191223新年活动兑奖详情
-export function deliveryDetail(data) {
-  return http.post('/convert/info/deliveryDetail', data, 'formData')
-}
-//建行20191223新年活动订单发货
-export function convertDeliveryPost(data) {
-  return http.post('/convert/info/post', data, 'formData')
-}
-//建行20191223新年活动导入兑奖信息
-export function insertExcel(data) {
-  return http.post('/convert/info/insertExcel', data, 'formData')
-}
-//建行20191223新年活动导出兑奖信息
-export function downloadConvertedExcel(data) {
-  return http.post('/convert/info/downloadConvertedExcel', data, 'formData')
-}
-
-
-
-
-// 非固定请求路径
-export function postApi(data,url) {
-  return http.post(url, data, 'formData')
 }
 
 

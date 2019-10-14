@@ -34,67 +34,28 @@
   margin: auto;
   margin-top: 20px;
 }
-.titleP {
-  line-height: 80px;
-  font-size: 36px;
-  width: 100%;
-  text-align: center;
-}
 </style>
 
 
 <template>
   <div class="bodyBox" id="HOME_AUTH_LIST">
-    <div>
-      <p class="titleP">操作权限</p>
-      <el-checkbox-group v-model="select">
-        <div class="tableBox" v-for="(item, index) in tree" :key="index">
-          <div class="title">{{item.label}}</div>
-          <div class="content">
-            <el-checkbox
-              v-for="(child, i) in item.children"
-              :key="i"
-              :label="child.id"
-            >{{child.label}}</el-checkbox>
-          </div>
+    <el-checkbox-group v-model="select">
+      <div class="tableBox" v-for="(item, index) in tree" :key="index">
+        <div class="title">{{item.label}}</div>
+        <div class="content">
+          <el-checkbox
+            v-for="(child, i) in item.children"
+            :key="i"
+            :label="child.id"
+          >{{child.label}}</el-checkbox>
         </div>
-      </el-checkbox-group>
-      <div>
-        <el-button type="primary" @click="checkAll">全选</el-button>
-        <span>(此操作默认为admin超级管理员权限)</span>
       </div>
-    </div>
-
+    </el-checkbox-group>
     <div>
-      <p class="titleP">菜单权限</p>
-      <!-- <el-checkbox-group v-model="Mselect">
-        <div class="tableBox" v-for="(item, index) in Mtree" :key="index">
-          <el-checkbox class="title" :key="item.id" :label="item.id">{{item.label}}</el-checkbox>
-          <div class="content">
-            <el-checkbox
-              v-for="(child, i) in item.children"
-              :key="i"
-              :label="child.id"
-            >{{child.label}}</el-checkbox>
-          </div>
-        </div>
-      </el-checkbox-group>-->
-      <el-tree
-        ref="tree"
-        :data="Mtree"
-        show-checkbox
-        node-key="id"
-        default-expand-all
-        :default-checked-keys="Mselect"
-        :props="defaultProps"
-        @check-change="handleCheckChange"
-      ></el-tree>
-      <!-- <div>
-        <el-button type="primary" @click="McheckAll">全选</el-button>
-        <span>(此操作默认为admin超级管理员权限)</span>
-      </div>-->
-      <el-button class="submitBtn" type="primary" @click="submit">保存提交</el-button>
+      <el-button type="primary" @click="checkAll">全选</el-button>
+      <span>(此操作默认为admin超级管理员权限)</span>
     </div>
+    <el-button class="submitBtn" type="primary" @click="submit">保存提交</el-button>
   </div>
 </template>
 
@@ -108,15 +69,7 @@ export default {
     return {
       tree: [],
       select: [],
-      count: 0,
-      Mtree: [],
-      Mselect: [],
-      Mchange: [],
-      Mcount: 0,
-      defaultProps: {
-        children: "children",
-        label: "label"
-      }
+      count: 0
     };
   },
   created() {
@@ -129,31 +82,14 @@ export default {
       return;
     }
     var obj = {};
-    var Mobj = {};
     getUsableList({ targetId: this.$route.query.id })
       .then(res => {
         if (res.code == 200) {
           try {
             var select = [],
-              tree = [],
-              Mselect = [],
-              Mtree = [];
-            var authList = res.data.authList;
-            var paixu = [];
-            res.data.menuList.forEach(e => {
-              if (e.permission.parent == "-1") {
-                paixu.push(e);
-              }
-            });
-            res.data.menuList.forEach(e => {
-              if (e.permission.parent != "-1") {
-                paixu.push(e);
-              }
-            });
-            var menuList = paixu;
-            this.count = authList.length;
-            this.Mcount = menuList.length;
-            authList.forEach((r, i) => {
+              tree = [];
+            this.count = res.data.length;
+            res.data.forEach((r, i) => {
               var e = r.permission;
               if (r.isAuthorize == "Y") {
                 select.push(e.permissionId);
@@ -169,34 +105,11 @@ export default {
                 label: e.name
               });
             });
-            menuList.forEach((r, i) => {
-              var e = r.permission;
-              if (r.isAuthorize == "Y") {
-                Mselect.push(e.permissionId);
-              }
-              if (e.parent == "-1") {
-                Mobj[e.permissionId] = {
-                  label: e.name,
-                  id: e.permissionId,
-                  children: []
-                };
-              } else {
-                Mobj[e.parent].children.push({
-                  id: e.permissionId,
-                  label: e.name
-                });
-              }
-            });
             for (const k in obj) {
               tree.push(obj[k]);
             }
-            for (const k in Mobj) {
-              Mtree.push(Mobj[k]);
-            }
             this.tree = tree;
             this.select = select;
-            this.Mtree = Mtree;
-            this.Mselect = Mselect;
           } catch (error) {
             console.log(error);
           }
@@ -213,10 +126,8 @@ export default {
       this.select.forEach(e => {
         data.permissionIds += e + ",";
       });
-      this.Mselect.forEach(e => {
-        data.permissionIds += e + ",";
-      });
       data.permissionIds = this.$util.delLast(data.permissionIds);
+      console.log(data);
       userAuthorize(data)
         .then(res => {
           if (res.code == 200) {
@@ -244,27 +155,6 @@ export default {
         });
         this.select = list;
       }
-    },
-    McheckAll() {
-      if (this.Mselect.length == this.Mcount) {
-        this.Mselect = [];
-      } else {
-        var list = [];
-        this.Mtree.forEach(e => {
-          e.children.forEach(i => {
-            list.push(i.id);
-          });
-        });
-        this.Mselect = list;
-      }
-    },
-    handleCheckChange() {
-      let res = this.$refs.tree.getCheckedNodes();
-      let arr = [];
-      res.forEach(item => {
-        arr.push(item.id);
-      });
-      this.Mselect = arr
     }
   }
 };

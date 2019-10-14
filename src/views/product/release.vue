@@ -111,14 +111,23 @@
   border-radius: 3px;
 }
 .classifBox {
-  color: #333;
-  p{
-    width: 200px;
-    font-size: 16px;
-    color: #409EFF;
-    span{
-      margin-left: 16px;
-      color: #000;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  .classifItem {
+    position: relative;
+    margin-right: 10px;
+    margin-bottom: 8px;
+    .deleteBtn {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: -7px;
+      right: 5px;
+      background: rgb(255, 0, 0);
+      color: #fff;
+      border-radius: 50%;
+      @include flex-center;
     }
   }
 }
@@ -143,74 +152,6 @@
 .footer {
   margin-top: 20px;
   @include flex-center;
-}
-
-.attributeBox {
-  padding-bottom: 1px;
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  .attribute_title {
-    padding: 12px;
-    order: 2;
-  }
-  .attribute_item.SALE {
-    order: 1;
-  }
-  .attribute_item.STOCK {
-    background: #f5f5f5;
-    order: 3;
-    margin-bottom: 0;
-    padding-bottom: 22px;
-  }
-  .attribute_table {
-    order: 4;
-  }
-  .categoryAdd {
-    order: 5;
-    width: 120px;
-    margin-top: 15px;
-    margin-left: 20px;
-  }
-}
-.addAttribute {
-  .inputs {
-    width: 200px;
-  }
-  .inputBox {
-    position: relative;
-    width: 260px;
-    margin-top: 10px;
-    .isDefault {
-      position: absolute;
-      top: 50%;
-      right: 70px;
-      width: 14px;
-      height: 14px;
-      transform: translate(0, -50%);
-      background: #fff;
-      border-radius: 50%;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-    .isDefault.on {
-      border: 5px solid #409eff;
-    }
-    .btns {
-      position: absolute;
-      top: 50%;
-      right: 26px;
-      transform: translate(0, -50%);
-      font-size: 24px;
-    }
-  }
-}
-.delAttr {
-  font-size: 24px;
-  margin-left: 15px;
-}
-.cascader{
-  width: 360px;
 }
 </style>
 
@@ -272,48 +213,40 @@
         <span class="describe">商品销售价格</span>
       </el-form-item>
 
-      <el-form-item label="所属场景" verify prop="sceneId">
+      <el-form-item label="场景分类" verify prop="classif">
         <el-select
-          class="formItem"
+          class="formItem classif"
           multiple
-          v-model="sizeForm.sceneId"
+          v-model="sizeForm.classif"
           placeholder="请选择场景分类"
-          @change="getClassif"
         >
           <el-option
-            v-for="item in scene"
-            :key="item.sceneId"
+            v-for="item in classif"
+            :key="item.labelId"
             :label="item.name"
-            :value="item.sceneId"
+            :value="item.labelId"
           ></el-option>
         </el-select>
         <span class="describe">商品所属场景，可多选</span>
       </el-form-item>
-      <el-form-item label="所属标签" verify prop="classif">
-        <el-checkbox-group v-model="sizeForm.classif">
-          <div class="classifBox" v-for="(item, index) in classif" :key="index">
-            <p>
-              {{item.parentName}}
-              <span>
-                <el-switch v-model="item.checkAll"  active-color="#13ce66" inactive-color="#f5f5f5" @change="handleCheckAllChange(index)">
-                </el-switch>
-                全选
-              </span>
-            </p>
-            <el-checkbox v-for="(l, i) in item.list" :key="i" :label="l.labelId">{{l.name}}</el-checkbox>
-          </div>
-        </el-checkbox-group>
-        <span class="describe">商品所属标签，可多选</span>
-      </el-form-item>
 
-      <el-form-item label="商品类别" verify prop="categoryId">
-         <el-cascader
-          class="cascader"
+      <el-form-item label="商品类别">
+        <el-select class="category" v-model="categoryId" @change="changeCategory">
+          <el-option v-for="item in category" :key="item.id" :label="item.name" :value="item.id"></el-option>
+        </el-select>
+        <el-select
+          class="category"
           v-model="sizeForm.categoryId"
-          :options="category"
-          :props="{ expandTrigger: 'hover',value:'id',label:'name' }"
-          >
-        </el-cascader>
+          @change="getAttribute"
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in categoryChild"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
 
       <el-form-item label="供货商" verify prop="supplyMerchant">
@@ -325,69 +258,59 @@
         <el-input class="formItem" v-model.number="sizeForm.usableStock"></el-input>
       </el-form-item>
 
-      <div class="attributeBox">
-        <p class="attribute_title">库存属性部分</p>
-        <el-form-item
-          v-for="(item, index) in sizeForm.attrList"
-          v-show="item.inputType!=='RADIO'"
-          :key="item.name"
-          :label="item.name"
-          :verify="item.isNullable=='Y'?'verify':undefined"
-          :prop="'attrList.'+index+'.value'"
-          class="attribute_item"
-          :class="item.dataType"
+      <el-form-item
+        v-for="(item, index) in attribute"
+        :key="item.name.nameId"
+        :label="item.name.name"
+        verify
+        :prop="item.name.inputType!=='CHECKBOX'?('attrs.'+useless[index]):''"
+      >
+        <el-input
+          class="formItem"
+          v-if="item.name.inputType=='TEXT'"
+          v-model="sizeForm.attrs[useless[index]]"
+        ></el-input>
+        <el-checkbox-group
+          v-if="item.name.inputType=='CHECKBOX'"
+          v-model="sizeForm.attrs[useless[index]]"
+          @change="checkStock"
         >
-          <el-input class="formItem" v-if="item.dataType=='SALE'" v-model="item.value"></el-input>
-          <el-checkbox-group
-            style="float:left"
-            v-if="item.dataType=='STOCK'"
-            v-model="item.value"
-            @change="checkStock()"
-          >
-            <el-checkbox-button v-for="val in item.valueList" :label="val" :key="val">{{val}}</el-checkbox-button>
-          </el-checkbox-group>
-          <i
-            class="delAttr el-icon-delete"
-            @click="delAttr(index)"
-          ></i>
-        </el-form-item>
-        <el-table
-          class="attribute_table"
-          v-show="sizeForm.stockList&&sizeForm.stockList.length>0"
-          :data="sizeForm.stockList"
-          border
-          style="width: 100%"
+          <el-checkbox-button
+            v-for="val in item.valueList"
+            :label="val.value"
+            :key="val.value"
+          >{{val.value}}</el-checkbox-button>
+        </el-checkbox-group>
+        <el-select
+          class="formItem"
+          v-if="item.name.inputType=='RADIO'"
+          v-model="sizeForm.attrs[useless[index]]"
+          placeholder="请选择"
         >
-          <el-table-column
-            align="center"
-            v-for="(item, index) in tableHead"
-            :prop="getKey(item,index)"
-            :key="index"
-            :label="item"
-          ></el-table-column>
-          <el-table-column align="center" width="200" label="库存">
-            <template slot-scope="scope">
-              <el-input class="stockItem" v-model="scope.row.usableStock" placeholder="请输入库存数量"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column align="center" width="200" label="售价">
-            <template slot-scope="scope">
-              <el-input class="stockItem" v-model="scope.row.salePrice" placeholder="请输入售价"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column align="center" width="200" label="进货价">
-            <template slot-scope="scope">
-              <el-input class="stockItem" v-model="scope.row.minPrice" placeholder="请输入进货价"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column align="center" width="200" label="原价">
-            <template slot-scope="scope">
-              <el-input class="stockItem" v-model="scope.row.originPrice" placeholder="请输入原价"></el-input>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-button type="primary" class="categoryAdd" @click="categoryAdd=true">添加属性</el-button>
-      </div>
+          <el-option
+            v-for="child in item.valueList"
+            :key="child.value"
+            :label="child.value"
+            :value="child.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        v-for="item in sizeForm.stockList"
+        :key="item.label"
+        :label="item.label"
+        class="stockLabel"
+      >
+        <el-input class="stockItem" v-model="item.usableStock" placeholder="请输入库存数量">
+          <template slot="prepend">库存</template>
+        </el-input>
+        <el-input class="stockItem" v-model="item.salePrice" placeholder="请输入售价">
+          <template slot="prepend">售价</template>
+        </el-input>
+        <el-input class="stockItem" v-model="item.minPrice" placeholder="请输入进货价">
+          <template slot="prepend">进货价</template>
+        </el-input>
+      </el-form-item>
 
       <el-form-item
         label="是否包邮"
@@ -403,13 +326,12 @@
           <template slot="append">元</template>
         </el-input>
       </el-form-item>
-      <el-form-item label="发货时间" verify int prop="postTime">
-        <el-input class="formItem postType" type="number" v-model.number="sizeForm.postTime">
-          <template slot="append">小时</template>
-        </el-input>
-      </el-form-item>
-      <el-form-item label="商品编号" v-if="sizeForm.number">
-        {{productInfo.number||sizeForm.number}}
+      <el-form-item
+        label="发货时间"
+        verify
+        prop="postPrice"
+      >
+        <el-input class="formItem postType" v-model="sizeForm.postTime"></el-input>
       </el-form-item>
 
       <el-form-item>
@@ -443,7 +365,6 @@
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
         :on-change="handleListenChange"
-        :on-remove="handleRemove"
         :before-upload="beforeAvatarUpload"
         :limit="5"
         :file-list="fileList"
@@ -568,15 +489,15 @@
               </div>
               <div class="hc"></div>
               <div class="attribute">
-                <!-- <div
+                <div
                   class="li"
-                  v-for="(item, index) in sizeForm.attrList"
+                  v-for="(item, index) in attribute"
                   :key="index"
                   v-show="item.name.inputType=='TEXT'"
                 >
                   {{item.name.name}}：
-                  <span>{{sizeForm.attrList[useless[index]]}}</span>
-                </div>-->
+                  <span>{{sizeForm.attrs[useless[index]]}}</span>
+                </div>
               </div>
               <div class="label">
                 <div class="li">
@@ -637,45 +558,6 @@
         </div>
       </div>
     </el-dialog>
-
-    <el-dialog title="新增属性" :visible.sync="categoryAdd" width="60%">
-      <el-form :model="attribute" ref="attribute" label-width="100px" class="addAttribute">
-        <el-form-item label="属性名" verify prop="name">
-          <el-input class="inputs" v-model="attribute.name"></el-input>
-        </el-form-item>
-        <el-form-item label="商品属性" prop="dataType">
-          <el-radio v-model="attribute.dataType" label="STOCK">库存属性</el-radio>
-          <el-radio v-model="attribute.dataType" label="SALE">普通属性</el-radio>
-        </el-form-item>
-        <el-form-item label v-if="attribute.dataType=='STOCK'">
-          <div class="inputBox" v-for="(item, index) in typeItem" :key="index">
-            <el-input class="inputs" placeholder="请输入候选项" v-model="item.value"></el-input>
-            <i
-              class="btns"
-              :class="index==0?'el-icon-plus':'el-icon-delete'"
-              @click="valueChange(index)"
-            ></i>
-          </div>
-        </el-form-item>
-        <el-form-item label="是否必填">
-          <el-switch
-            v-model="attribute.isNullable"
-            active-value="Y"
-            inactive-value="N"
-            active-text="是"
-            inactive-text="否"
-          ></el-switch>
-        </el-form-item>
-        <el-form-item label="排序" verify prop="sort">
-          <el-input class="inputs" v-model.number="attribute.sort"></el-input>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="addAttr('attribute')">添加</el-button>
-          <el-button @click="resetForm('attribute')">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-dialog>
   </div>
 </template>
 
@@ -688,7 +570,6 @@ import {
   produckInfoRelease,
   produckInfoUpdate,
   produckBatchAdd,
-  productScenelList,
   produckInfoDetails
 } from "@/api/table";
 import merchantList from "@/views/merchant/list";
@@ -705,13 +586,12 @@ export default {
         originPrice: "",
         salePrice: "",
         classif: [],
-        sceneId: [],
-        categoryId: [],
+        categoryId: "",
         supplyMerchant: "",
         usableStock: "",
         postPrice: "",
-        postTime: 24, //发货时间，默认24,单位小时
-        attrList: [], // 商品属性
+        postTime: '24小时', //发货时间，默认24小时
+        attrs: {}, // 存放商品属性值，提交之前处理一次。
         stockList: [] // 库存属性处理完成后存放
       },
       productInfo: {}, //商品基本属性提交成功后储存
@@ -723,8 +603,10 @@ export default {
       postType: true,
       options: ["P", "F", "S", "W"],
       classif: [],
-      scene: [],
       category: [],
+      categoryId: "",
+      categoryChild: [],
+      attribute: [],
       useless: [
         "a",
         "b",
@@ -739,7 +621,8 @@ export default {
         "k",
         "l",
         "m"
-      ], // 无实际意义，渲染商品属性时用来绑定数据
+      ],
+      // 无实际意义，渲染商品属性时用来绑定数据
       updataInfo: 0, // 保存商品基本属性状态，0 = 参数未提交； 1 = 参数正在提交，不可重复提交； 2 = 参数已提交完毕，如需再次提交，将参数重置为0。
       upImgUrl: process.env[this.$base] + "/medias/image/upload",
       access_token: {
@@ -750,17 +633,7 @@ export default {
       changeIndex: 0, // 商品详情列表替换图片时，存储需要替换的图片索引。
       previewCode: false,
       multipleSelection: [],
-      detailInfo: {},
-      tableHead: [],
-      categoryAdd: false,
-      attribute: {
-        dataType: "STOCK",
-        isNullable: "Y",
-        name: '',
-        sort: '',
-        value:[]
-      },
-      typeItem: [{ value: "" }],
+      detailInfo: {}
     };
   },
   components: {
@@ -768,11 +641,13 @@ export default {
   },
   created() {
     var self = this;
-    productScenelList()
-      .then(res => {
-        this.scene = res.data;
-      })
-      .catch(err => {});
+    var obj = {};
+    this.useless.forEach(e => {
+      obj[e] = "";
+    });
+    // 给sizeForm下的attrs赋值，用作数据绑定。
+    this.$set(this.sizeForm, "attrs", obj);
+
     if (this.$route.query.id) {
       // 编辑，初始化数据
       produckInfoDetails({ productId: this.$route.query.id })
@@ -806,14 +681,7 @@ export default {
             this.sizeForm.salePrice = this.$util.prices(
               res.data.info.salePrice
             );
-            var scene_id = res.data.info.sceneIds;
-            scene_id =
-              scene_id.substring(scene_id.length - 1) == ","
-                ? scene_id.substring(0, scene_id.length - 1)
-                : scene_id;
-            this.sizeForm.sceneId = scene_id?scene_id.split(","):[];
-            this.getClassif(this.sizeForm.sceneId);
-            var lab = res.data.info.labelIds;
+            var lab = res.data.info.lableIds;
             lab =
               lab.substring(lab.length - 1) == ","
                 ? lab.substring(0, lab.length - 1)
@@ -825,47 +693,6 @@ export default {
               );
               this.postType = false;
             }
-            res.data.allAttributes.forEach(e => {
-              if(e.dataType == 'STOCK'){
-                e.valueList = e.value = e.value.split(',')
-              }
-            });
-            this.sizeForm.attrList = res.data.allAttributes
-
-            if (
-              res.data.productStockModelList &&
-              res.data.productStockModelList.length > 0
-            ){
-              var tableHead = [];
-              res.data.productStockModelList.forEach(e => {
-                var label = JSON.parse(e.stockProperties);
-                var str = "";
-                var objs = {
-                  propertiesValue: e.stockProperties,
-                  label: str,
-                  usableStock: e.usableStock,
-                  salePrice: self.$util.prices(e.salePrice),
-                  minPrice: self.$util.prices(e.minPrice),
-                  originPrice: self.$util.prices(e.originPrice),
-                };
-
-                for (const k in label) {
-                  str += k + "：" + label[k] + "；";
-                  if (tableHead.indexOf(k) == -1) {
-                    tableHead.push(k);
-                  }
-                  for (let i = 0; i < res.data.allAttributes.length; i++) {
-                    if (k == res.data.allAttributes[i].name) {
-                      objs[self.useless[i]] = label[k];
-                      break;
-                    }
-                  }
-                }
-                self.sizeForm.stockList.push(objs);
-              });
-              self.tableHead = tableHead;
-            }
-
             this.detailInfo = res.data;
             this.getChecks();
           }
@@ -876,193 +703,151 @@ export default {
     }
   },
   methods: {
-    handleCheckAllChange(i){
-      this.classif[i].list.forEach(e => {
-        var index = this.sizeForm.classif.indexOf(e.labelId)
-        if(this.classif[i].checkAll){
-          if(index == -1){
-            this.sizeForm.classif.push(e.labelId)
-          }
-        }else{
-          if(index != -1){
-            this.sizeForm.classif.splice(index,1)
-          }
-        }
-      });
-    },
-    addAttr(formName) {
-      var self = this;
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          var data = JSON.parse(JSON.stringify(this.attribute));
-          var v = ''
-          if (data.dataType == "STOCK") {
-            v = []
-            var code = true;
-            var list = []
-            this.typeItem.forEach(e => {
-              if(e.value==""){
-                code = false
-              }else{
-                list.push(e.value)
-              }
-            });
-            data.valueList = list
-            if(this.typeItem.length==0){
-              code = false
-            }
-            if (!code) {
-              this.$message.error("候选项不能为空");
-              return;
-            }
-          }
-          data.value = v
-          this.sizeForm.attrList.push(data)
-          this.categoryAdd = false
-          this.resetForm('attribute')
-          this.checkStock()
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
-    },
-    valueChange(i) {
-      if (i == 0) {
-        this.typeItem.push({ value: "" });
-      } else {
-        this.typeItem.splice(i, 1);
-      }
-    },
-    delAttr(i){
-      this.sizeForm.attrList.splice(i, 1);
-      this.checkStock()
-    },
-    getClassif(val) {
-      var list = [];
-      var code = 0;
-      var self = this;
-      val.forEach((e,i) => {
-        produckTabel({ sceneId: e }).then(result => {
-          var parentName =  ''
-          try {
-            parentName = result.data[0].sceneName
-          } catch (error) {}
-          var obj = {
-            list : result.data,
-            parentName: parentName,
-            checkAll: false
-          }
-          list.push(obj);
-          code++;
-          if (code == val.length) {
-            successFun();
-          }
-        });
-      });
-      if(!val||val.length==0){
-        this.classif = []
-      }
-      function successFun() {
-        self.classif = list;
-      }
-    },
     getChecks() {
+      produckTabel().then(result => {
+        this.classif = result.data;
+      });
       produckTree().then(result => {
         try {
           this.category = result.data;
-          var ids = []
-          // 编辑时，取商品信息下的类别
-          result.data.forEach((e,a) => {
-            e.children.forEach((i,b) => {
-              i.children.forEach((t,c) => {
-                if (this.$route.query.id){
-                  if (t.id == this.detailInfo.info.categoryId) {
-                    ids = [e.id,i.id,t.id]
-                  }
-                }else{
-                  // 发布商品时，取第一个有效值
-                  if(ids.length==0){
-                    ids = [e.id,i.id,t.id]
-                  }
+          if (this.$route.query.id) {
+            // 编辑时，取商品信息下的类别
+            result.data.forEach(e => {
+              if (e.id == this.detailInfo.info.categoryId) {
+                this.categoryId = e.id;
+                this.categoryChild = e.children;
+                this.sizeForm.categoryId = e.children[0].id;
+              }
+              e.children.forEach(i => {
+                if (i.id == this.detailInfo.info.categoryId) {
+                  this.categoryId = e.id;
+                  this.categoryChild = e.children;
+                  this.sizeForm.categoryId = i.id;
                 }
               });
             });
-          });
-          this.sizeForm.categoryId = ids
-          var id = ids[2]
-          if(id){
-            this.getAttribute(id);
+          } else {
+            // 发布新商品时，默认取第一个类别
+            this.categoryId = result.data[0].id;
+            this.categoryChild = result.data[0].children;
+            this.sizeForm.categoryId = result.data[0].children[0].id;
           }
-        } catch (error) {
-          console.log(error);
-        }
+          this.getAttribute(this.sizeForm.categoryId);
+        } catch (error) {}
       });
     },
-    getKey(item, index) {
-      var k = "";
-      for (let i = 0; i < this.sizeForm.attrList.length; i++) {
-        if (this.sizeForm.attrList[i].name == item) {
-          k = this.useless[i];
+    changeCategory(val) {
+      for (let i = 0; i < this.category.length; i++) {
+        if (this.category[i].id == val) {
+          this.categoryChild = this.category[i].children;
+          this.sizeForm.categoryId = this.category[i].children[0].id;
+          this.getAttribute(this.sizeForm.categoryId);
           break;
         }
       }
-      return k;
     },
     checkStock() {
       // 处理库存属性
       var data = {};
-      var tableHead = [];
-      this.sizeForm.attrList.forEach((e,i) => {
-        if(e.dataType=='STOCK'&&e.value.length>0){
-          data[this.useless[i]] = e.value;
+      for (const k in this.sizeForm.attrs) {
+        if (
+          this.sizeForm.attrs[k].length > 0 &&
+          typeof this.sizeForm.attrs[k] !== "string"
+        ) {
+          data[k] = this.sizeForm.attrs[k];
         }
-      });
+      }
       var stockList = [];
       if (Object.keys(data).length > 0) {
         stockList = this.$util.arrange(data);
       }
       stockList.forEach(e => {
-        var propertiesValue = {};
+        var str = "";
+        var propertie = {};
         for (const k in e) {
           if (e[k]) {
-            var name = this.sizeForm.attrList[this.useless.indexOf(k)].name;
-            if (tableHead.indexOf(name) == -1) {
-              tableHead.push(name);
-            }
-            propertiesValue[name] = e[k];
+            str +=
+              this.attribute[this.useless.indexOf(k)].name.name +
+              "：" +
+              e[k] +
+              "；";
+            propertie[this.attribute[this.useless.indexOf(k)].name.name] = e[k];
+            delete e[k];
           }
         }
-        e.propertiesValue = JSON.stringify(propertiesValue);
+        e.propertie = JSON.stringify(propertie);
+        e.label = str;
         e.usableStock = "";
         e.salePrice = "";
         e.minPrice = "";
-        e.originPrice = "";
       });
-      this.tableHead = tableHead;
       this.sizeForm.stockList = stockList;
     },
     getAttribute(id) {
-      if (this.$route.query.id) {
-        return;
-      }
       produckAllAttribute({ categoryId: id }).then(result => {
-        var list = [];
-        result.data.forEach(e => {
-          var obj = e.name,
-            valList = [];
-          e.valueList.forEach(v => {
-            valList.push(v.value);
-          });
-          obj.valueList = valList;
-          if(obj.dataType=='STOCK'){
-            obj.value = []
-          }else{
-            obj.value = ''
+        try {
+          var self = this,
+            isDetail = false;
+          function attrs() {
+            if (
+              self.detailInfo.saleAttributes &&
+              self.detailInfo.saleAttributes.length > 0
+            ) {
+              self.detailInfo.saleAttributes.forEach((e, i) => {
+                if (e.dataType == "STOCK") {
+                  self.sizeForm.attrs[self.useless[i]] = e.value.split(",");
+                } else {
+                  self.sizeForm.attrs[self.useless[i]] = e.value;
+                }
+              });
+            }
+            if (
+              self.detailInfo.productStockModelList &&
+              self.detailInfo.productStockModelList.length > 0
+            ) {
+              self.detailInfo.productStockModelList.forEach(e => {
+                var label = JSON.parse(e.stockProperties);
+                var str = "";
+                for (const k in label) {
+                  str += k + "：" + label[k] + "；";
+                }
+                var objs = {
+                  propertie: e.stockProperties,
+                  label: str,
+                  usableStock: e.usableStock,
+                  salePrice: self.$util.prices(e.salePrice),
+                  minPrice: self.$util.prices(e.minPrice)
+                };
+                self.sizeForm.stockList.push(objs);
+              });
+            }
           }
-          list.push(obj);
-        });
-        this.sizeForm.attrList = list;
+          // 初始化attrs
+          this.useless.forEach(e => {
+            this.sizeForm.attrs[e] = "";
+          });
+          // 初始化规格列表
+          self.sizeForm.stockList = [];
+          result.data.forEach((e, i) => {
+            // 如果是CheckBox类型的属性，则对应绑定值修改为数组类型。
+            if (e.name.inputType == "CHECKBOX") {
+              this.sizeForm.attrs[this.useless[i]] = [];
+            } else {
+              this.sizeForm.attrs[this.useless[i]] = "";
+            }
+            if (this.$route.query.id) {
+              if (this.detailInfo.info.categoryId == e.name.categoryId) {
+                isDetail = true;
+              }
+            }
+          });
+          if (isDetail) {
+            attrs();
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        this.attribute = result.data;
       });
     },
     checkPostType(val) {
@@ -1174,63 +959,61 @@ export default {
             data.postPrice = this.postType ? 0 : data.postPrice * 100;
             data.postType = this.postType ? "FREE" : "PAY";
             data.attributes = [];
-            data.categoryId = data.categoryId[2]
             // 处理属性值
-            for (let index = 0; index < this.sizeForm.attrList.length; index++) {
+            for (let index = 0; index < this.attribute.length; index++) {
               var k = this.useless[index];
-              var item = this.sizeForm.attrList[index]
-              var obj = {};
-              obj.attributeName = item.name;
-              obj.attributeValue = ""
-              if (item.dataType == "SALE") {
-                obj.attributeValue = item.value;
-                // 输入框类型时，取输入的值作为valueid
-              } else if (item.dataType == "STOCK") {
-                item.value.forEach(n => {
-                  obj.attributeValue += n + ",";
-                });
-                obj.attributeValue = obj.attributeValue.slice(0, obj.attributeValue.length - 1);
+              if (data.attrs[k]) {
+                var obj = {};
+                obj.nameId = this.attribute[index].name.nameId;
+                if (this.attribute[index].name.inputType == "TEXT") {
+                  // 输入框的数据类型是字符串，多选、单选的数据类型是object
+                  obj.valueId = data.attrs[k];
+                  // 输入框类型时，取输入的值作为valueid
+                } else if (this.attribute[index].name.inputType == "CHECKBOX") {
+                  obj.valueId = "";
+                  data.attrs[k].forEach(e => {
+                    this.attribute[index].valueList.forEach(n => {
+                      if (n.value == e) {
+                        obj.valueId += n.valueId + ",";
+                      }
+                    });
+                  });
+                  obj.valueId = obj.valueId.slice(0, obj.valueId.length - 1);
+                } else if (this.attribute[index].name.inputType == "RADIO") {
+                  obj.valueId = "";
+                  this.attribute[index].valueList.forEach(n => {
+                    if (n.value == data.attrs[k]) {
+                      obj.valueId = n.valueId;
+                    }
+                  });
+                }
+                data.attributes.push(obj);
               }
-              obj.sort = item.sort
-              obj.isNullable = item.isNullable
-              obj.attributeType = item.dataType
-              data.attributes.push(obj);
             }
-            data.propertiesValue = [];
+            data.properties = [];
             // 处理库存属性数据
             data.stockList.forEach(e => {
               var obj = {
-                propertiesValue: e.propertiesValue,
+                propertie: e.propertie,
                 usableStock: e.usableStock,
                 salePrice: e.salePrice * 100,
-                minPrice: e.minPrice * 100,
-                originPrice: e.originPrice * 100,
+                minPrice: e.minPrice * 100
               };
-              data.propertiesValue.push(obj);
+              data.properties.push(obj);
             });
             data.attributes = JSON.stringify(data.attributes);
-            data.properties = JSON.stringify(data.propertiesValue);
-            data.labelIds = "";
+            data.properties = JSON.stringify(data.properties);
+            data.lableIds = "";
             data.classif.forEach(e => {
-              if (data.labelIds) {
-                data.labelIds += "," + e;
+              if (data.lableIds) {
+                data.lableIds += "," + e;
               } else {
-                data.labelIds = e;
-              }
-            });
-            data.sceneIds = "";
-            data.sceneId.forEach(e => {
-              if (data.sceneIds) {
-                data.sceneIds += "," + e;
-              } else {
-                data.sceneIds = e;
+                data.lableIds = e;
               }
             });
             delete data.classif;
-            delete data.attrList;
-            delete data.sceneId;
+            delete data.attrs;
             delete data.stockList;
-            delete data.propertiesValue;
             if (this.$route.query.id) {
               data.productId = this.$route.query.id;
               produckInfoUpdate(data)
@@ -1276,9 +1059,6 @@ export default {
       });
     },
     resetForm(formName) {
-      if(formName=='attribute'){
-        this.typeItem = [{ value: "" }];
-      }
       this.$refs[formName].resetFields();
     },
     handleAvatarSuccess(res, file) {
@@ -1325,10 +1105,6 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
       // 查看原图
-    },
-    handleRemove(file, fileList) {
-      console.log(fileList,'fileListfileListfileList');
-      this.fileList = fileList;
     },
     async handleListenChange(file, fileList) {
       var self = this;

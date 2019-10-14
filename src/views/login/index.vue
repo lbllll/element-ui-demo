@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">登 录</h3>
+        <h3 class="title">登 陆</h3>
       </div>
 
       <el-form-item prop="username">
@@ -41,7 +41,7 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登 录</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登陆</el-button>
 
       <!-- <div class="tips">
         <span style="margin-right:20px;">username: admin</span>
@@ -59,11 +59,11 @@ export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
-      // if (!validUsername(value)) {
-      //   callback(new Error('Please enter the correct user name'))
-      // } else {
+      if (!validUsername(value)) {
+        callback(new Error('Please enter the correct user name'))
+      } else {
         callback()
-      // }
+      }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
@@ -110,20 +110,9 @@ export default {
         if (valid) {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            try {
-              var route = JSON.parse(window.sessionStorage.getItem('route'))
-
-              try {
-                this.$router.push({ name: route[0].name })
-              } catch (error) {
-                this.$router.push({ path: this.redirect || '/' })
-              }
-              this.loading = false
-            } catch (error) {
-              console.log(error);
-            }
-          }).catch((err) => {
-            this.$message.error(err.message)
+            this.$router.push({ path: this.redirect || '/' })
+            this.loading = false
+          }).catch(() => {
             this.loading = false
           })
         } else {

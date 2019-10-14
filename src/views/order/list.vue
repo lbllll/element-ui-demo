@@ -67,7 +67,7 @@
 <template>
   <div class="bodyBox" id="PRODUCT_ORDER_LIST">
     <div class="searchBox">
-      <el-select class="select" size="mini" v-model="data.buyType" placeholder="请选择" @change="getList">
+      <el-select class="select" size="mini" v-model="data.buyType" placeholder="请选择">
         <el-option
           v-for="item in buyTypeList"
           :key="item.value"
@@ -77,7 +77,7 @@
       </el-select>
       <div class="flex-center">
         <!-- <p>订单状态：</p> -->
-        <el-select class="select" size="mini" v-model="data.status" placeholder="请选择" @change="getList">
+        <el-select class="select" size="mini" v-model="data.status" placeholder="请选择">
           <el-option
             v-for="item in statusList"
             :key="item.value"
@@ -88,7 +88,7 @@
       </div>
       <div class="flex-center">
         <!-- <p>订单来源：</p> -->
-        <el-select class="select" size="mini" v-model="data.payType" placeholder="请选择" @change="getList">
+        <el-select class="select" size="mini" v-model="data.payType" placeholder="请选择">
           <el-option
             v-for="item in payTypeList"
             :key="item.value"
@@ -140,10 +140,9 @@
       <el-table-column align="center" label="支付状态" width="80">
         <template slot-scope="scope">{{status[scope.row.status]}}</template>
       </el-table-column>
-      <el-table-column align="center" label="支付方式" width="100">
+      <el-table-column align="center" label="支付方式" width="80">
         <template slot-scope="scope">{{payType[scope.row.payType]}}</template>
       </el-table-column>
-      <el-table-column align="center" prop="remark" label="订单备注"></el-table-column>
       <el-table-column align="center" label="操作" width="100">
         <template slot-scope="scope">
           <el-button type="primary" @click="getDetail(scope.row.orderId)" size="mini">查看订单</el-button>
@@ -266,7 +265,7 @@ export default {
       statusList: [
         {
           value: "",
-          label: "所有付款状态"
+          label: "所有付款方式"
         },
         {
           value: "PAID",
@@ -297,11 +296,7 @@ export default {
         {
           value: "MERGE",
           label: "组合支付"
-        },
-        {
-          value: "CONVERT",
-          label: "单品卡兑换"
-        },
+        }
       ],
       tableData: [],
       checkAll: false,
@@ -368,7 +363,8 @@ export default {
         .catch(err => {});
     },
     deCodes(str) {
-      console.log(str);
+      str = str.substr(0, str.length - 1);
+      str = str.substr(1, str.length - 1);
       return this.$util.decode(str);
     },
     //点击复选框触发，复选框样式的改变

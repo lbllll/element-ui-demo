@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '鹅小满aa',
+  title: '鹅毛颂',
 
   /**
    * @type {boolean} true | false
