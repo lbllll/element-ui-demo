@@ -21,12 +21,19 @@
 </template>
 
 <script>
+import { removeToken } from '@/utils/auth'
 
 export default {
   name: 'Page404',
   computed: {
     message() {
       return 'The webmaster said that you can not enter this page...'
+    }
+  },
+  created(){
+    var routeList = JSON.parse(window.sessionStorage.getItem('route')) || []
+    if(routeList.length==0){
+      removeToken('access_token')
     }
   }
 }

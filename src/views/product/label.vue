@@ -39,12 +39,13 @@
 <template>
   <div class>
     <div class="header flex">
-      <el-button type="primary" @click="noticeCode=true">添加通知</el-button>
+      <el-button type="primary" @click="noticeCode=true">添加标签</el-button>
     </div>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="name" align="center" label="标签名称"></el-table-column>
       <el-table-column prop="description" align="center" label="描述"></el-table-column>
       <el-table-column prop="productCount" align="center" label="商品数量"></el-table-column>
+      <el-table-column prop="sceneName" align="center" label="所属场景"></el-table-column>
       <el-table-column align="center" label="排序" width="120">
         <template slot-scope="scope">
           <input class="sorts" type="number" v-model.number="scope.row.sort" />
@@ -74,6 +75,16 @@
         <el-form-item verify label="标签描述" prop="labelDescription">
           <el-input class="inputs" v-model="formData.labelDescription"></el-input>
         </el-form-item>
+        <el-form-item verify label="所属场景" prop="sceneId">
+          <el-select v-model="formData.sceneId" placeholder="请选择" @change="changeScene">
+            <el-option
+              v-for="item in options"
+              :key="item.sceneId"
+              :label="item.name"
+              :value="item.sceneId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm('formData')">提 交</el-button>
@@ -89,6 +100,7 @@ import {
   productLabelCounter,
   noticeSetStatus,
   productLabelSave,
+  productScenelList,
   productLabelDelete
 } from "@/api/table";
 
@@ -99,19 +111,27 @@ export default {
       page: 1,
       formData: {
         detailUrl: "",
-        iconUrl: ""
+        iconUrl: "",
+        sceneId:"",
+        sceneName: ""
       },
       tableData: [],
       noticeCode: false,
-      countNum: 0
+      countNum: 0,
+      options: []
     };
   },
   created() {
     this.getList();
+    productScenelList({ page: 0, sceneName: "" })
+      .then(res => {
+        this.options = res.data;
+      })
+      .catch(err => {});
   },
   methods: {
     getList() {
-      var page = JSON.parse(JSON.stringify(this.page))
+      var page = JSON.parse(JSON.stringify(this.page));
       page--;
       productLabel({ page: page })
         .then(res => {
@@ -158,8 +178,8 @@ export default {
                 message: "添加成功"
               });
               this.noticeCode = false;
-              this.formData.labelDescription = ''
-              this.formData.labelName = ''
+              this.formData.labelDescription = "";
+              this.formData.labelName = "";
               this.getList();
             })
             .catch(err => {});
@@ -180,9 +200,17 @@ export default {
         .catch(err => {});
     },
     handleCurrentChange(val) {
-      this.data.page = val;
+      this.page = val;
       this.getList();
       console.log(`当前页: ${val}`);
+    },
+    changeScene(val){
+      console.log(val);
+      this.options.forEach(e => {
+        if(e.sceneId==val){
+          this.formData.sceneName = e.name
+        }
+      });
     }
   }
 };

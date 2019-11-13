@@ -74,7 +74,9 @@
           :value="item.labelId"
         ></el-option>
       </el-select>
-      <el-select
+
+
+      <!-- <el-select
         class="select"
         size="mini"
         prop="categoryId"
@@ -82,7 +84,19 @@
         placeholder="请选择"
       >
         <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-      </el-select>
+      </el-select> -->
+
+
+      <el-cascader
+        class="select"
+        size="mini"
+        v-model="data.category"
+        v-if="categoryList.length>0"
+        :show-all-levels="false"
+        :options="categoryList"
+        :props="{ expandTrigger: 'hover',checkStrictly: true }"
+        @change="handleChange">
+      </el-cascader>
       <el-input class="inputs" placeholder="请输入内容" size="mini" prop="name" v-model="data.name">
         <template slot="prepend">商品名称</template>
       </el-input>
@@ -209,6 +223,7 @@ import {
   produckBatchUp,
   produckSetCoefficient
 } from "@/api/table";
+import { stringify } from 'querystring';
 export default {
   name: "PRODUCT_LIST",
   data() {
@@ -217,6 +232,7 @@ export default {
         listType: "", // 顶部4按钮
         lableId: "", // 场景
         categoryId: "", // 分类
+        category: [], // 分类
         status: "", // 上下架状态
         name: "", // 商品名称
         number: "", // 货号
@@ -243,16 +259,27 @@ export default {
     if(this.selectArr&&this.selectArr.length>0){
       this.multipleSelection=this.selectArr
     }
+    if(window.sessionStorage.getItem('searchData')){
+      try {
+        this.data = JSON.parse(window.sessionStorage.getItem('searchData'))
+      } catch (error) {
+        window.sessionStorage.removeItem('searchData')        
+      }
+    }
     this.getData();
     this.getList();
   },
   methods: {
     getList() {
+      window.sessionStorage.setItem('searchData',JSON.stringify(this.data))
       var data = JSON.parse(JSON.stringify(this.data));
       data.minPrice = data.minPrice ? +data.minPrice * 100 : "";
       data.maxPrice = data.maxPrice ? +data.maxPrice * 100 : "";
       // 后端page从0开始，所以需要减一
       data.page--;
+      data.categoryId = data.category[data.category.length-1]
+      delete data.category
+      console.log(data);
       produckList(data).then(result => {
         this.count = result.data.count;
         this.tableData = result.data.list;
@@ -341,12 +368,34 @@ export default {
       });
       produckTree().then(result => {
         result.data.unshift({ name: "所有分类", id: "" });
-        this.categoryList = result.data;
+        var list = []
+        result.data.forEach(e => {
+          var one = {
+            value: e.id,
+            label: e.name,
+            children: []
+          }
+          if(e.children){
+            e.children.forEach(c => {
+              var two = {
+                value: c.id,
+                label: c.name
+              }
+              one.children.push(two)
+            });
+          }
+          list.push(one)
+        });
+        console.log(list);
+        this.categoryList = list;
       });
       produckTabel().then(result => {
         result.data.unshift({ name: "所有场景", labelId: "" });
         this.lableList = result.data;
       });
+    },
+    handleChange(){
+      
     },
     //点击复选框触发，复选框样式的改变
     handleSelectionChange(val) {

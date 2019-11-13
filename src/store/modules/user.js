@@ -44,6 +44,10 @@ const actions = {
         login({ userName: username, password: password }, url).then(response => {
           const { data } = response
           console.log(JSON.stringify(response.data.headPath));
+          if(response.data.isSuccessful!=='Y'){
+            reject(response.data)
+            return
+          }
           setToken(data.access_token)
           window.sessionStorage.setItem('avatar',response.data.headPath)
           commit('SET_AVATAR', response.data.headPath)

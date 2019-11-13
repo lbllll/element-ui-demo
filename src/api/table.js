@@ -244,6 +244,11 @@ export function produckAddAttribute(data) {
   return http.post('/product/attribute/name/add', data, 'formData')
 }
 
+// 编辑分类属性
+export function produckEditAttribute(data) {
+  return http.post('/product/attribute/name/edit', data, 'formData')
+}
+
 // 查看全部属性
 export function produckAllAttribute(data) {
   return http.post('/product/attribute/name/attributes', data, 'formData')
@@ -252,6 +257,11 @@ export function produckAllAttribute(data) {
 // 删除属性
 export function produckDelAttribute(data) {
   return http.post('/product/attribute/name/delete', data, 'formData')
+}
+
+// 修改分类排序
+export function setCoefficient(data) {
+  return http.post('/product/category/setCoefficient', data, 'formData')
 }
 
 // 商品标签
@@ -272,6 +282,26 @@ export function productLabelSave(data) {
 // 商品标签删除
 export function productLabelDelete(data) {
   return http.post('/product/label/delete', data, 'formData')
+}
+
+// 新增场景
+export function productScenelSave(data) {
+  return http.post('/product/scene/save', data, 'formData')
+}
+
+// 场景列表
+export function productScenelList(data) {
+  return http.post('/product/scene/list', data, 'formData')
+}
+
+// 删除场景
+export function productScenelDel(data) {
+  return http.post('/product/scene/delete', data, 'formData')
+}
+
+// 场景排序
+export function productScenelSort(data) {
+  return http.post('/product/scene/sort', data, 'formData')
 }
 
 

@@ -64,6 +64,12 @@
 .mb0 {
   margin-bottom: 0px;
 }
+.coefficient{
+  width: 100%;
+  height: 100%;
+  border: none;
+  text-align: center;
+}
 </style>
 
 
@@ -86,7 +92,11 @@
     >
       <el-table-column align="center" :prop="type?'categoryId':'labelId'" label="编号" width="80"></el-table-column>
       <el-table-column align="center" prop="name" label="分类名称"></el-table-column>
-      <el-table-column align="center" prop="sort" label="排序"></el-table-column>
+      <el-table-column align="center" prop="sort" label="排序">
+        <template slot-scope="scope">
+          <input class="coefficient" @blur="changeSlot(scope.row)" type="number" v-model.number="scope.row.sort">
+        </template>
+      </el-table-column>
       <el-table-column
         align="center"
         :prop="type?'productCount':'relatedProductCount'"
@@ -110,7 +120,11 @@
         >
           <el-table-column align="center" prop="categoryId" label="编号" width="80"></el-table-column>
           <el-table-column align="center" prop="name" label="分类名称"></el-table-column>
-          <el-table-column align="center" prop="sort" label="排序"></el-table-column>
+          <el-table-column align="center" prop="sort" label="排序">
+            <template slot-scope="scope">
+              <input class="coefficient" @blur="changeSlot(scope.row)" type="number" v-model.number="scope.row.sort">
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="添加属性">
             <template slot-scope="scope">
               <el-button
@@ -163,10 +177,15 @@
               <i class="el-icon-delete" @click="delAttribute(scope.row.name.nameId,scope.$index)"></i>
             </template>
           </el-table-column>
+          <el-table-column align="center" label="编辑">
+            <template slot-scope="scope">
+              <i class="el-icon-edit-outline" @click="editAttr(scope.row)"></i>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </el-dialog>
-    <el-dialog :title="childName+'新增属性'" :visible.sync="categoryAdd" width="60%">
+    <el-dialog :title="childName+(addEdit?'新增属性':'编辑属性')" :visible.sync="categoryAdd" width="60%">
       <el-form :model="attribute" ref="attribute" label-width="100px" class="addAttribute">
         <el-form-item label="属性名" verify prop="name">
           <el-input class="inputs" v-model="attribute.name"></el-input>
@@ -187,7 +206,7 @@
         </el-form-item>
         <el-form-item label v-if="attribute.inputType!=='TEXT'">
           <div class="inputBox" v-for="(item, index) in typeItem" :key="index">
-            <el-input class="inputs" placeholder="请输入候选项" v-model="item.val"></el-input>
+            <el-input class="inputs" placeholder="请输入候选项" v-model="item.value"></el-input>
             <i class="isDefault" :class="item.default?'on':''" @click="checkDefault(index)"></i>
             <i
               class="btns"
@@ -210,7 +229,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submitForm('attribute')">立即创建</el-button>
+          <el-button type="primary" @click="submitForm('attribute')">{{addEdit?'立即创建':'确认编辑'}}</el-button>
           <el-button @click="resetForm('attribute')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -224,8 +243,10 @@ import {
   produckCategoryList,
   produckLabelList,
   produckAddAttribute,
+  produckEditAttribute,
   produckAllAttribute,
-  produckDelAttribute
+  produckDelAttribute,
+  setCoefficient
 } from "@/api/table";
 
 export default {
@@ -244,7 +265,10 @@ export default {
         dataType: "STOCK",
         inputType: "TEXT",
         categoryId: "",
-        isNullable: "Y"
+        isNullable: "Y",
+        name: '',
+        sort: '',
+        defaultValue:''
       },
       options: [
         {
@@ -260,15 +284,22 @@ export default {
           label: "多选框"
         }
       ],
-      typeItem: [{ val: "", default: true }],
+      typeItem: [{ value: "", default: true }],
       allAttribute: false,
-      allAttributeList: []
+      allAttributeList: [],
+      addEdit: true // true=新增，false=编辑
     };
   },
   created() {
     this.getList();
   },
   methods: {
+    changeSlot(row){
+      console.log(row);
+      setCoefficient({categoryId:row.categoryId,coefficient:row.sort}).then((res) => {
+      }).catch((err) => {
+      });
+    },
     getList() {
       produckCategoryList()
         .then(result => {
@@ -316,8 +347,41 @@ export default {
           });
         });
     },
-    addAttribute(row) {
+    editAttr(row){
+      this.addEdit = false
       console.log(row);
+      this.attribute.categoryId = row.name.categoryId;
+      this.attribute.name = row.name.name;
+      this.attribute.dataType = row.name.dataType;
+      this.attribute.inputType = row.name.inputType;
+      this.attribute.isNullable = row.name.isNullable;
+      this.attribute.sort = row.name.sort;
+      this.attribute.nameId = row.name.nameId;
+      var list = JSON.parse(JSON.stringify(row.valueList))
+
+      list.forEach(e => {
+        if(e.value==row.name.defaultValue){
+          e.default = true
+        }else{
+          e.default = false
+        }
+      });
+      this.typeItem = list
+      this.childName = row.name.name;
+      this.categoryAdd = true;
+    },
+    addAttribute(row) {
+      this.addEdit = true
+      console.log(row);
+
+      this.attribute.name = '';
+      this.attribute.dataType = 'STOCK';
+      this.attribute.inputType = 'TEXT';
+      this.attribute.isNullable = 'Y';
+      this.attribute.sort = '';
+      this.attribute.nameId = '';
+      this.typeItem = [{ value: "", default: true }]
+
       this.attribute.categoryId = row.categoryId;
       this.childName = row.name;
       this.categoryAdd = true;
@@ -338,7 +402,7 @@ export default {
     },
     valueChange(i) {
       if (i == 0) {
-        this.typeItem.push({ val: "", default: false });
+        this.typeItem.push({ value: "", default: false });
       } else {
         if (this.typeItem[i].default) {
           this.typeItem[0].default = true;
@@ -362,7 +426,7 @@ export default {
         .catch(err => {});
     },
     resetForm(formName) {
-      this.typeItem = [{ val: "", default: true }];
+      this.typeItem = [{ value: "", default: true }];
       this.$refs[formName].resetFields();
     },
     submitForm(formName) {
@@ -375,10 +439,10 @@ export default {
             data.valueListJson = [];
             this.typeItem.forEach(e => {
               if (e.default) {
-                data.defaultValue = e.val;
+                data.defaultValue = e.value;
               }
-              data.valueListJson.push(e.val);
-              if (!e.val) {
+              data.valueListJson.push(e.value);
+              if (!e.value) {
                 code = false;
               }
             });
@@ -388,19 +452,36 @@ export default {
               return;
             }
           }
+          if(this.addEdit){
+            delete data.nameId
+            produckAddAttribute(data)
+              .then(result => {
+                this.$message({
+                  message: "添加属性成功",
+                  type: "success"
+                });
+                setTimeout(() => {
+                  self.categoryAdd = false;
+                  self.resetForm("attribute");
+                }, 1000);
+              })
+              .catch(err => {});
+          }else{
+            produckEditAttribute(data)
+              .then(result => {
+                this.$message({
+                  message: "编辑成功",
+                  type: "success"
+                });
+                self.openAll({name:data.name,categoryId:data.categoryId})
+                setTimeout(() => {
+                  self.categoryAdd = false;
+                  self.resetForm("attribute");
+                }, 1000);
+              })
+              .catch(err => {});
+          }
           console.log(data);
-          produckAddAttribute(data)
-            .then(result => {
-              this.$message({
-                message: "添加属性成功",
-                type: "success"
-              });
-              setTimeout(() => {
-                self.categoryAdd = false;
-                self.resetForm("attribute");
-              }, 1000);
-            })
-            .catch(err => {});
         } else {
           console.log("error submit!!");
           return false;
