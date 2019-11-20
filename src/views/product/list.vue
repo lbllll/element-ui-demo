@@ -256,7 +256,7 @@ export default {
     selectArr: Array
   },
   created() {
-    if(this.selectArr&&this.selectArr.length>0){
+    if(this.selectArr&&this.selectArr.length>=0){
       this.multipleSelection=this.selectArr
     }
     if(window.sessionStorage.getItem('searchData')){
@@ -279,10 +279,20 @@ export default {
       data.page--;
       data.categoryId = data.category[data.category.length-1]
       delete data.category
-      console.log(data);
       produckList(data).then(result => {
         this.count = result.data.count;
         this.tableData = result.data.list;
+        if(this.selectArr&&this.selectArr.length>=0){
+          var ids = []
+          this.selectArr.forEach(e => {
+            ids.push(e.productId)
+          });
+          result.data.list.forEach(e => {
+            if(ids.indexOf(e.productId)!=-1){
+              this.$refs.multipleTable.toggleRowSelection(e);
+            }
+          });
+        }
       });
     },
     searchs() {
@@ -296,7 +306,6 @@ export default {
       });
     },
     changeSlot(row){
-      console.log(row);
       produckSetCoefficient({productId:row.productId,coefficient:row.coefficient}).then((res) => {
         
       }).catch((err) => {
@@ -386,7 +395,6 @@ export default {
           }
           list.push(one)
         });
-        console.log(list);
         this.categoryList = list;
       });
       produckTabel().then(result => {

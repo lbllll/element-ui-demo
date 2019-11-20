@@ -36,6 +36,25 @@
 .icon{
   width: 40px;
 }
+.categoryBox{
+  position: relative;
+  display: inline-block;
+  .btn{
+    width: 160px;
+    margin-left: 10px;
+  }
+  .sort{
+    margin-left: 10px;
+    width: 80px;
+  }
+}
+.btns {
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  transform: translate(0, -50%);
+  font-size: 24px;
+}
 </style>
 
 
@@ -44,7 +63,7 @@
     <div class="header flex">
       <el-input class="inputs" v-model="sceneName" placeholder="场景名"></el-input>
       <el-button type="primary" @click="getList">搜索</el-button>
-      <el-button type="primary" @click="noticeCode=true">添加场景</el-button>
+      <el-button type="primary" @click="addLabel">添加场景</el-button>
     </div>
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="name" align="center" label="场景名称"></el-table-column>
@@ -58,6 +77,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="createTime" align="center" label="创建时间"></el-table-column>
+      <el-table-column prop="operateContent" align="center" label="编辑" width="100">
+        <template slot-scope="scope">
+          <i class="el-icon-edit" @click="editLabel(scope.row.sceneId)"></i>
+        </template>
+      </el-table-column>
       <el-table-column prop="operateContent" align="center" label="删除" width="100">
         <template slot-scope="scope">
           <i class="el-icon-delete" @click="delLabel(scope.row.sceneId)"></i>
@@ -73,7 +97,7 @@
       :total="countNum"
     ></el-pagination> -->
 
-    <el-dialog title="添加标签" :visible.sync="noticeCode" width="70%">
+    <el-dialog :title="formData.sceneId?'编辑场景':'添加场景'" :visible.sync="noticeCode" width="70%">
       <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
         <el-form-item verify label="场景名" prop="sceneName">
           <el-input class="inputs" v-model="formData.sceneName"></el-input>
@@ -97,11 +121,31 @@
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
-
+        <el-form-item label="分类" v-for="(item, index) in category" :key="index">
+          <div class="categoryBox">
+            <el-cascader
+              v-model="item.categoryId"
+              placeholder="选择分类"
+              clearable
+              :options="categoryList"
+              :props="{ expandTrigger: 'hover' }"
+              ></el-cascader>
+            <el-button class="btn" @click="chectProduct(index)">{{item.product.length>0?'已选'+item.product.length+'件商品':'选择商品'}}</el-button>
+            <el-input class="sort" v-model="item.sort" placeholder="排序"></el-input>
+            <i
+              class="btns"
+              :class="index==0?'el-icon-plus':'el-icon-delete'"
+              @click="valueChange(index)"
+            ></i>
+          </div>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm('formData')">提 交</el-button>
       </span>
+    </el-dialog>
+    <el-dialog title="选择商品" :visible.sync="productCode" width="90%">
+      <product-list v-if="productCode" checkItem @selectData="selectData" :selectArr="selects"></product-list>
     </el-dialog>
   </div>
 </template>
@@ -112,12 +156,18 @@ import {
   productScenelList,
   productLabelCounter,
   productScenelSort,
-  productScenelSave,
-  productScenelDel
+  productScenelDel,
+  produckTree,
+  productScenelDetail,
+  postApi
 } from "@/api/table";
+import productList from "@/views/product/list";
 
 export default {
   name: "PRODUCT_SCENE",
+  components:{
+    productList
+  },
   data() {
     return {
       page: 1,
@@ -125,7 +175,7 @@ export default {
         icon: "",
         sceneName: "",
         sceneDescription: "",
-        sort: "",
+        sort: ""
       },
       tableData: [],
       noticeCode: false,
@@ -134,10 +184,44 @@ export default {
       access_token: {
         access_token: this.$store.getters.token
       },
-      sceneName: ''
+      sceneName: '',
+      categoryList: [],
+      productCode: false,
+      selects: [],
+      category: [
+        {
+          categoryId: [],
+          product: [],
+          sort: ''
+        }
+      ],
+      categoryIndex: 0
     };
   },
   created() {
+    produckTree().then((res) => {
+      var list = []
+      res.data.forEach(e => {
+        var a = {
+          label:e.name,
+          value:e.id,
+          children:[]
+        }
+        if(e.children&&e.children.length>0){
+          e.children.forEach(l => {
+            var b = {
+              label:l.name,
+              value:l.id
+            }
+            a.children.push(b)
+          });
+        }
+        list.push(a)
+      });
+      this.categoryList = list
+    }).catch((err) => {
+      
+    });
     this.getList();
   },
   methods: {
@@ -182,17 +266,46 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          productScenelSave(this.formData)
+          var list = [],
+              data = JSON.parse(JSON.stringify(this.formData))
+          this.category.forEach((e,i) => {
+            try {
+              var obj = {
+                categoryId: e.categoryId[1],
+                sort: e.sort||0,
+                productIdList: ''
+              }
+              e.product.forEach(p => {
+                if(obj.productIdList){
+                  obj.productIdList+=(','+p.productId)
+                }else{
+                  obj.productIdList = p.productId
+                }
+              });
+              list.push(obj)
+            } catch (error) {
+              console.log(error);
+            }
+          });
+          data.categoryListJson = JSON.stringify(list)
+          var url = ''
+          if(data.sceneId){
+            url = '/product/scene/edit'
+          }else{
+            url = '/product/scene/save'
+          }
+          postApi(data,url)
             .then(res => {
               this.$message({
                 type: "success",
-                message: "添加成功"
+                message: data.sceneId?'编辑成功':"添加成功"
               });
               this.noticeCode = false;
               this.formData.icon = ''
               this.formData.sceneName = ''
               this.formData.sceneDescription = ''
               this.formData.sort = ''
+              this.category = [{categoryId: [],product: [],sort: ''}]
               this.getList();
             })
             .catch(err => {});
@@ -208,7 +321,6 @@ export default {
       console.log(`当前页: ${val}`);
     },
     iconUrlSuccess(res) {
-      console.log(res);
       this.formData.icon = res.data;
     },
     beforeAvatarUpload(file) {
@@ -233,6 +345,61 @@ export default {
       }).catch((err) => {
         this.$message.error('操作失败')
       });
+    },
+    selectData(val){
+      this.productCode = false
+      this.category[this.categoryIndex].product = val
+    },
+    chectProduct(i){
+      this.selects = JSON.parse(JSON.stringify(this.category[i].product))
+      this.categoryIndex = i
+      this.productCode=true
+    },
+    valueChange(i){
+      if(i==0){
+        this.category.push({categoryId: [],product: []})
+      }else{
+        this.category.splice(i, 1);
+      }
+    },
+    editLabel(id){
+      productScenelDetail({sceneId:id}).then((res) => {
+        var data = res.data.productSceneModel
+        var formData= {
+          icon: data.icon,
+          sceneName: data.name,
+          sceneDescription: data.description,
+          sort: data.sort,
+          sceneId: data.sceneId
+        }
+        this.formData = formData
+        var list = []
+        res.data.systemHomeCategoryDtoList.forEach(e => {
+          var obj = {
+            categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
+            product: [],
+            sort: e.sort
+          }
+          e.productInfoModelList.forEach(l => {
+            obj.product.push(l)
+          });
+          list.push(obj)
+        });
+        this.category = list
+        this.noticeCode = true
+      }).catch((err) => {
+        
+      });
+    },
+    addLabel(){
+      this.formData = {
+        icon: "",
+        sceneName: "",
+        sceneDescription: "",
+        sort: ""
+      }
+      this.category = [{categoryId: [],product: [],sort: ''}]
+      this.noticeCode = true
     }
   }
 };

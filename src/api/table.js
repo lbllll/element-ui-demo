@@ -284,6 +284,11 @@ export function productLabelDelete(data) {
   return http.post('/product/label/delete', data, 'formData')
 }
 
+// 商品标签详情
+export function productLabelDetail(data) {
+  return http.post('/product/label/detail', data, 'formData')
+}
+
 // 新增场景
 export function productScenelSave(data) {
   return http.post('/product/scene/save', data, 'formData')
@@ -302,6 +307,16 @@ export function productScenelDel(data) {
 // 场景排序
 export function productScenelSort(data) {
   return http.post('/product/scene/sort', data, 'formData')
+}
+
+// 场景详情
+export function productScenelDetail(data) {
+  return http.post('/product/scene/detail', data, 'formData')
+}
+
+// 场景编辑
+export function productScenelEdit(data) {
+  return http.post('/product/scene/edit', data, 'formData')
 }
 
 
@@ -434,6 +449,17 @@ export function getHistorys(data) {
 // 获取绑定商品
 export function getHistoryDetail(data) {
   return http.post('/coupon/bind/record/detail', data, 'formData')
+}
+
+
+
+
+
+
+
+// 非固定请求路径
+export function postApi(data,url) {
+  return http.post(url, data, 'formData')
 }
 
 
