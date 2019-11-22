@@ -91,7 +91,7 @@
       :total="countNum"
     ></el-pagination>
 
-    <el-dialog :title="formData.sceneId?'编辑标签':'添加标签'" :visible.sync="noticeCode" width="70%">
+    <el-dialog :title="submitType?'添加标签':'编辑标签'" :visible.sync="noticeCode" width="70%">
       <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
         <el-form-item verify label="标签名称" prop="labelName">
           <el-input class="inputs" v-model="formData.labelName"></el-input>
@@ -180,7 +180,8 @@ export default {
           sort: ''
         }
       ],
-      categoryIndex: 0
+      categoryIndex: 0,
+      submitType: true, // true=添加，false=编辑
     };
   },
   created() {
@@ -279,10 +280,10 @@ export default {
           });
           data.categoryListJson = JSON.stringify(list)
           var url = ''
-          if(data.sceneId){
-            url = '/product/label/edit'
-          }else{
+          if(this.submitType){
             url = '/product/label/save'
+          }else{
+            url = '/product/label/edit'
           }
           postApi(data,url)
             .then(res => {
@@ -374,6 +375,7 @@ export default {
             list.push(obj)
           });
           this.category = list
+          this.submitType = false
           this.noticeCode = true
         } catch (error) {
           console.log(error);
@@ -390,6 +392,7 @@ export default {
         sceneName: ""
       }
       this.category = [{categoryId: [],product: [],sort: ''}]
+      this.submitType = true
       this.noticeCode = true
     }
   }

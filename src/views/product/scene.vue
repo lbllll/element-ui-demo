@@ -364,29 +364,33 @@ export default {
     },
     editLabel(id){
       productScenelDetail({sceneId:id}).then((res) => {
-        var data = res.data.productSceneModel
-        var formData= {
-          icon: data.icon,
-          sceneName: data.name,
-          sceneDescription: data.description,
-          sort: data.sort,
-          sceneId: data.sceneId
-        }
-        this.formData = formData
-        var list = []
-        res.data.systemHomeCategoryDtoList.forEach(e => {
-          var obj = {
-            categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
-            product: [],
-            sort: e.sort
+        try {
+          var data = res.data.productSceneModel
+          var formData= {
+            icon: data.icon,
+            sceneName: data.name,
+            sceneDescription: data.description,
+            sort: data.sort,
+            sceneId: data.sceneId
           }
-          e.productInfoModelList.forEach(l => {
-            obj.product.push(l)
+          this.formData = formData
+          var list = []
+          res.data.systemHomeCategoryDtoList.forEach(e => {
+            var obj = {
+              categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
+              product: [],
+              sort: e.sort
+            }
+            e.productInfoModelList.forEach(l => {
+              obj.product.push(l)
+            });
+            list.push(obj)
           });
-          list.push(obj)
-        });
-        this.category = list
-        this.noticeCode = true
+          this.category = list
+          this.noticeCode = true
+        } catch (error) {
+            console.log(error);          
+        }
       }).catch((err) => {
         
       });
