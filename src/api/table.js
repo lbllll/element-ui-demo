@@ -3,7 +3,7 @@ import Vue from 'vue'
 import http from '@/utils/http'
 
 /**
- * 
+ *
  * 同功能，在不同环境时请求接口路径不同时，分两个对象存储路径
  */
 
@@ -182,7 +182,7 @@ export function produckBatchUp(data) {
   return http.post('/product/info/batchUpDown', data, 'formData')
 }
 
-// 商品推荐 
+// 商品推荐
 export function produckRecommend(data) {
   return http.post('/product/recommend/recommend', data, 'formData')
 }
@@ -451,7 +451,13 @@ export function getHistoryDetail(data) {
   return http.post('/coupon/bind/record/detail', data, 'formData')
 }
 
-
+/**
+ *文章
+ */
+// 发布文章
+export function postArticleRelease(data) {
+  return http.post('/article/info/release', data, 'formData')
+}
 
 
 
