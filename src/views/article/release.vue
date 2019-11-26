@@ -313,7 +313,7 @@ export default {
     })
       data.detailsJson = JSON.stringify(arr);
       console.log(data);
-      return false;
+//      return false;
       postArticleRelease(data)
         .then(result => {
         if (result.code == 200) {
