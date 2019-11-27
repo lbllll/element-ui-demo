@@ -76,6 +76,16 @@
           <input class="sorts" type="number" v-model.number="scope.row.sort" @blur="setStor(scope.row.sort,scope.row.sceneId)" />
         </template>
       </el-table-column>
+      <el-table-column align="center" label="是否在首页展示" width="120">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.showHomePage"
+            @change="changeShow(scope.row)"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </template>
+      </el-table-column>
       <el-table-column prop="createTime" align="center" label="创建时间"></el-table-column>
       <el-table-column prop="operateContent" align="center" label="编辑" width="100">
         <template slot-scope="scope">
@@ -98,7 +108,7 @@
     ></el-pagination> -->
 
     <el-dialog :title="formData.sceneId?'编辑场景':'添加场景'" :visible.sync="noticeCode" width="70%">
-      <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
+      <el-form :model="formData" ref="formData" label-width="120px" class="demo-formData">
         <el-form-item verify label="场景名" prop="sceneName">
           <el-input class="inputs" v-model="formData.sceneName"></el-input>
         </el-form-item>
@@ -107,6 +117,13 @@
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input class="inputs" type="number" v-model.number="formData.sort"></el-input>
+        </el-form-item>
+        <el-form-item label="是否在首页展示">
+          <el-switch
+            v-model="formData.showHomePage"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
         </el-form-item>
         <el-form-item label="图标" prop="icon">
           <el-upload
@@ -159,6 +176,7 @@ import {
   productScenelDel,
   produckTree,
   productScenelDetail,
+  sceneShowHomePage,
   postApi
 } from "@/api/table";
 import productList from "@/views/product/list";
@@ -404,6 +422,13 @@ export default {
       }
       this.category = [{categoryId: [],product: [],sort: ''}]
       this.noticeCode = true
+    },
+    changeShow(row){
+      sceneShowHomePage({sceneId:row.sceneId,showHomePage:row.showHomePage}).then((res) => {
+        
+      }).catch((err) => {
+        
+      });
     }
   }
 };

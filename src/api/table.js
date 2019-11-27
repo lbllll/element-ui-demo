@@ -289,6 +289,11 @@ export function productLabelDetail(data) {
   return http.post('/product/label/detail', data, 'formData')
 }
 
+// 商品标签详情
+export function labelShowHomePage(data) {
+  return http.post('/product/label/showHomePage', data, 'formData')
+}
+
 // 新增场景
 export function productScenelSave(data) {
   return http.post('/product/scene/save', data, 'formData')
@@ -317,6 +322,11 @@ export function productScenelDetail(data) {
 // 场景编辑
 export function productScenelEdit(data) {
   return http.post('/product/scene/edit', data, 'formData')
+}
+
+// 场景编辑
+export function sceneShowHomePage(data) {
+  return http.post('/product/scene/showHomePage', data, 'formData')
 }
 
 

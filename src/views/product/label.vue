@@ -70,6 +70,16 @@
           <input class="sorts" type="number" v-model.number="scope.row.sort" />
         </template>
       </el-table-column>
+      <el-table-column align="center" label="是否在首页展示" width="120">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.showHomePage"
+            @change="changeShow(scope.row)"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </template>
+      </el-table-column>
       <el-table-column prop="createTime" align="center" label="创建时间"></el-table-column>
       <el-table-column prop="operateContent" align="center" label="编辑" width="100">
         <template slot-scope="scope">
@@ -92,12 +102,19 @@
     ></el-pagination>
 
     <el-dialog :title="submitType?'添加标签':'编辑标签'" :visible.sync="noticeCode" width="70%">
-      <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
+      <el-form :model="formData" ref="formData" label-width="120px" class="demo-formData">
         <el-form-item verify label="标签名称" prop="labelName">
           <el-input class="inputs" v-model="formData.labelName"></el-input>
         </el-form-item>
         <el-form-item verify label="标签描述" prop="labelDescription">
           <el-input class="inputs" v-model="formData.labelDescription"></el-input>
+        </el-form-item>
+        <el-form-item label="是否在首页展示">
+          <el-switch
+            v-model="formData.showHomePage"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
         </el-form-item>
         <el-form-item verify label="所属场景" prop="sceneId">
           <el-select v-model="formData.sceneId" placeholder="请选择" @change="changeScene">
@@ -148,6 +165,7 @@ import {
   productScenelList,
   productLabelDelete,
   productLabelDetail,
+  labelShowHomePage,
   produckTree
 } from "@/api/table";
 import productList from "@/views/product/list";
@@ -350,6 +368,7 @@ export default {
           var formData= {
             icon: data.icon,
             labelName: data.name,
+            sceneName: data.sceneName,
             labelDescription: data.description,
             sort: data.sort,
             labelId: data.labelId,
@@ -364,15 +383,17 @@ export default {
           this.formData = formData
           var list = []
           res.data.systemHomeCategoryDtoList.forEach(e => {
-            var obj = {
-              categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
-              product: [],
-              sort: e.sort
+            if(e.productCategoryModel){
+              var obj = {
+                categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
+                product: [],
+                sort: e.sort
+              }
+              e.productInfoModelList.forEach(l => {
+                obj.product.push(l)
+              });
+              list.push(obj)
             }
-            e.productInfoModelList.forEach(l => {
-              obj.product.push(l)
-            });
-            list.push(obj)
           });
           this.category = list
           this.submitType = false
@@ -394,6 +415,13 @@ export default {
       this.category = [{categoryId: [],product: [],sort: ''}]
       this.submitType = true
       this.noticeCode = true
+    },
+    changeShow(row){
+      labelShowHomePage({labelId:row.labelId,showHomePage:row.showHomePage}).then((res) => {
+        
+      }).catch((err) => {
+        
+      });
     }
   }
 };
