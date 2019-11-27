@@ -3,7 +3,7 @@
 <style lang="scss" scoped>
 @import "~@/styles/mixin.scss";
 
-.inputs{
+.inputs {
   width: 360px;
 }
 .describe {
@@ -14,47 +14,60 @@
   width: 360px;
 }
 .demo-formData {
-.title {
-  margin: 15px 0;
-  font-weight: bold;
-  color: #333;
+  .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
 }
-}
-.articleDetailBtn{
+.articleDetailBtn {
   margin: 0 auto;
 }
-.articleAddWithDetail{
+.articleAddWithDetail {
   margin-top: 20px;
-  padding-top:20px ;
+  padding-top: 20px;
   border: 1px solid #333;
   border-radius: 8px;
   width: 600px;
-  height: 300px ;
 }
-.articleAddWithDetail textarea{
+.articleAddWithDetail textarea {
   border-radius: 8px;
+  padding: 12px;
   width: 360px;
   height: 100px;
-  resize:none;
+  resize: none;
   outline: none !important;
 }
-.articleAddWithProduct{
+.articleAddWithProduct {
   margin-top: 20px;
-  padding-top:20px ;
+  padding-top: 20px;
   border: 1px solid #333;
   border-radius: 8px;
   width: 600px;
-  height: 230px ;
+  height: 230px;
 }
 .footer {
   margin-top: 20px;
-@include flex-center;
+  @include flex-center;
 }
-  .imgArea{
-    border: 1px solid black;
-    width: 500px;
-    height: 4000px;
+.imgArea {
+  border: 1px solid black;
+  width: 500px;
+  height: 4000px;
+}
+.addCont{
+  display: block;
+}
+.detailContent{
+  position: relative;
+  width: 360px;
+  .delete{
+    position: absolute;
+    left: 366px;
+    bottom: 24px;
+    font-size: 24px;
   }
+}
 </style>
 
 
@@ -72,7 +85,7 @@
           :before-upload="beforeAvatarUpload"
           :on-success="uploadSuccess"
         >
-          <img v-if="imageUrl" :src="imageUrl" class="avatar">
+          <img v-if="imageUrl" :src="imageUrl" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           <el-input class="inputs none imgArea" v-model="imageUrl"></el-input>
         </el-upload>
@@ -86,8 +99,9 @@
           :on-change="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
           :on-success="uploadListSuccess"
+          :multiple="false"
         >
-          <img v-if="imageListUrl" :src="imageListUrl" class="avatar">
+          <img v-if="imageListUrl" :src="imageListUrl" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           <el-input class="inputs none imgArea" v-model="imageUrl"></el-input>
         </el-upload>
@@ -122,37 +136,47 @@
       </div>
       <div class="articleDetailInfo">
         <div class="articleDetailBtn">
-          <el-button type="primary"   @click="articleAddWithDetail">添加文章描述</el-button>
-          <el-button type="primary"  @click="articleAddWithProduct">添加相关产品</el-button>
+          <el-button type="primary" @click="articleAddWithDetail">添加文章描述</el-button>
+          <el-button type="primary" @click="articleAddWithProduct">添加相关产品</el-button>
         </div>
-        <div class="articleAddWithDetail" v-for="(info,articleInfo) in articleInfo" :key='articleInfo'>
-          <el-form-item   label="描述小标题" prop="articleDetailTitle">
+        <div class="articleAddWithDetail" v-for="(info,index) in articleInfo" :key="index">
+          <el-form-item label="描述小标题" prop="articleDetailTitle">
             <el-input class="inputs" v-model="info.articleDetailTitle"></el-input>
             <span class="describe">字数不超过30</span>
           </el-form-item>
-          <el-form-item   label="描述内容" prop="detailContent">
-            <textarea  class="inputs" v-model="info.detailContent"></textarea >
+          <el-form-item label="描述内容" prop="detailContent">
+            <div class="detailContent" v-for="(cont, i) in info.detailContent" :key="i">
+              <textarea class="inputs" v-model="cont.txt"></textarea>
+              <i class="delete el-icon-delete" v-if="i>0" @click="delCont(index,i)"></i>
+            </div>
+            <el-button type="primary" size="mini" class="addCont" @click="addCont(index)">添加段落</el-button>
           </el-form-item>
-          </el-form-item>
-          <el-form-item    label="排序" prop="sort">
-            <el-input class="inputs"   v-model="info.sort" ></el-input>
+          <el-form-item label="排序" prop="sort">
+            <el-input class="inputs" v-model="info.sort"></el-input>
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
-          <el-input class="inputs articleType" v-model="info.articleType" type="hidden" ></el-input>
+          <el-input class="inputs articleType" v-model="info.articleType" type="hidden"></el-input>
         </div>
-        <div class="articleAddWithProduct" v-for="(item,index) in articleProduct" :key="'product'+index">
-          <el-form-item  label="描述小标题"  prop="articleDetailTitle">
+        <div
+          class="articleAddWithProduct"
+          v-for="(item,index) in articleProduct"
+          :key="'product'+index"
+        >
+          <el-form-item label="描述小标题" prop="articleDetailTitle">
             <el-input class="inputs" v-model="item.articleDetailTitle"></el-input>
           </el-form-item>
           <el-form-item label="选择产品" verify prop="labelIds">
-            <el-button class="btn" @click="chectProduct(index)">{{item.product.length>0?'已选'+item.product.length+'件商品':'选择商品'}}</el-button>
+            <el-button
+              class="btn"
+              @click="chectProduct(index)"
+            >{{item.product.length>0?'已选'+item.product.length+'件商品':'选择商品'}}</el-button>
             <span class="describe">选择产品</span>
           </el-form-item>
-          <el-form-item   label="排序"  prop="sort">
-            <el-input class="inputs"  v-model="item.sort" ></el-input>
+          <el-form-item label="排序" prop="sort">
+            <el-input class="inputs" v-model="item.sort"></el-input>
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
-          <el-input class="inputs articleType" v-model="item.articleType" type="hidden" ></el-input>
+          <el-input class="inputs articleType" v-model="item.articleType" type="hidden"></el-input>
         </div>
       </div>
       <div class="footer">
@@ -178,25 +202,27 @@ import productList from "@/views/product/list";
 
 export default {
   name: "ARTICLE_RELEASE",
-  components:{
+  components: {
     productList
   },
   data() {
     return {
-      formData:{
-        labelIds:"",
-        headImg:"",
-        listImg:"",
-        title:"",
-        description:"",
-        memberId:"1",
-        sceneId:'',
-        detailsJson:[{
-          articleDetailTitle:"",
-          detailContent:"",
-          articleType:"",
-          sort:0
-        }]
+      formData: {
+        labelIds: "",
+        headImg: "",
+        listImg: "",
+        title: "",
+        description: "",
+        memberId: "1",
+        sceneId: "",
+        detailsJson: [
+          {
+            articleDetailTitle: "",
+            detailContent: "",
+            articleType: "",
+            sort: 0
+          }
+        ]
       },
       scene: [],
       product: [],
@@ -204,92 +230,101 @@ export default {
       access_token: {
         access_token: this.$store.getters.token
       },
-      imageUrl: '',
-      imageListUrl: '',
+      imageUrl: "",
+      imageListUrl: "",
       classif: [],
       articleInfo: [],
       articleProduct: [],
-      selects:[],
-      categoryIndex:"",
-      productCode:false
+      selects: [],
+      categoryIndex: "",
+      productCode: false
     };
   },
   created() {
-    productScenelList()
-      .then(res => {
+    productScenelList().then(res => {
       this.scene = res.data;
-    //解析表单数据
+      //解析表单数据
     }),
-    produckList()
-      .then(res => {
-      this.product = res.data.list;
-    //解析表单数据
-  })
+      produckList().then(res => {
+        this.product = res.data.list;
+        //解析表单数据
+      });
   },
   methods: {
     //商品筛选：
-    dataFilter(name){
+    dataFilter(name) {
       this.name = name;
       console.log(this.name);
-      if(name){
-        this.options = this.product.filter((item) => {
-            if(!!~item.name.indexOf(name) || !!~item.name.toUpperCase().indexOf(name.toUpperCase())){
-              return true;
-            }
-          })
-      }else { //val为空时，还原数组
+      if (name) {
+        this.options = this.product.filter(item => {
+          if (
+            !!~item.name.indexOf(name) ||
+            !!~item.name.toUpperCase().indexOf(name.toUpperCase())
+          ) {
+            return true;
+          }
+        });
+      } else {
+        //val为空时，还原数组
         this.options = this.product;
       }
     },
-    articleAddWithDetail(){
-      let info={
-        articleDetailTitle:"",
-        detailContent:"",
-        articleType:"ARTICLE",
-        sort:""
+    addCont(i){
+      this.articleInfo[i].detailContent.push({txt:''})
+    },
+    delCont(index,i){
+      this.articleInfo[index].detailContent.splice(i,1)
+    },
+    articleAddWithDetail() {
+      let info = {
+        articleDetailTitle: "",
+        detailContent: [{ txt: "" }],
+        articleType: "ARTICLE",
+        sort: ""
       };
       this.articleInfo.push(info);
     },
-    articleAddWithProduct(){
-      let item={
-        articleDetailTitle:"",
-        detailContent:"",
-        articleType:"PRODUCT",
-        sort:"",
-        product:[]
+    articleAddWithProduct() {
+      let item = {
+        articleDetailTitle: "",
+        detailContent: "",
+        articleType: "PRODUCT",
+        sort: "",
+        product: []
       };
       this.articleProduct.push(item);
     },
-    selectData(val){
-      if(val.length>1){
-        this.$message.error('一次选择一个产品');
-        return
+    selectData(val) {
+      if (val.length > 1) {
+        this.$message.error("一次选择一个产品");
+        return;
       }
       this.productCode = false;
       this.articleProduct[this.categoryIndex].product = val;
-      this.articleProduct[this.categoryIndex].detailContent = JSON.parse(JSON.stringify(val))[0].productId;
+      this.articleProduct[this.categoryIndex].detailContent = JSON.parse(
+        JSON.stringify(val)
+      )[0].productId;
     },
-    chectProduct(i){
+    chectProduct(i) {
       this.selects = JSON.parse(JSON.stringify(this.articleProduct[i].product));
       this.categoryIndex = i;
-      this.productCode=true
+      this.productCode = true;
     },
-    handleAvatarSuccess(file, fileList){
-    },
-    uploadSuccess(response,file,fileList){
-      if(response.code=='200'){
+    handleAvatarSuccess(file, fileList) {},
+    uploadSuccess(response, file, fileList) {
+      if (response.code == "200") {
         this.formData.headImg = response.data;
-        this.imageUrl = response.data
+        this.imageUrl = response.data;
       }
     },
-    uploadListSuccess(response,file,fileList){
-    if(response.code=='200'){
-      this.formData.listImg = response.data;
-      this.imageListUrl = response.data
-    }
-},
-    checkChange(){
-      console.log("data===="+this.formData.sceneId);
+    uploadListSuccess(response, file, fileList) {
+      if (response.code == "200") {
+        this.formData.listImg = response.data;
+        this.imageListUrl = response.data;
+      }
+    },
+    checkChange() {
+      console.log("data====" + this.formData.sceneId);
     },
     beforeAvatarUpload(file) {
       var type = "image/jpg,image/jpeg,image/png,image/gif";
@@ -304,7 +339,7 @@ export default {
       }
       return isJPG && isLt2M;
     },
-    releaseData(){
+    releaseData() {
       //发布文章请求参数组装
       let data = {
         labelIds: "",
@@ -318,48 +353,57 @@ export default {
       //labelIds转为1,2,3的格式
       data.labelIds = this.formData.sceneId.join(",");
       //detailsJson数组转为字符串
-//            "[{"articleDetailTitle": "articleDetailTitle", "detailContent": "detailContent", "articleType": "articleType", "sort": "0"},]"
+      //            "[{"articleDetailTitle": "articleDetailTitle", "detailContent": "detailContent", "articleType": "articleType", "sort": "0"},]"
       //组装数据
       let arr = [];
-      this.articleInfo.forEach(item  => {
+      this.articleInfo.forEach(item => {
         let article = {
-          articleDetailTitle:item.articleDetailTitle,
-          detailContent:item.detailContent,
-          articleType:item.articleType,
-          sort:item.sort
-        }
-        arr.push(article)
-    })
-      this.articleProduct.forEach(item  => {
+          articleDetailTitle: item.articleDetailTitle,
+          detailContent: '',
+          articleType: item.articleType,
+          sort: item.sort
+        };
+        item.detailContent.forEach(e => {
+          if(article.detailContent){
+            article.detailContent += '##'+e.txt
+          }else{
+            article.detailContent = e.txt
+          }
+        });
+        arr.push(article);
+      });
+      this.articleProduct.forEach(item => {
         let article = {
-          articleDetailTitle:item.articleDetailTitle,
-          detailContent:item.detailContent,
-          articleType:item.articleType,
-          sort:item.sort
-        }
-        arr.push(article)
-    })
+          articleDetailTitle: item.articleDetailTitle,
+          detailContent: item.detailContent,
+          articleType: item.articleType,
+          sort: item.sort
+        };
+        arr.push(article);
+      });
       data.detailsJson = JSON.stringify(arr);
       console.log(data);
-//      return false;
+      //      return false;
       postArticleRelease(data)
         .then(result => {
-        if (result.code == 200) {
-        this.$message({
-          message: "发布成功",
-          type: "success"
+          if (result.code == 200) {
+            this.$message({
+              message: "发布成功",
+              type: "success"
+            });
+            setTimeout(() => {
+              location.reload();
+              this.updataInfo = 2;
+            }, 2000);
+          } else {
+            this.$message.error(result.description);
+            this.updataInfo = 2;
+          }
+        })
+        .catch(err => {
+          this.$message.error("网络错误");
+          this.updataInfo = 2;
         });
-        location.reload();
-        this.updataInfo = 2;
-      } else {
-        this.$message.error(result.description);
-        this.updataInfo = 2;
-      }
-    })
-    .catch(err => {
-        this.$message.error("网络错误");
-      this.updataInfo = 2;
-    });
     }
   }
 };
