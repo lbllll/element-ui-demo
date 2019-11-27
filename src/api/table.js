@@ -468,6 +468,10 @@ export function getHistoryDetail(data) {
 export function postArticleRelease(data) {
   return http.post('/article/info/release', data, 'formData')
 }
+// 文章列表
+export function articleList(data) {
+  return http.post('/article/info/articleList', data, 'formData')
+}
 
 
 
