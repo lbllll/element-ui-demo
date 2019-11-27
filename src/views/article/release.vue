@@ -63,6 +63,7 @@
     <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
       <p class="title">文章基本信息</p>
       <el-form-item verify label="文章封面图" prop="headImg">
+        <p class="describe">提示：本地上传图片大小不能超过2M（图片尺寸比例建议640×378）</p>
         <el-upload
           :action="upImgUrl"
           :data="access_token"
@@ -76,11 +77,28 @@
           <el-input class="inputs none imgArea" v-model="imageUrl"></el-input>
         </el-upload>
       </el-form-item>
+      <el-form-item verify label="列表展示图" prop="listImg">
+        <p class="describe">提示：本地上传图片大小不能超过2M（图片尺寸比例建议300×300）</p>
+        <el-upload
+          :action="upImgUrl"
+          :data="access_token"
+          :show-file-list="false"
+          :on-change="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload"
+          :on-success="uploadListSuccess"
+        >
+          <img v-if="imageListUrl" :src="imageListUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          <el-input class="inputs none imgArea" v-model="imageUrl"></el-input>
+        </el-upload>
+      </el-form-item>
       <el-form-item verify label="文章标题" prop="title">
         <el-input class="inputs" v-model="formData.title"></el-input>
+        <span class="describe">字数不超过30</span>
       </el-form-item>
       <el-form-item verify label="文章副标题" prop="description">
         <el-input class="inputs" v-model="formData.description"></el-input>
+        <span class="describe">字数不超过50</span>
       </el-form-item>
       <el-form-item label="选择场景" verify prop="labelIds">
         <el-select
@@ -110,6 +128,7 @@
         <div class="articleAddWithDetail" v-for="(info,articleInfo) in articleInfo" :key='articleInfo'>
           <el-form-item   label="描述小标题" prop="articleDetailTitle">
             <el-input class="inputs" v-model="info.articleDetailTitle"></el-input>
+            <span class="describe">字数不超过30</span>
           </el-form-item>
           <el-form-item   label="描述内容" prop="detailContent">
             <textarea  class="inputs" v-model="info.detailContent"></textarea >
@@ -117,7 +136,7 @@
           </el-form-item>
           <el-form-item    label="排序" prop="sort">
             <el-input class="inputs"   v-model="info.sort" ></el-input>
-            <span class="describe">排序数字(越小越前)</span>
+            <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="info.articleType" type="hidden" ></el-input>
         </div>
@@ -131,7 +150,7 @@
           </el-form-item>
           <el-form-item   label="排序"  prop="sort">
             <el-input class="inputs"  v-model="item.sort" ></el-input>
-            <span class="describe">排序数字(越小越前)</span>
+            <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="item.articleType" type="hidden" ></el-input>
         </div>
@@ -167,6 +186,7 @@ export default {
       formData:{
         labelIds:"",
         headImg:"",
+        listImg:"",
         title:"",
         description:"",
         memberId:"1",
@@ -185,6 +205,7 @@ export default {
         access_token: this.$store.getters.token
       },
       imageUrl: '',
+      imageListUrl: '',
       classif: [],
       articleInfo: [],
       articleProduct: [],
@@ -261,6 +282,12 @@ export default {
         this.imageUrl = response.data
       }
     },
+    uploadListSuccess(response,file,fileList){
+    if(response.code=='200'){
+      this.formData.listImg = response.data;
+      this.imageListUrl = response.data
+    }
+},
     checkChange(){
       console.log("data===="+this.formData.sceneId);
     },
@@ -282,6 +309,7 @@ export default {
       let data = {
         labelIds: "",
         headImg: this.formData.headImg,
+        listImg: this.formData.listImg,
         title: this.formData.title,
         description: this.formData.description,
         memberId: this.formData.memberId,

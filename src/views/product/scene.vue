@@ -115,7 +115,7 @@
         <el-form-item verify label="描述" prop="sceneDescription">
           <el-input class="inputs" v-model="formData.sceneDescription"></el-input>
         </el-form-item>
-        <el-form-item label="排序" prop="sort">
+        <el-form-item verify label="排序" prop="sort">
           <el-input class="inputs" type="number" v-model.number="formData.sort"></el-input>
         </el-form-item>
         <el-form-item label="是否在首页展示">
@@ -238,7 +238,7 @@ export default {
       });
       this.categoryList = list
     }).catch((err) => {
-      
+
     });
     this.getList();
   },
@@ -407,10 +407,10 @@ export default {
           this.category = list
           this.noticeCode = true
         } catch (error) {
-            console.log(error);          
+            console.log(error);
         }
       }).catch((err) => {
-        
+
       });
     },
     addLabel(){

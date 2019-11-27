@@ -40,6 +40,12 @@
           <span><img :src="scope.row.headImg" width="100" height="100"></span>
         </template>
       </el-table-column>
+      <el-table-column
+        label="列表图" width="120" align="center" >
+        <template slot-scope="scope">
+          <span><img :src="scope.row.listImg" width="100" height="100"></span>
+        </template>
+      </el-table-column>
 
       <el-table-column
         label="副标题" width="400" align="center">
