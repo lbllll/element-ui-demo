@@ -182,7 +182,8 @@ export default {
         detailUrl: "",
         iconUrl: "",
         sceneId:"",
-        sceneName: ""
+        sceneName: "",
+        showHomePage: false
       },
       tableData: [],
       noticeCode: false,
@@ -372,7 +373,8 @@ export default {
             labelDescription: data.description,
             sort: data.sort,
             labelId: data.labelId,
-            sceneId: data.sceneId
+            sceneId: data.sceneId,
+            showHomePage: data.showHomePage
           }
           // {
           //   detailUrl: "",
@@ -395,6 +397,9 @@ export default {
               list.push(obj)
             }
           });
+          if(list.length==0){
+            list.push({categoryId: [],product: [],sort: ''})
+          }
           this.category = list
           this.submitType = false
           this.noticeCode = true
@@ -410,7 +415,8 @@ export default {
         detailUrl: "",
         iconUrl: "",
         sceneId:"",
-        sceneName: ""
+        sceneName: "",
+        showHomePage: false
       }
       this.category = [{categoryId: [],product: [],sort: ''}]
       this.submitType = true

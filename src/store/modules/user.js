@@ -35,12 +35,14 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       try {
-        var url = ''
-        if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
-          url = '/sys/user/login'
-        } else {
-          url = '/merchant/info/login'
-        }
+        var url = '/sys/user/login'
+        console.log(window.location.href);
+        console.log(process.env.VUE_APP_URLCONT);
+        // if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
+        //   url = '/sys/user/login'
+        // } else {
+        //   url = '/merchant/info/login'
+        // }
         login({ userName: username, password: password }, url).then(response => {
           const { data } = response
           console.log(JSON.stringify(response.data.headPath));

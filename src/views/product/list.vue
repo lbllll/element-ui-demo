@@ -56,7 +56,7 @@
 
 <template>
   <div class="bodyBox" id="PRODUCT_LIST">
-    <div class="listType" v-if="!checkItem">
+    <div class="listType">
       <!-- <el-radio v-model="data.status" label="4" border>库存告急</el-radio> -->
       <el-radio-group v-model="data.status" @change="getList">
         <el-radio label border>全部</el-radio>

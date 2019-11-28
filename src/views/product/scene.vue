@@ -193,7 +193,8 @@ export default {
         icon: "",
         sceneName: "",
         sceneDescription: "",
-        sort: ""
+        sort: "",
+        showHomePage: false
       },
       tableData: [],
       noticeCode: false,
@@ -389,21 +390,27 @@ export default {
             sceneName: data.name,
             sceneDescription: data.description,
             sort: data.sort,
-            sceneId: data.sceneId
+            sceneId: data.sceneId,
+            showHomePage: data.showHomePage
           }
           this.formData = formData
           var list = []
           res.data.systemHomeCategoryDtoList.forEach(e => {
-            var obj = {
-              categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
-              product: [],
-              sort: e.sort
+            if(e.productCategoryModel){
+              var obj = {
+                categoryId: [e.productCategoryModel.parentId,e.productCategoryModel.categoryId],
+                product: [],
+                sort: e.sort
+              }
+              e.productInfoModelList.forEach(l => {
+                obj.product.push(l)
+              });
+              list.push(obj)
             }
-            e.productInfoModelList.forEach(l => {
-              obj.product.push(l)
-            });
-            list.push(obj)
           });
+          if(list.length==0){
+            list.push({categoryId: [],product: [],sort: ''})
+          }
           this.category = list
           this.noticeCode = true
         } catch (error) {
@@ -418,7 +425,8 @@ export default {
         icon: "",
         sceneName: "",
         sceneDescription: "",
-        sort: ""
+        sort: "",
+        showHomePage: false
       }
       this.category = [{categoryId: [],product: [],sort: ''}]
       this.noticeCode = true
