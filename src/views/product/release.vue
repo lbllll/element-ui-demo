@@ -642,7 +642,7 @@
         </div>
       </div>
     </el-dialog>
-    
+
     <el-dialog title="新增属性" :visible.sync="categoryAdd" width="60%">
       <el-form :model="attribute" ref="attribute" label-width="100px" class="addAttribute">
         <el-form-item label="属性名" verify prop="name">

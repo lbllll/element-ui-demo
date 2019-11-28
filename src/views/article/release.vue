@@ -120,7 +120,7 @@
           multiple
           v-model="formData.sceneId"
           placeholder="请选择场景"
-          @change="checkChange"
+          @change=""
         >
           <el-option
             v-for="item in scene"
@@ -180,8 +180,15 @@
         </div>
       </div>
       <div class="footer">
-        <el-button type="primary" @click="releaseData">确认发布</el-button>
+        <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
+        <el-button type="primary" @click="previewCode=true">预览</el-button>
       </div>
+
+      <el-dialog title="预览" class="previewBox" :visible.sync="previewCode" width="446px">
+        xxxx
+      </el-dialog>
+
+
     </el-form>
     <el-dialog title="选择商品" :visible.sync="productCode" width="90%">
       <product-list v-if="productCode" checkItem @selectData="selectData" :selectArr="selects"></product-list>
@@ -196,7 +203,8 @@ import {
   produckTabel,
   produckList,
   productScenelList,
-  postArticleRelease
+  postArticleRelease,
+  articleDetail
 } from "@/api/table";
 import productList from "@/views/product/list";
 
@@ -237,7 +245,8 @@ export default {
       articleProduct: [],
       selects: [],
       categoryIndex: "",
-      productCode: false
+      productCode: false,
+      previewCode:false
     };
   },
   created() {
@@ -249,6 +258,21 @@ export default {
         this.product = res.data.list;
         //解析表单数据
       });
+    if(this.$route.query.id){
+      articleDetail({ articleId: this.$route.query.id })
+        .then(res => {
+        //处理标签赋值
+      res.data.articleInfoModel.sceneId = res.data.articleInfoModel.labelIds.split(",");
+      this.formData = res.data.articleInfoModel;
+      //图片赋值
+      this.imageUrl=this.formData.headImg;
+      this.imageListUrl=this.formData.listImg;
+      //文章产品描述
+      this.product = res.data.articleProductses;
+      //文章文字内容描述
+      this.articleInfo = res.data.articleInfos;
+    })
+    };
   },
   methods: {
     //商品筛选：
@@ -323,9 +347,13 @@ export default {
         this.imageListUrl = response.data;
       }
     },
-    checkChange() {
+/*    checkChange() {
       console.log("data====" + this.formData.sceneId);
-    },
+      productScenelList().then(res => {
+        this.scene = res.data;
+      //解析表单数据
+    })
+    },*/
     beforeAvatarUpload(file) {
       var type = "image/jpg,image/jpeg,image/png,image/gif";
       const isJPG = type.indexOf(file.type) != -1;

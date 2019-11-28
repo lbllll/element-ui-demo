@@ -472,6 +472,14 @@ export function postArticleRelease(data) {
 export function articleList(data) {
   return http.post('/article/info/articleList', data, 'formData')
 }
+//删除文章
+export function articleDel(data) {
+  return http.post('/article/info/del', data, 'formData')
+}
+//文章详情
+export function articleDetail(data){
+  return http.post('/article/info/detail', data, 'formData')
+}
 
 
 

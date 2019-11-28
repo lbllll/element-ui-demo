@@ -24,8 +24,8 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column label="文章标题" width="300" prop="title" align="center"></el-table-column>
-      <el-table-column label="副标题" width="300" prop="description" align="center"></el-table-column>
+      <el-table-column label="文章标题"  prop="title" align="center"></el-table-column>
+      <el-table-column label="副标题"  prop="description" align="center"></el-table-column>
       <el-table-column label="标签" width="250" prop="labels" align="center"></el-table-column>
       <el-table-column label="文章上下架" width="100" align="center">
         <template slot-scope="scope">
@@ -41,19 +41,15 @@
       </el-table-column>
       <el-table-column label="点赞数" width="100" prop="likeCount" align="center"></el-table-column>
       <el-table-column label="分享数" width="100" prop="shareCount" align="center"></el-table-column>
-      <el-table-column width="" align="center" label="操作">
+      <el-table-column  align="center" width="150" label="操作">
         <template slot-scope="scope">
-          <el-button type="danger" icon="el-icon-delete"  @click="del(scope.row.articleId)"></el-button>
-        </template>
-        <template slot-scope="scope">
-          <el-button type="danger" icon="el-icon-delete"  @click="del(scope.row.articleId)"></el-button>
+          <router-link class="editBtn" type="primary" round icon="el-icon-edit" :to="{name: 'ARTICLE_RELEASE', query: {id: scope.row.articleId}}">
+            <el-button type="primary" round icon="el-icon-edit" size="mini"  @click="edit(scope.row.articleId)"></el-button>
+          </router-link>
+          <el-button type="danger" icon="el-icon-delete" size="mini" round @click="del(scope.row.articleId)"></el-button>
         </template>
       </el-table-column>
-<!--      <el-button-group>
-        <el-button type="primary" icon="el-icon-edit" @click="del(scope.row.articleId)"></el-button>
-        <el-button type="primary" icon="el-icon-share" @click="del(scope.row.articleId)"></el-button>
-        <el-button type="primary" icon="el-icon-delete" @click="del(scope.row.articleId)"></el-button>
-      </el-button-group>-->
+
     </el-table>
     <el-pagination
       @current-change="handleCurrentChange"
@@ -68,7 +64,11 @@
 
 
 <script>
-import { articleList,postApi } from "@/api/table";
+import {
+  articleList,
+  postApi,
+  articleDel
+} from "@/api/table";
 export default {
   name: "ARTICLE_LIST",
   data() {
@@ -123,9 +123,34 @@ export default {
 
       });
     },
+    edit(articleId){
+      console.log(articleId)
+    },
     del(articleId){
-      console.log(articleId);
-    }
+      this.$confirm("此操作将永久删除该文章, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        })
+        .then(() => {
+        articleDel({ articleId: articleId })
+        .then(res => {
+        console.log(res);
+        this.$message({
+        type: "success",
+        message: "操作成功"
+      });
+      this.init();
+    })
+    .catch(err => {});
+    })
+    .catch(() => {
+        this.$message({
+        type: "info",
+        message: "已取消删除"
+      });
+    });
+    },
   },
   mounted() {
     this.init();
