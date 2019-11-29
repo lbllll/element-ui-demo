@@ -2,6 +2,7 @@
 
 <style lang="scss" scoped>
 @import "~@/styles/mixin.scss";
+@import "~@/styles/preview.scss";
 
 .inputs {
   width: 360px;
@@ -68,6 +69,65 @@
     font-size: 24px;
   }
 }
+.mobile {
+  border: 1px solid black;
+}
+  .banner{
+    position: absolute;
+    top:0;
+    width: 100%;
+    .banner-img {
+      width: 100%;
+      height: 160px;
+    }
+  }
+  .pre-content{
+    position: absolute;
+    background-color: red;
+    border-radius:  10px 10px 0 0 ;
+    top:140px;
+    .pre-title{
+      color: black;
+      font-weight: bolder;
+    }
+    .pre-description{
+      margin-top: -8px;
+      font-weight: bolder;
+    }
+  .pre-description span{
+    position: absolute;
+    }
+    .pre-description-detail{
+      padding: 2px 0 0 5px;
+    }
+    .pre-scene {
+      margin-top: 8px;
+      padding-bottom: 5px;
+      width: 100%;
+      border-bottom: 2px solid #F3F3F3;
+        .scene {
+          display: inline-block;
+          margin-right: 8px;
+          padding: 4px 6px;
+          font-size: 12px;
+          color: #FA5051;
+          background-color: #FFE8E4;
+          border-radius: 50px;
+        }
+    }
+  .pre-detail{
+    border: 1px solid red;
+    height: 200px;
+    margin-top: 15px;
+
+  }
+  .foot{
+    margin-top: 25px;
+    border: 1px solid green;
+    border-top: 2px solid #F3F3F3;
+    height: 30px;
+  }
+  }
 </style>
 
 
@@ -120,7 +180,7 @@
           multiple
           v-model="formData.sceneId"
           placeholder="请选择场景"
-          @change=""
+          @change="checkScene"
         >
           <el-option
             v-for="item in scene"
@@ -184,9 +244,39 @@
         <el-button type="primary" @click="previewCode=true">预览</el-button>
       </div>
 
+
+
       <el-dialog title="预览" class="previewBox" :visible.sync="previewCode" width="446px">
-        xxxx
+        <div class="previewBox">
+          <div class="Preview" id="Preview">
+            <div class="mobile pre-mobile">
+              <div class="wins">
+                <div class="banner">
+                    <img class="banner-img" :src="imageUrl" alt />
+                </div>
+                <div class="content pre-content">
+                  <h2 class="pre-title">{{formData.title}}</h2>
+                  <div class="pre-description">
+                    <span>|</span>
+                    <div class="pre-description-detail">{{formData.description}}</div>
+                  </div>
+                  <div class="pre-scene">
+                    <div class="scene" v-for="(item, index) in  scene" :key="index">{{item.name}}</div>
+                  </div>
+                  <div class="pre-detail">
+                    <div class="detail" v-for="(item, index) in  formData.detailsJson" :key="index">
+                    </div>
+                  </div>
+                  <div class="foot">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </el-dialog>
+
+
 
 
     </el-form>
@@ -232,6 +322,7 @@ export default {
           }
         ]
       },
+      checkedScene:[],
       scene: [],
       product: [],
       upImgUrl: process.env[this.$base] + "/medias/image/upload",
@@ -267,12 +358,27 @@ export default {
       //图片赋值
       this.imageUrl=this.formData.headImg;
       this.imageListUrl=this.formData.listImg;
-      //文章产品描述
+/*      //文章产品描述
       this.product = res.data.articleProductses;
       //文章文字内容描述
-      this.articleInfo = res.data.articleInfos;
+      this.articleInfo = res.data.articleInfos;*/
     })
     };
+    //预览选中标签处理
+/*    this.scene.forEach(item =>{
+     let arr  =  this.formData.sceneId;
+    for(let i=0;i<arr.length;i++){
+      if(item.sceneId == arr[i]){
+        let info = {
+          sceneId:item.sceneId,
+          name:item.name
+        }
+        console.log("======="+item.name)
+        this.checkedScene.push(info);
+      }
+    }
+    console.log("======="+this.checkedScene)
+    })*/
   },
   methods: {
     //商品筛选：
@@ -292,6 +398,12 @@ export default {
         //val为空时，还原数组
         this.options = this.product;
       }
+    },
+    //被选中场景标签的数据组
+    checkScene(){
+      this.checkedScene = this.formData.sceneId;
+      console.log("========"+this.formData.sceneId)
+      console.log("========"+this.checkedScene)
     },
     addCont(i){
       this.articleInfo[i].detailContent.push({txt:''})
