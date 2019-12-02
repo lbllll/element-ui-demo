@@ -233,7 +233,7 @@
             <span class="describe">选择产品</span>
           </el-form-item>
           <el-form-item label="排序" prop="sort">
-            <el-input class="inputs" v-model="item.sort"></el-input>
+            <el-input class="inputs" v-msodel="item.sort"></el-input>
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="item.articleType" type="hidden"></el-input>
@@ -261,7 +261,7 @@
                     <div class="pre-description-detail">{{formData.description}}</div>
                   </div>
                   <div class="pre-scene">
-                    <div class="scene" v-for="(item, index) in  scene" :key="index">{{item.name}}</div>
+                    <div class="scene" v-for="(item, index) in  checkedScene" :key="index">{{item.name}}</div>
                   </div>
                   <div class="pre-detail">
                     <div class="detail" v-for="(item, index) in  formData.detailsJson" :key="index">
@@ -344,11 +344,14 @@ export default {
     productScenelList().then(res => {
       this.scene = res.data;
       //解析表单数据
+    // 预览选中标签处理
     }),
       produckList().then(res => {
         this.product = res.data.list;
         //解析表单数据
       });
+
+    //如果有id则是修改
     if(this.$route.query.id){
       articleDetail({ articleId: this.$route.query.id })
         .then(res => {
@@ -364,21 +367,6 @@ export default {
       this.articleInfo = res.data.articleInfos;*/
     })
     };
-    //预览选中标签处理
-/*    this.scene.forEach(item =>{
-     let arr  =  this.formData.sceneId;
-    for(let i=0;i<arr.length;i++){
-      if(item.sceneId == arr[i]){
-        let info = {
-          sceneId:item.sceneId,
-          name:item.name
-        }
-        console.log("======="+item.name)
-        this.checkedScene.push(info);
-      }
-    }
-    console.log("======="+this.checkedScene)
-    })*/
   },
   methods: {
     //商品筛选：
@@ -399,11 +387,24 @@ export default {
         this.options = this.product;
       }
     },
-    //被选中场景标签的数据组
+    // 预览选中标签处理
     checkScene(){
-      this.checkedScene = this.formData.sceneId;
-      console.log("========"+this.formData.sceneId)
-      console.log("========"+this.checkedScene)
+      this.checkedScene.length=0;
+      //预览选中标签处理
+      let info = {
+        sceneId:"",
+        name:""
+      };
+      for(let i=0;i<this.formData.sceneId.length;i++){
+        for(let j=0;j<this.scene.length;j++){
+          if(this.formData.sceneId[i] == this.scene[j].sceneId){
+            info.sceneId = this.scene[j].sceneId;
+            info.name = this.scene[j].name;
+          }
+        }
+      }
+      console.log("scene========="+this.checkedScene)
+      this.checkedScene.push(info);
     },
     addCont(i){
       this.articleInfo[i].detailContent.push({txt:''})
