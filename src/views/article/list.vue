@@ -66,6 +66,23 @@
             </el-select>
           </el-form-item>
         </div>
+        <div class="scene">
+          <el-form-item  prop="articleSort" >
+            <el-select
+              class="data"
+              v-model="data.articleSort"
+              placeholder="请选择文章排序顺序"
+              size="small"
+            >
+              <el-option
+                v-for="item in articleSortGroup"
+                :key="item.articleSortId"
+                :label="item.name"
+                :value="item.articleSortId"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </div>
         <div class="search">
           <el-button type="primary"  size="small" @click="searchs()">搜索</el-button>
         </div>
@@ -109,6 +126,7 @@
       </el-table-column>
       <el-table-column label="点赞数" width="100" prop="likeCount" align="center"></el-table-column>
       <el-table-column label="分享数" width="100" prop="shareCount" align="center"></el-table-column>
+      <el-table-column label="文章排序" width="100" prop="articleSort" align="center"></el-table-column>
       <el-table-column  align="center" width="150" label="操作">
         <template slot-scope="scope">
           <router-link class="editBtn" type="primary" round icon="el-icon-edit" :to="{name: 'ARTICLE_RELEASE', query: {id: scope.row.articleId}}">
@@ -148,9 +166,24 @@ export default {
         labelIds: "", // 标签id
         memberId: "", // 商户id
         status:"",//状态
+        articleSort:"",
         page: 1,
         size: 10
       },
+      articleSortGroup:[
+        {
+          articleSortId:"1",
+          name:"根据创建时间排序"
+        },
+        {
+          articleSortId:"2",
+          name:"根据序号降序"
+        },
+        {
+          articleSortId:"3",
+          name:"根据序号升序"
+        }
+      ],
       scenes:'',
       scene:[],
       tableData: [],

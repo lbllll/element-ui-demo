@@ -174,6 +174,10 @@
         <el-input class="inputs" v-model="formData.description"></el-input>
         <span class="describe">字数不超过50</span>
       </el-form-item>
+      <el-form-item verify label="文章排序" prop="sort">
+        <el-input class="inputs" v-model="formData.articleSort"></el-input>
+        <span class="describe">排序数字(越大越前)</span>
+      </el-form-item>
       <el-form-item label="选择场景" verify prop="labelIds">
         <el-select
           class="formItem"
@@ -312,6 +316,7 @@ export default {
         title: "",
         description: "",
         memberId: "1",
+        articleSort:"",
         sceneId: "",
         detailsJson: [
           {
@@ -489,6 +494,7 @@ export default {
         title: this.formData.title,
         description: this.formData.description,
         memberId: this.formData.memberId,
+        articleSort: this.formData.articleSort,
         detailsJson: ""
       };
       //labelIds转为1,2,3的格式
