@@ -115,12 +115,81 @@
           border-radius: 50px;
         }
     }
-  .pre-detail{
-    border: 1px solid red;
-    height: 200px;
-    margin-top: 15px;
-
+.pre-detail {
+  border: 1px solid red;
+  height: 200px;
+  margin-top: 15px;
+  font-size: 30rpx;
+  min-height: 1000rpx;
+  .article-title {
+    margin-bottom: 24rpx;
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333333;
+    }
+  .article-paragraph {
+    margin-bottom: 48rpx;
+    font-size: 32rpx;
+    line-height: 58rpx;
+    color: #5C5C5C;
+    .partList {
+      margin-bottom: 20rpx;
+    }
   }
+  .article-lable {
+    margin-bottom: 24rpx;
+    font-size: 32rpx;
+    line-height: 45rpx;
+    color: #7D8B72;
+  }
+  .article-goods {
+      position: relative;
+      margin-bottom: 88rpx;
+    .goods-img {
+      display: block;
+      margin: 0 auto;
+      width: 686rpx;
+      height: 686rpx;
+    }
+    .goods-price {
+      position: absolute;
+      bottom: 160rpx;
+      right: 20rpx;
+      padding: 9rpx 24rpx;
+      font-size: 24rpx;
+      color: #fff;
+      background-color: rgba(172,170,176,0.5);
+      border:2px solid rgba(255,255,255,0.5);
+      border-radius: 50rpx;
+    }
+    .goods-price-line {
+      position: absolute;
+      right: 142rpx;
+      bottom: 185rpx;
+      width: 35rpx;
+      height: 2rpx;
+      background-color: #fff;
+    }
+    .goods-price-Circle1 {
+      position: absolute;
+      right: 175rpx;
+      bottom: 172rpx;
+      width: 30rpx;
+      height: 30rpx;
+      background-color:  rgba(0,0,0,0.3);
+      border-radius: 50%;
+    }
+    .goods-price-Circle2 {
+      position: relative;
+      top: 9rpx;
+      left: 9rpx;
+      width: 12rpx;
+      height: 12rpx;
+      background-color: #fff;
+      border-radius: 50%;
+    }
+    }
+}
   .foot{
     margin-top: 25px;
     border: 1px solid green;
@@ -220,6 +289,7 @@
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="info.articleType" type="hidden"></el-input>
+          <el-input class="inputs " v-model="info.articleDetailId" type="hidden"></el-input>
         </div>
         <div
           class="articleAddWithProduct"
@@ -237,15 +307,16 @@
             <span class="describe">选择产品</span>
           </el-form-item>
           <el-form-item label="排序" prop="sort">
-            <el-input class="inputs" v-msodel="item.sort"></el-input>
+            <el-input class="inputs" v-model="item.sort"></el-input>
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="item.articleType" type="hidden"></el-input>
+          <el-input class="inputs " v-model="item.articleDetailId" type="hidden"></el-input>
         </div>
       </div>
       <div class="footer">
         <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
-        <el-button type="primary" @click="previewCode=true">预览</el-button>
+        <el-button type="primary" @click="previewCode=true;previewData()">预览</el-button>
       </div>
 
 
@@ -268,8 +339,27 @@
                     <div class="scene" v-for="(item, index) in  checkedScene" :key="index">{{item.name}}</div>
                   </div>
                   <div class="pre-detail">
-                    <div class="detail" v-for="(item, index) in  formData.detailsJson" :key="index">
-                    </div>
+                    <block class="detail" v-for="(item, index) in  detailsJson" :key="index">
+                          <view class="article-title" v-if="item.articleType === 'ARTICLE'">{{item.articleDetailTitle}}</view>
+                          <view class="article-paragraph" v-if="item.articleType === 'ARTICLE'">
+                            <view v-if="!item.partList">{{item.detailContent}}</view>
+                            <view v-if="item.partList">
+                              <view class="partList" v-for="(tt,ii) in item.partList" :key="ii">{{tt}}</view>
+                            </view>
+                          </view>
+                          <view class="article-lable" v-if="item.articleType === 'PRODUCT'">{{item.articleDetailTitle}}</view>
+                          <view class="article-goods" v-if="item.articleType === 'PRODUCT'">
+                            <image class="goods-img" :src="item.productInfoOne.productImg"></image>
+                            <view class="goods-price">
+                              ￥{{item.productInfoOne.productPrice/100}}
+                            </view>
+                            <view class="goods-price-line"></view>
+                            <view class="goods-price-Circle1">
+                              <view class="goods-price-Circle2"></view>
+                            </view>
+                          </view>
+                        </block>
+                    </block>
                   </div>
                   <div class="foot">
                   </div>
@@ -344,21 +434,25 @@ export default {
       selects: [],
       categoryIndex: "",
       productCode: false,
-      previewCode:false
+      previewCode:false,
+      detailsJson:[],
+      productInfoOne:{
+        productImg: "",
+        productPrice: ""
+      }
     };
   },
   created() {
     productScenelList().then(res => {
       this.scene = res.data;
       //解析表单数据
-    // 预览选中标签处理
     }),
       produckList().then(res => {
         this.product = res.data.list;
         //解析表单数据
       });
 
-    //如果有id则是修改
+    //如果有id则是修改,这里查询文章详情
     if(this.$route.query.id){
       articleDetail({ articleId: this.$route.query.id })
         .then(res => {
@@ -368,10 +462,40 @@ export default {
       //图片赋值
       this.imageUrl=this.formData.headImg;
       this.imageListUrl=this.formData.listImg;
-/*      //文章产品描述
-      this.product = res.data.articleProductses;
       //文章文字内容描述
-      this.articleInfo = res.data.articleInfos;*/
+      var list = [];
+      res.data.articleInfos.forEach(item => {
+        let info = {
+          articleDetailId:item.articleDetailId,
+          articleDetailTitle: item.articleDetailTitle,
+          articleId: item.articleId,
+          articleType: item.articleType,
+          detailContent: [],
+          sort: item.sort
+        };
+      var cont =  item.detailContent.split("##")
+      cont.forEach(e => {
+        info.detailContent.push({txt:e})
+      })
+        list.push(info);
+      })
+      this.articleInfo = list;
+      let productList=[];
+      //文章产品描述
+//      this.product = res.data.articleProductses;
+      res.data.articleProductses.forEach( item => {
+        let info = {
+          articleDetailId:item.articleDetailId,
+          articleDetailTitle: item.articleDetailTitle,
+          articleId: item.articleId,
+          articleType: item.articleType,
+          detailContent: item.detailContent,
+          sort: item.sort,
+          product: []
+        };
+        productList.push(info);
+      })
+      this.articleProduct = productList;
     })
     };
   },
@@ -396,22 +520,7 @@ export default {
     },
     // 预览选中标签处理
     checkScene(){
-      this.checkedScene.length=0;
-      //预览选中标签处理
-      let info = {
-        sceneId:"",
-        name:""
-      };
-      for(let i=0;i<this.formData.sceneId.length;i++){
-        for(let j=0;j<this.scene.length;j++){
-          if(this.formData.sceneId[i] == this.scene[j].sceneId){
-            info.sceneId = this.scene[j].sceneId;
-            info.name = this.scene[j].name;
-          }
-        }
-      }
-      console.log("scene========="+this.checkedScene)
-      this.checkedScene.push(info);
+//      this.checkedScene.length=0;
     },
     addCont(i){
       this.articleInfo[i].detailContent.push({txt:''})
@@ -421,6 +530,7 @@ export default {
     },
     articleAddWithDetail() {
       let info = {
+        articleDetailId:"",
         articleDetailTitle: "",
         detailContent: [{ txt: "" }],
         articleType: "ARTICLE",
@@ -430,6 +540,7 @@ export default {
     },
     articleAddWithProduct() {
       let item = {
+        articleDetailId:"",
         articleDetailTitle: "",
         detailContent: "",
         articleType: "PRODUCT",
@@ -467,13 +578,6 @@ export default {
         this.imageListUrl = response.data;
       }
     },
-/*    checkChange() {
-      console.log("data====" + this.formData.sceneId);
-      productScenelList().then(res => {
-        this.scene = res.data;
-      //解析表单数据
-    })
-    },*/
     beforeAvatarUpload(file) {
       var type = "image/jpg,image/jpeg,image/png,image/gif";
       const isJPG = type.indexOf(file.type) != -1;
@@ -487,6 +591,7 @@ export default {
       }
       return isJPG && isLt2M;
     },
+    //修改或者发布文章
     releaseData() {
       //发布文章请求参数组装
       let data = {
@@ -508,6 +613,7 @@ export default {
       let arr = [];
       this.articleInfo.forEach(item => {
         let article = {
+          articleDetailId: item.articleDetailId,
           articleDetailTitle: item.articleDetailTitle,
           detailContent: '',
           articleType: item.articleType,
@@ -524,6 +630,7 @@ export default {
       });
       this.articleProduct.forEach(item => {
         let article = {
+          articleDetailId: item.articleDetailId,
           articleDetailTitle: item.articleDetailTitle,
           detailContent: item.detailContent,
           articleType: item.articleType,
@@ -575,6 +682,22 @@ export default {
         this.updataInfo = 2;
       });
       }
+    },
+    //组装预览数据
+    previewData(){
+
+    },
+    getArticleInfoByProductId(productId){
+      this.product.forEach( item => {
+        if(item.productId == productId){
+          let info = {
+            productImg: item.headPath,
+            productPrice: item.salePrice
+          };
+        this.productInfoOne = info;
+        console.log("info=========="+this.productInfoOne.productImg)
+        }
+      })
     }
   }
 };
