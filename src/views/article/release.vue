@@ -298,7 +298,8 @@ import {
   produckList,
   productScenelList,
   postArticleRelease,
-  articleDetail
+  articleDetail,
+  articleEdit
 } from "@/api/table";
 import productList from "@/views/product/list";
 
@@ -310,6 +311,7 @@ export default {
   data() {
     return {
       formData: {
+        articleId:"",
         labelIds: "",
         headImg: "",
         listImg: "",
@@ -489,12 +491,13 @@ export default {
       //发布文章请求参数组装
       let data = {
         labelIds: "",
+        articleId:this.formData.articleId,
         headImg: this.formData.headImg,
         listImg: this.formData.listImg,
         title: this.formData.title,
         description: this.formData.description,
         memberId: this.formData.memberId,
-        articleSort: this.formData.articleSort,
+        articleSort:this.formData.articleSort,
         detailsJson: ""
       };
       //labelIds转为1,2,3的格式
@@ -530,27 +533,48 @@ export default {
       });
       data.detailsJson = JSON.stringify(arr);
       console.log(data);
-      //      return false;
-      postArticleRelease(data)
-        .then(result => {
-          if (result.code == 200) {
-            this.$message({
-              message: "发布成功",
-              type: "success"
-            });
-            setTimeout(() => {
-              location.reload();
-              this.updataInfo = 2;
-            }, 2000);
-          } else {
-            this.$message.error(result.description);
-            this.updataInfo = 2;
-          }
-        })
-        .catch(err => {
-          this.$message.error("网络错误");
+//      return false;
+      //如果文章id不为空，那就是修改
+      if(data.articleId!=""){
+        articleEdit(data)
+          .then(result =>{
+          if(result.code == 200){
+          this.$message({
+            message: "编辑成功",
+            type: "success"
+          });
+          setTimeout(() => {
+            location.reload();
           this.updataInfo = 2;
-        });
+          }, 2000);
+        }else {
+          this.$message.error(result.description);
+          this.updataInfo = 2;
+        }
+        })
+      }
+      else {
+        postArticleRelease(data)
+          .then(result => {
+          if (result.code == 200) {
+          this.$message({
+            message: "发布成功",
+            type: "success"
+          });
+          setTimeout(() => {
+            location.reload();
+          this.updataInfo = 2;
+        }, 2000);
+        } else {
+          this.$message.error(result.description);
+          this.updataInfo = 2;
+        }
+      })
+      .catch(err => {
+          this.$message.error("网络错误");
+        this.updataInfo = 2;
+      });
+      }
     }
   }
 };
