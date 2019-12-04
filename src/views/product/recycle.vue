@@ -30,17 +30,31 @@
 .footer {
   height: 50px;
 }
+.table_item_name {
+  display: flex;
+  align-items: center;
+  img {
+    width: 50px;
+    margin-right: 6px;
+  }
+}
 </style>
 
 
 <template>
-  <div class="bodyBox" id="PRODUCT_LIST">
-    <div class="searchBox">
-      <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.itemNum">
+  <div class="bodyBox" id="PRODUCT_RECYCLE">
+    <el-form :model="data" ref="searchs" class="searchBox">
+      <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.name">
+        <template slot="prepend">商品名称</template>
+      </el-input>
+      <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.number">
         <template slot="prepend">商品货号</template>
       </el-input>
-      <el-button type="primary" size="mini">搜索</el-button>
-    </div>
+      <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.supplyMerchant">
+        <template slot="prepend">供应商</template>
+      </el-input>
+      <el-button type="primary" size="mini" @click="searchs()" >搜索</el-button>
+    </el-form>
     <el-table
       class="tableBox"
       :data="tableData"
@@ -55,15 +69,22 @@
       @row-click="handleRowClick"-->
       <el-table-column align="center" type="selection" width="40"></el-table-column>
       <el-table-column align="center" type="index" width="40"></el-table-column>
-      <el-table-column align="center" prop="date" label="商品名称"></el-table-column>
-      <el-table-column align="center" prop="itemNum" label="货号" width="100"></el-table-column>
-      <el-table-column align="center" prop="name" label="价格" width="100"></el-table-column>
-      <el-table-column align="center" prop="name" label="状态" width="80"></el-table-column>
-      <el-table-column align="center" prop="company" label="供应商" width="260"></el-table-column>
-      <el-table-column align="center" prop="name" label="操作" width="100">
+      <el-table-column align="center" prop="name" label="商品名称" >
         <template slot-scope="scope">
-          <span type="primary" @click="edits(scope.row)">还原</span>
-          <span type="primary" @click="edits(scope.row)">删除</span>
+          <div class="table_item_name">
+            <img :src="scope.row.productImg" />
+            <p v-text="scope.row.name"></p>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" prop="number" label="商品货号" width="100"></el-table-column>
+      <el-table-column align="center" prop="deleteReason" label="删除原因" width="300"></el-table-column>
+      <el-table-column align="center" prop="createTime" label="删除时间" width="200"></el-table-column>
+      <el-table-column align="center" prop="supplyMerchant" label="供应商" width="200"></el-table-column>
+      <el-table-column align="center" prop="name" label="操作" width="150">
+        <template slot-scope="scope">
+          <el-button  type="primary" size="mini" @click="recover(scope.row.productId)">还原</el-button>
+          <!-- <el-button type="danger" size="mini" @click="del(scope.row.productId)">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -74,17 +95,17 @@
           v-model="checkAll"
           @change="handleCheckAllChange"
         >全选</el-checkbox>
-        <el-button type="primary" size="mini">还原</el-button>
-        <el-button type="primary" size="mini">删除</el-button>
+        <el-button type="primary"  size="mini" @click="recoverAll('N')" >还原</el-button>
+        <!-- <el-button type="danger"   size="mini" @click="delAll('Y')" >删除</el-button> -->
       </div>
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="data.page"
-        :page-size="100"
+        :page-size="10"
         background
         layout="total, prev, pager, next, jumper"
-        :total="400"
+        :total="count"
       ></el-pagination>
     </div>
   </div>
@@ -92,17 +113,19 @@
 
 
 <script>
+import {
+  productDeleteRecordList,
+  productDelete
+  
+} from "@/api/table";
 export default {
   name: "PRODUCT_RECYCLE",
   data() {
     return {
       data: {
-        listType: "1", // 顶部4按钮
-        scene: "0", // 场景
-        class: "0", // 分类
-        state: "0", // 上下架状态
-        itemNum: "", // 货号
-        supplier: "", // 供货商
+        name: "", // 场景
+        number: "", // 分类
+        supplyMerchant: "", // 货号
         page: 1
       },
       scene: [
@@ -131,32 +154,7 @@ export default {
           label: "北京烤鸭"
         }
       ],
-      classList: [
-        {
-          value: "0",
-          label: "所有分类"
-        },
-        {
-          value: "1",
-          label: "黄金糕"
-        },
-        {
-          value: "2",
-          label: "双皮奶"
-        },
-        {
-          value: "3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "4",
-          label: "龙须面"
-        },
-        {
-          value: "5",
-          label: "北京烤鸭"
-        }
-      ],
+      classList: [],
       state: [
         {
           value: "0",
@@ -175,53 +173,101 @@ export default {
           label: "置顶"
         }
       ],
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "1000000",
-          address: "上海市普陀区金沙江路 1518 弄",
-          itemNum: "ECS000060",
-          company: "重庆义方人科技有限公司",
-          up: true,
-          zd: false,
-          tj: true
-        },
-        {
-          date: "2016-05-02",
-          name: "1000000",
-          address: "上海市普陀区金沙江路 1518 弄",
-          itemNum: "ECS000060",
-          company: "重庆义方人科技有限公司",
-          up: true,
-          zd: false,
-          tj: true
-        },
-        {
-          date: "2016-05-02",
-          name: "1000000",
-          address: "上海市普陀区金沙江路 1518 弄",
-          itemNum: "ECS000060",
-          company: "重庆义方人科技有限公司",
-          up: true,
-          zd: false,
-          tj: true
-        },
-        {
-          date: "2016-05-02",
-          name: "1000000",
-          address: "上海市普陀区金沙江路 1518 弄",
-          itemNum: "ECS000060",
-          company: "重庆义方人科技有限公司",
-          up: true,
-          zd: false,
-          tj: true
-        }
-      ],
+      tableData: [],
+      count: 0,
       checkAll: false,
       isIndeterminate: false
     };
   },
+  props: {
+    checkItem: Boolean,
+    selectArr: Array
+  },
   methods: {
+    //获取记录列表
+    getList() {
+      window.sessionStorage.setItem('productDeleteRecordSearch',JSON.stringify(this.data));
+      let data = JSON.parse(JSON.stringify(this.data));
+      data.page --;
+      productDeleteRecordList(data).then(result => {
+        this.count = result.data.count;
+        this.tableData = result.data.list;
+    });
+    },
+    searchs() {
+      this.$refs.searchs.validate(valid => {
+        if (valid) {
+          this.getList();
+        } else {
+          console.log("error submit!!");
+      return false;
+    }
+    });
+    },
+    recover(productId){
+      var data = { status: status, productIds: "" };
+      data.status = "N"
+      data.productIds = productId;
+      this.$confirm("确认恢复数据, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          productDelete(data)
+          .then(result => {
+          this.$message({
+            message: "操作成功",
+            type: "success"
+          });
+      })
+      .catch(err => {});
+      }).catch(() => {
+        this.$message({
+        type: "info",
+        message: "已取消删除"
+      });
+    });
+      
+    },
+    del(productId){
+      console.log(productId)
+    },
+    recoverAll(status){
+      if (this.$refs.multipleTable.selection.length == 0) {
+        this.$message({
+          message: "请选择需要操作的商品",
+          type: "warning"
+        });
+        return;
+      }
+      var data = { status: status, productIds: ""};
+      this.$refs.multipleTable.selection.forEach(e => {
+        data.productIds += e.productId + ",";
+      });
+      this.$confirm("此操作将恢复选中商品?确认恢复", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(()=> {
+          console.log("产品id===="+data)
+         productDelete(data)
+        .then(result => {
+          this.$message({
+            message: "操作成功",
+            type: "success"
+          });
+          this.$refs.multipleTable.selection.forEach(e => {
+            e.status = status;
+          });
+        })
+        .catch(err => {});
+        }).catch(() => {
+        this.$message({
+        type: "info",
+        message: "已取消恢复"
+      });
+      });
+    },
     //点击复选框触发，复选框样式的改变
     handleSelectionChange(val) {
       this.multipleSelection = val;
@@ -269,7 +315,19 @@ export default {
       }
     }
   },
-  created() {}
+  created() {
+    if(this.selectArr&&this.selectArr.length>=0){
+      this.multipleSelection=this.selectArr
+    }
+    if(window.sessionStorage.getItem('productDeleteRecordSearch')){
+      try {
+        this.data = JSON.parse(window.sessionStorage.getItem('productDeleteRecordSearch'))
+      } catch (error) {
+        window.sessionStorage.removeItem('productDeleteRecordSearch')
+      }
+    }
+    this.getList();
+  }
 };
 </script>
 

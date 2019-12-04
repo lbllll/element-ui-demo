@@ -190,6 +190,7 @@
         >全选</el-checkbox>
         <el-button type="primary" v-if="!checkItem" size="mini" @click="batchUp('GROUNDED')">上架</el-button>
         <el-button type="primary" v-if="!checkItem" size="mini" @click="batchUp('UNGROUNDED')">下架</el-button>
+        <el-button type="primary" v-if="!checkItem" size="mini" @click="deleteProduct('Y')">删除</el-button>
         <el-button
           type="primary"
           v-if="checkItem"
@@ -221,7 +222,8 @@ import {
   produckRecommend,
   produckUnRecommend,
   produckBatchUp,
-  produckSetCoefficient
+  produckSetCoefficient,
+  productDelete
 } from "@/api/table";
 import { stringify } from 'querystring';
 export default {
@@ -263,7 +265,7 @@ export default {
       try {
         this.data = JSON.parse(window.sessionStorage.getItem('searchData'))
       } catch (error) {
-        window.sessionStorage.removeItem('searchData')        
+        window.sessionStorage.removeItem('searchData')
       }
     }
     this.getData();
@@ -307,9 +309,9 @@ export default {
     },
     changeSlot(row){
       produckSetCoefficient({productId:row.productId,coefficient:row.coefficient}).then((res) => {
-        
+
       }).catch((err) => {
-        
+
       });
     },
     setStatus(row) {
@@ -348,6 +350,43 @@ export default {
           });
         })
         .catch(err => {});
+    },
+    deleteProduct(status) {
+      if (this.$refs.multipleTable.selection.length == 0) {
+        this.$message({
+          message: "请选择需要操作的商品",
+          type: "warning"
+        });
+        return;
+      }
+      var data = { status: status, productIds: "" ,deleteReason:""};
+      this.$refs.multipleTable.selection.forEach(e => {
+        data.productIds += e.productId + ",";
+      });
+      this.$prompt("此操作将删除选中商品?确认删除，请填写删除原因", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then((e)=> {
+          console.log("产品id===="+data)
+          data.deleteReason = e.value;
+         productDelete(data)
+        .then(result => {
+          this.$message({
+            message: "操作成功",
+            type: "success"
+          });
+          this.$refs.multipleTable.selection.forEach(e => {
+            e.status = status;
+          });
+        })
+        .catch(err => {});
+        }).catch(() => {
+        this.$message({
+        type: "info",
+        message: "已取消删除"
+      });
+      });
     },
     recommends(row) {
       if (row.isRecommend == "Y") {
@@ -403,7 +442,7 @@ export default {
       });
     },
     handleChange(){
-      
+
     },
     //点击复选框触发，复选框样式的改变
     handleSelectionChange(val) {
