@@ -205,6 +205,10 @@ export default {
   },
   // base64解码
   decode(str) {
+    if(str.indexOf('{') != -1){
+      str = str.substr(0, str.length - 1);
+      str = str.substr(1, str.length - 1);
+    }
     return decodeURIComponent(
       atob(str)
         .split("")

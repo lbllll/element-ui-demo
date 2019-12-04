@@ -316,7 +316,7 @@
       </div>
       <div class="footer">
         <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
-        <el-button type="primary" @click="previewCode=true;previewData()">预览</el-button>
+        <!-- <el-button type="primary" @click="previewData()">预览</el-button> -->
       </div>
 
 
@@ -336,30 +336,29 @@
                     <div class="pre-description-detail">{{formData.description}}</div>
                   </div>
                   <div class="pre-scene">
-                    <div class="scene" v-for="(item, index) in  checkedScene" :key="index">{{item.name}}</div>
+                    <div class="scene" v-for="(item, index) in checkedScene" :key="index">{{item.name}}</div>
                   </div>
                   <div class="pre-detail">
-                    <block class="detail" v-for="(item, index) in  detailsJson" :key="index">
-                          <view class="article-title" v-if="item.articleType === 'ARTICLE'">{{item.articleDetailTitle}}</view>
-                          <view class="article-paragraph" v-if="item.articleType === 'ARTICLE'">
-                            <view v-if="!item.partList">{{item.detailContent}}</view>
-                            <view v-if="item.partList">
-                              <view class="partList" v-for="(tt,ii) in item.partList" :key="ii">{{tt}}</view>
-                            </view>
-                          </view>
-                          <view class="article-lable" v-if="item.articleType === 'PRODUCT'">{{item.articleDetailTitle}}</view>
-                          <view class="article-goods" v-if="item.articleType === 'PRODUCT'">
-                            <image class="goods-img" :src="item.productInfoOne.productImg"></image>
-                            <view class="goods-price">
-                              ￥{{item.productInfoOne.productPrice/100}}
-                            </view>
-                            <view class="goods-price-line"></view>
-                            <view class="goods-price-Circle1">
-                              <view class="goods-price-Circle2"></view>
-                            </view>
-                          </view>
-                        </block>
-                    </block>
+                    <!-- <block class="detail" v-for="(item, index) in  detailsJson" :key="index">
+                      <view class="article-title" v-if="item.articleType === 'ARTICLE'">{{item.articleDetailTitle}}</view>
+                      <view class="article-paragraph" v-if="item.articleType === 'ARTICLE'">
+                        <view v-if="!item.partList">{{item.detailContent}}</view>
+                        <view v-if="item.partList">
+                          <view class="partList" v-for="(tt,ii) in item.partList" :key="ii">{{tt}}</view>
+                        </view>
+                      </view>
+                      <view class="article-lable" v-if="item.articleType === 'PRODUCT'">{{item.articleDetailTitle}}</view>
+                      <view class="article-goods" v-if="item.articleType === 'PRODUCT'">
+                        <image class="goods-img" :src="item.productInfoOne.productImg"></image>
+                        <view class="goods-price">
+                          ￥{{item.productInfoOne.productPrice/100}}
+                        </view>
+                        <view class="goods-price-line"></view>
+                        <view class="goods-price-Circle1">
+                          <view class="goods-price-Circle2"></view>
+                        </view>
+                      </view>
+                    </block> -->
                   </div>
                   <div class="foot">
                   </div>
@@ -685,7 +684,7 @@ export default {
     },
     //组装预览数据
     previewData(){
-
+      this.previewCode=true;
     },
     getArticleInfoByProductId(productId){
       this.product.forEach( item => {

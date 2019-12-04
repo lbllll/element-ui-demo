@@ -167,6 +167,16 @@ export function produckTree(data) {
   return http.post('/product/category/tree', data, 'formData')
 }
 
+// 增加商品分类
+export function saveCategory(data) {
+  return http.post('/product/category/saveCategory', data, 'formData')
+}
+
+// 删除商品分类
+export function deleteCategory(data) {
+  return http.post('/product/category/deleteCategory', data, 'formData')
+}
+
 // 标签场景查询接口
 export function produckTabel(data) {
   return http.post('/product/label/list', data, 'formData')

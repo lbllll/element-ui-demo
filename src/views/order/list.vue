@@ -363,8 +363,7 @@ export default {
         .catch(err => {});
     },
     deCodes(str) {
-      str = str.substr(0, str.length - 1);
-      str = str.substr(1, str.length - 1);
+      console.log(str);
       return this.$util.decode(str);
     },
     //点击复选框触发，复选框样式的改变
