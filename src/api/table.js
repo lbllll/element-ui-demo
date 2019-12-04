@@ -232,6 +232,14 @@ export function produckInfoDetails(data) {
 export function produckBatchAdd(data) {
   return http.post('/product/details/batchAdd', data, 'formData')
 }
+//删除产品
+export function productDelete(data){
+  return http.post('/product/info/deleteRecover', data,'formData')
+}
+//删除产品记录列表
+export function productDeleteRecordList(data){
+  return http.post('/productDeleteRecord/info/deleteRecordList', data,'formData')
+}
 
 
 
@@ -470,6 +478,7 @@ export function getHistorys(data) {
 export function getHistoryDetail(data) {
   return http.post('/coupon/bind/record/detail', data, 'formData')
 }
+
 
 /**
  *文章
