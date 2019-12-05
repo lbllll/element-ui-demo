@@ -503,6 +503,10 @@ export function articleDel(data) {
 export function articleDetail(data){
   return http.post('/article/info/detail', data, 'formData')
 }
+//文章预览所需的商品信息
+export function forArticlePreview(data){
+  return http.post('/product/info/forArticlePreview', data, 'formData')
+}
 
 
 

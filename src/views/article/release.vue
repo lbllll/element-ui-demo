@@ -56,13 +56,13 @@
   width: 500px;
   height: 4000px;
 }
-.addCont{
+.addCont {
   display: block;
 }
-.detailContent{
+.detailContent {
   position: relative;
   width: 360px;
-  .delete{
+  .delete {
     position: absolute;
     left: 366px;
     bottom: 24px;
@@ -72,131 +72,147 @@
 .mobile {
   border: 1px solid black;
 }
-  .banner{
-    position: absolute;
-    top:0;
+.banner {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  .banner-img {
     width: 100%;
-    .banner-img {
-      width: 100%;
-      height: 160px;
-    }
+    height: 160px;
   }
-  .pre-content{
-    position: absolute;
-    background-color: red;
-    border-radius:  10px 10px 0 0 ;
-    top:140px;
-    .pre-title{
-      color: black;
-      font-weight: bolder;
-    }
-    .pre-description{
-      margin-top: -8px;
-      font-weight: bolder;
-    }
-  .pre-description span{
-    position: absolute;
-    }
-    .pre-description-detail{
-      padding: 2px 0 0 5px;
-    }
-    .pre-scene {
-      margin-top: 8px;
-      padding-bottom: 5px;
-      width: 100%;
-      border-bottom: 2px solid #F3F3F3;
-        .scene {
-          display: inline-block;
-          margin-right: 8px;
-          padding: 4px 6px;
-          font-size: 12px;
-          color: #FA5051;
-          background-color: #FFE8E4;
-          border-radius: 50px;
-        }
-    }
-.pre-detail {
-  border: 1px solid red;
-  height: 200px;
-  margin-top: 15px;
-  font-size: 30rpx;
-  min-height: 1000rpx;
-  .article-title {
-    margin-bottom: 24rpx;
-    font-size: 36rpx;
-    font-weight: bold;
-    color: #333333;
-    }
-  .article-paragraph {
-    margin-bottom: 48rpx;
-    font-size: 32rpx;
-    line-height: 58rpx;
-    color: #5C5C5C;
-    .partList {
-      margin-bottom: 20rpx;
-    }
-  }
-  .article-lable {
-    margin-bottom: 24rpx;
-    font-size: 32rpx;
-    line-height: 45rpx;
-    color: #7D8B72;
-  }
-  .article-goods {
-      position: relative;
-      margin-bottom: 88rpx;
-    .goods-img {
-      display: block;
-      margin: 0 auto;
-      width: 686rpx;
-      height: 686rpx;
-    }
-    .goods-price {
-      position: absolute;
-      bottom: 160rpx;
-      right: 20rpx;
-      padding: 9rpx 24rpx;
-      font-size: 24rpx;
-      color: #fff;
-      background-color: rgba(172,170,176,0.5);
-      border:2px solid rgba(255,255,255,0.5);
-      border-radius: 50rpx;
-    }
-    .goods-price-line {
-      position: absolute;
-      right: 142rpx;
-      bottom: 185rpx;
-      width: 35rpx;
-      height: 2rpx;
-      background-color: #fff;
-    }
-    .goods-price-Circle1 {
-      position: absolute;
-      right: 175rpx;
-      bottom: 172rpx;
-      width: 30rpx;
-      height: 30rpx;
-      background-color:  rgba(0,0,0,0.3);
-      border-radius: 50%;
-    }
-    .goods-price-Circle2 {
-      position: relative;
-      top: 9rpx;
-      left: 9rpx;
-      width: 12rpx;
-      height: 12rpx;
-      background-color: #fff;
-      border-radius: 50%;
-    }
-    }
 }
-  .foot{
+.pre-content {
+  position: absolute;
+  background-color: red;
+  border-radius: 10px 10px 0 0;
+  top: 140px;
+  .pre-title {
+    color: #333;
+    font-weight: bolder;
+    font-size: 26px
+  }
+  .pre-description {
+    margin-top: -8px;
+    font-weight: bolder;
+    font-size: 16px;
+    color: #5C5C5C;
+  }
+  .pre-description span {
+    position: absolute;
+  }
+  .pre-description-detail {
+    padding: 2px 0 0 5px;
+  }
+  .pre-scene {
+    margin-top: 8px;
+    padding-bottom: 5px;
+    width: 100%;
+    border-bottom: 2px solid #f3f3f3;
+    .scene {
+      display: inline-block;
+      margin-right: 8px;
+      padding: 4px 6px;
+      font-size: 12px;
+      color: #fa5051;
+      background-color: #ffe8e4;
+      border-radius: 50px;
+    }
+  }
+  .pre-detail {
+    height: 200px;
+    overflow-y: scroll;
+    font-size: 30px;
+    .pre_item{
+      padding-top: 18px;
+      margin-bottom: 6px;
+    }
+    .pre_content_title{
+      font-size: 18px;
+      color: #333;
+      line-height: 26px;
+    }
+    .pre_content_txt{
+      font-size: 16px;
+      color: #5C5C5C;
+      margin-top: 12px;
+      line-height: 28px;
+    }
+    .article-title {
+      margin-bottom: 24px;
+      font-size: 36px;
+      font-weight: bold;
+      color: #333333;
+    }
+    .article-paragraph {
+      margin-bottom: 48px;
+      font-size: 32px;
+      line-height: 58px;
+      color: #5c5c5c;
+      .partList {
+        margin-bottom: 20px;
+      }
+    }
+    .article-lable {
+      margin-bottom: 24px;
+      font-size: 32px;
+      line-height: 45px;
+      color: #7d8b72;
+    }
+    .article-goods {
+      position: relative;
+      margin-bottom: 88px;
+      .goods-img {
+        display: block;
+        margin: 0 auto;
+        width: 686px;
+        height: 686px;
+      }
+      .goods-price {
+        position: absolute;
+        bottom: 160px;
+        right: 20px;
+        padding: 9px 24px;
+        font-size: 24px;
+        color: #fff;
+        background-color: rgba(172, 170, 176, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50px;
+      }
+      .goods-price-line {
+        position: absolute;
+        right: 142px;
+        bottom: 185px;
+        width: 35px;
+        height: 2px;
+        background-color: #fff;
+      }
+      .goods-price-Circle1 {
+        position: absolute;
+        right: 175px;
+        bottom: 172px;
+        width: 30px;
+        height: 30px;
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+      }
+      .goods-price-Circle2 {
+        position: relative;
+        top: 9px;
+        left: 9px;
+        width: 12px;
+        height: 12px;
+        background-color: #fff;
+        border-radius: 50%;
+      }
+    }
+  }
+  .foot {
     margin-top: 25px;
     border: 1px solid green;
-    border-top: 2px solid #F3F3F3;
+    border-top: 2px solid #f3f3f3;
     height: 30px;
   }
-  }
+}
 </style>
 
 
@@ -232,7 +248,7 @@
         >
           <img v-if="imageListUrl" :src="imageListUrl" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-          <el-input class="inputs none imgArea" v-model="imageUrl"></el-input>
+          <el-input class="inputs none imgArea" v-model="imageListUrl"></el-input>
         </el-upload>
       </el-form-item>
       <el-form-item verify label="文章标题" prop="title">
@@ -289,7 +305,7 @@
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="info.articleType" type="hidden"></el-input>
-          <el-input class="inputs " v-model="info.articleDetailId" type="hidden"></el-input>
+          <el-input class="inputs" v-model="info.articleDetailId" type="hidden"></el-input>
         </div>
         <div
           class="articleAddWithProduct"
@@ -311,15 +327,13 @@
             <span class="describe">排序数字(越大越前)</span>
           </el-form-item>
           <el-input class="inputs articleType" v-model="item.articleType" type="hidden"></el-input>
-          <el-input class="inputs " v-model="item.articleDetailId" type="hidden"></el-input>
+          <el-input class="inputs" v-model="item.articleDetailId" type="hidden"></el-input>
         </div>
       </div>
       <div class="footer">
         <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
-        <!-- <el-button type="primary" @click="previewData()">预览</el-button> -->
+        <el-button type="primary" @click="previewData()">预览</el-button>
       </div>
-
-
 
       <el-dialog title="预览" class="previewBox" :visible.sync="previewCode" width="446px">
         <div class="previewBox">
@@ -327,7 +341,7 @@
             <div class="mobile pre-mobile">
               <div class="wins">
                 <div class="banner">
-                    <img class="banner-img" :src="imageUrl" alt />
+                  <img class="banner-img" :src="imageUrl" alt />
                 </div>
                 <div class="content pre-content">
                   <h2 class="pre-title">{{formData.title}}</h2>
@@ -336,42 +350,28 @@
                     <div class="pre-description-detail">{{formData.description}}</div>
                   </div>
                   <div class="pre-scene">
-                    <div class="scene" v-for="(item, index) in checkedScene" :key="index">{{item.name}}</div>
+                    <div class="scene" v-for="(item, index) in checkedScene" :key="index">{{item}}</div>
                   </div>
                   <div class="pre-detail">
-                    <!-- <block class="detail" v-for="(item, index) in  detailsJson" :key="index">
-                      <view class="article-title" v-if="item.articleType === 'ARTICLE'">{{item.articleDetailTitle}}</view>
-                      <view class="article-paragraph" v-if="item.articleType === 'ARTICLE'">
-                        <view v-if="!item.partList">{{item.detailContent}}</view>
-                        <view v-if="item.partList">
-                          <view class="partList" v-for="(tt,ii) in item.partList" :key="ii">{{tt}}</view>
-                        </view>
-                      </view>
-                      <view class="article-lable" v-if="item.articleType === 'PRODUCT'">{{item.articleDetailTitle}}</view>
-                      <view class="article-goods" v-if="item.articleType === 'PRODUCT'">
-                        <image class="goods-img" :src="item.productInfoOne.productImg"></image>
-                        <view class="goods-price">
-                          ￥{{item.productInfoOne.productPrice/100}}
-                        </view>
-                        <view class="goods-price-line"></view>
-                        <view class="goods-price-Circle1">
-                          <view class="goods-price-Circle2"></view>
-                        </view>
-                      </view>
-                    </block> -->
+                    <div v-for="(item, index) in previewList" :key="index">
+                      <div class="pre_item" v-if="item.articleType == 'PRODUCT'">
+
+                      </div>
+                      <div class="pre_item" v-if="item.articleType == 'ARTICLE'">
+                        <p class="pre_content_title">{{item.articleDetailTitle}}</p>
+                        <div v-if="item.detailContent">
+                          <p class="pre_content_txt" v-for="(txt, t) in item.detailContent" :key="t">{{txt.txt}}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="foot">
-                  </div>
+                  <div class="foot"></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </el-dialog>
-
-
-
-
     </el-form>
     <el-dialog title="选择商品" :visible.sync="productCode" width="90%">
       <product-list v-if="productCode" checkItem @selectData="selectData" :selectArr="selects"></product-list>
@@ -388,6 +388,7 @@ import {
   productScenelList,
   postArticleRelease,
   articleDetail,
+  forArticlePreview,
   articleEdit
 } from "@/api/table";
 import productList from "@/views/product/list";
@@ -400,14 +401,14 @@ export default {
   data() {
     return {
       formData: {
-        articleId:"",
+        articleId: "",
         labelIds: "",
         headImg: "",
         listImg: "",
         title: "",
         description: "",
         memberId: "1",
-        articleSort:"",
+        articleSort: "",
         sceneId: "",
         detailsJson: [
           {
@@ -418,7 +419,7 @@ export default {
           }
         ]
       },
-      checkedScene:[],
+      checkedScene: [],
       scene: [],
       product: [],
       upImgUrl: process.env[this.$base] + "/medias/image/upload",
@@ -433,12 +434,13 @@ export default {
       selects: [],
       categoryIndex: "",
       productCode: false,
-      previewCode:false,
-      detailsJson:[],
-      productInfoOne:{
+      previewCode: false, // ·······························
+      detailsJson: [],
+      productInfoOne: {
         productImg: "",
         productPrice: ""
-      }
+      },
+      previewList:[]
     };
   },
   created() {
@@ -452,51 +454,53 @@ export default {
       });
 
     //如果有id则是修改,这里查询文章详情
-    if(this.$route.query.id){
-      articleDetail({ articleId: this.$route.query.id })
-        .then(res => {
+    if (this.$route.query.id) {
+      articleDetail({ articleId: this.$route.query.id }).then(res => {
         //处理标签赋值
-      res.data.articleInfoModel.sceneId = res.data.articleInfoModel.labelIds.split(",");
-      this.formData = res.data.articleInfoModel;
-      //图片赋值
-      this.imageUrl=this.formData.headImg;
-      this.imageListUrl=this.formData.listImg;
-      //文章文字内容描述
-      var list = [];
-      res.data.articleInfos.forEach(item => {
-        let info = {
-          articleDetailId:item.articleDetailId,
-          articleDetailTitle: item.articleDetailTitle,
-          articleId: item.articleId,
-          articleType: item.articleType,
-          detailContent: [],
-          sort: item.sort
-        };
-      var cont =  item.detailContent.split("##")
-      cont.forEach(e => {
-        info.detailContent.push({txt:e})
-      })
-        list.push(info);
-      })
-      this.articleInfo = list;
-      let productList=[];
-      //文章产品描述
-//      this.product = res.data.articleProductses;
-      res.data.articleProductses.forEach( item => {
-        let info = {
-          articleDetailId:item.articleDetailId,
-          articleDetailTitle: item.articleDetailTitle,
-          articleId: item.articleId,
-          articleType: item.articleType,
-          detailContent: item.detailContent,
-          sort: item.sort,
-          product: []
-        };
-        productList.push(info);
-      })
-      this.articleProduct = productList;
-    })
-    };
+        res.data.articleInfoModel.sceneId = res.data.articleInfoModel.labelIds.split(
+          ","
+        );
+        this.formData = res.data.articleInfoModel;
+        this.checkScene();
+        //图片赋值
+        this.imageUrl = this.formData.headImg;
+        this.imageListUrl = this.formData.listImg;
+        //文章文字内容描述
+        var list = [];
+        res.data.articleInfos.forEach(item => {
+          let info = {
+            articleDetailId: item.articleDetailId,
+            articleDetailTitle: item.articleDetailTitle,
+            articleId: item.articleId,
+            articleType: item.articleType,
+            detailContent: [],
+            sort: item.sort
+          };
+          var cont = item.detailContent.split("##");
+          cont.forEach(e => {
+            info.detailContent.push({ txt: e });
+          });
+          list.push(info);
+        });
+        this.articleInfo = list;
+        let productList = [];
+        //文章产品描述
+        //      this.product = res.data.articleProductses;
+        res.data.articleProductses.forEach(item => {
+          let info = {
+            articleDetailId: item.articleDetailId,
+            articleDetailTitle: item.articleDetailTitle,
+            articleId: item.articleId,
+            articleType: item.articleType,
+            detailContent: item.detailContent,
+            sort: item.sort,
+            product: []
+          };
+          productList.push(info);
+        });
+        this.articleProduct = productList;
+      });
+    }
   },
   methods: {
     //商品筛选：
@@ -518,18 +522,25 @@ export default {
       }
     },
     // 预览选中标签处理
-    checkScene(){
-//      this.checkedScene.length=0;
+    checkScene() {
+      var list = [];
+      this.scene.forEach(e => {
+        if (this.formData.sceneId.indexOf(e.sceneId) != -1) {
+          list.push(e.name);
+        }
+      });
+      this.checkedScene = list;
+      console.log(list);
     },
-    addCont(i){
-      this.articleInfo[i].detailContent.push({txt:''})
+    addCont(i) {
+      this.articleInfo[i].detailContent.push({ txt: "" });
     },
-    delCont(index,i){
-      this.articleInfo[index].detailContent.splice(i,1)
+    delCont(index, i) {
+      this.articleInfo[index].detailContent.splice(i, 1);
     },
     articleAddWithDetail() {
       let info = {
-        articleDetailId:"",
+        articleDetailId: "",
         articleDetailTitle: "",
         detailContent: [{ txt: "" }],
         articleType: "ARTICLE",
@@ -539,7 +550,7 @@ export default {
     },
     articleAddWithProduct() {
       let item = {
-        articleDetailId:"",
+        articleDetailId: "",
         articleDetailTitle: "",
         detailContent: "",
         articleType: "PRODUCT",
@@ -595,13 +606,13 @@ export default {
       //发布文章请求参数组装
       let data = {
         labelIds: "",
-        articleId:this.formData.articleId,
+        articleId: this.formData.articleId,
         headImg: this.formData.headImg,
         listImg: this.formData.listImg,
         title: this.formData.title,
         description: this.formData.description,
         memberId: this.formData.memberId,
-        articleSort:this.formData.articleSort,
+        articleSort: this.formData.articleSort,
         detailsJson: ""
       };
       //labelIds转为1,2,3的格式
@@ -614,15 +625,15 @@ export default {
         let article = {
           articleDetailId: item.articleDetailId,
           articleDetailTitle: item.articleDetailTitle,
-          detailContent: '',
+          detailContent: "",
           articleType: item.articleType,
           sort: item.sort
         };
         item.detailContent.forEach(e => {
-          if(article.detailContent){
-            article.detailContent += '##'+e.txt
-          }else{
-            article.detailContent = e.txt
+          if (article.detailContent) {
+            article.detailContent += "##" + e.txt;
+          } else {
+            article.detailContent = e.txt;
           }
         });
         arr.push(article);
@@ -639,64 +650,104 @@ export default {
       });
       data.detailsJson = JSON.stringify(arr);
       console.log(data);
-//      return false;
+      //      return false;
       //如果文章id不为空，那就是修改
-      if(data.articleId!=""){
-        articleEdit(data)
-          .then(result =>{
-          if(result.code == 200){
-          this.$message({
-            message: "编辑成功",
-            type: "success"
-          });
-          setTimeout(() => {
-            location.reload();
-          this.updataInfo = 2;
-          }, 2000);
-        }else {
-          this.$message.error(result.description);
-          this.updataInfo = 2;
-        }
-        })
-      }
-      else {
+      if (data.articleId != "") {
+        articleEdit(data).then(result => {
+          if (result.code == 200) {
+            this.$message({
+              message: "编辑成功",
+              type: "success"
+            });
+            setTimeout(() => {
+              location.reload();
+              this.updataInfo = 2;
+            }, 2000);
+          } else {
+            this.$message.error(result.description);
+            this.updataInfo = 2;
+          }
+        });
+      } else {
         postArticleRelease(data)
           .then(result => {
-          if (result.code == 200) {
-          this.$message({
-            message: "发布成功",
-            type: "success"
+            if (result.code == 200) {
+              this.$message({
+                message: "发布成功",
+                type: "success"
+              });
+              setTimeout(() => {
+                location.reload();
+                this.updataInfo = 2;
+              }, 2000);
+            } else {
+              this.$message.error(result.description);
+              this.updataInfo = 2;
+            }
+          })
+          .catch(err => {
+            this.$message.error("网络错误");
+            this.updataInfo = 2;
           });
-          setTimeout(() => {
-            location.reload();
-          this.updataInfo = 2;
-        }, 2000);
-        } else {
-          this.$message.error(result.description);
-          this.updataInfo = 2;
-        }
-      })
-      .catch(err => {
-          this.$message.error("网络错误");
-        this.updataInfo = 2;
-      });
       }
     },
     //组装预览数据
-    previewData(){
-      this.previewCode=true;
+    previewData() {
+      /**数组根据数组对象中的某个属性值进行排序的方法
+       * 使用例子：newArray.sort(sortBy('number',false)) //表示根据number属性降序排列;若第二个参数不传递，默认表示升序排序
+       * @param attr 排序的属性 如number属性
+       * @param rev true表示升序排列，false降序排序
+       * */
+        function sortBy(attr,rev){
+          //第二个参数没有传递 默认升序排列
+          if (rev == undefined) {
+            rev = 1;
+          } else {
+            rev = rev ? 1 : -1;
+          }
+  
+          return function(a, b) {
+            a = a[attr];
+            b = b[attr];
+            if (a < b) {
+              return rev * -1;
+            }
+            if (a > b) {
+              return rev * 1;
+            }
+            return 0;
+          };
+        }
+      var list = []
+      var productId = ''
+      this.articleProduct.forEach(e => {
+        console.log(e);
+        list.push(e)
+      });
+      this.articleInfo.forEach(e => {
+        list.push(e)
+      });
+      list = list.sort(sortBy('sort',false))
+      console.log(list);
+      // forArticlePreview().then((res) => {
+        
+      // }).catch((err) => {
+        
+      // });
+      this.previewList = list
+      this.previewCode = true;
     },
-    getArticleInfoByProductId(productId){
-      this.product.forEach( item => {
-        if(item.productId == productId){
+    getArticleInfoByProductId(productId) {
+      this.product.forEach(item => {
+        if (item.productId == productId) {
           let info = {
             productImg: item.headPath,
             productPrice: item.salePrice
           };
-        this.productInfoOne = info;
-        console.log("info=========="+this.productInfoOne.productImg)
+          this.productInfoOne = info;
+          console.log("info==========" + this.productInfoOne.productImg);
         }
-      })
+      });
     }
   }
 };
