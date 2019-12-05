@@ -219,6 +219,7 @@ export default {
             message: "操作成功",
             type: "success"
           });
+          this.getList();
       })
       .catch(err => {});
       }).catch(() => {
@@ -259,6 +260,7 @@ export default {
           this.$refs.multipleTable.selection.forEach(e => {
             e.status = status;
           });
+          this.getList()
         })
         .catch(err => {});
         }).catch(() => {

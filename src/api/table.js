@@ -240,6 +240,10 @@ export function productDelete(data){
 export function productDeleteRecordList(data){
   return http.post('/productDeleteRecord/info/deleteRecordList', data,'formData')
 }
+//下载产品信息表
+export function productDownLoad(data){
+  return http.post('/product/info/table', data,'formData')
+}
 
 
 

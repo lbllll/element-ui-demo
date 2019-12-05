@@ -120,6 +120,7 @@
       </el-form-item>
       <el-button type="primary" size="mini" @click="searchs()">搜索</el-button>
       <el-button type="primary" size="mini" @click="$router.push({name:'PRODUCT_RELEASE'})">发布新商品</el-button>
+      <el-button type="primary" size="mini" @click="download('downLoad')">导出商品</el-button>
     </el-form>
 
     <el-table
@@ -223,7 +224,8 @@ import {
   produckUnRecommend,
   produckBatchUp,
   produckSetCoefficient,
-  productDelete
+  productDelete,
+  productDownLoad
 } from "@/api/table";
 import { stringify } from 'querystring';
 export default {
@@ -250,7 +252,8 @@ export default {
       checkAll: false,
       isIndeterminate: false,
       count: 0,
-      multipleSelection: []
+      multipleSelection: [],
+      upCode: false,
     };
   },
   props: {
@@ -296,6 +299,39 @@ export default {
           });
         }
       });
+    },
+    download(type){
+        if (this.upCode) {
+            return;
+        }
+        this.upCode = true;
+      var data = JSON.parse(JSON.stringify(this.data));
+      data.page--;
+      console.log("========"+data)
+      if (type == "downLoad") {
+        // 触发下载
+        var str =
+          process.env[this.$base] +
+          "/product/info/table?access_token=";
+        str += this.$store.getters.token;
+        for (const k in data) {
+          str += "&" + k + "=" + data[k];
+        }
+        this.upCode = false;
+        window.open(str);
+        return;
+      }
+      productDownLoad(data)
+        .then(res => {
+          this.upCode = false;
+          if (res.code == 200) {
+            this.countNum = res.data.count;
+            this.tableData = res.data.list;
+          }
+        })
+        .catch(err => {
+          this.upCode = false;
+        });
     },
     searchs() {
       this.$refs.searchs.validate(valid => {
@@ -379,6 +415,7 @@ export default {
           this.$refs.multipleTable.selection.forEach(e => {
             e.status = status;
           });
+          this.getList()
         })
         .catch(err => {});
         }).catch(() => {
