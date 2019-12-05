@@ -45,183 +45,75 @@
   border: 1px solid #333;
   border-radius: 8px;
   width: 600px;
-  height: 230px;
+  padding: 20px 0 0 0;
+  .productImgArea{
+    width: 100px;
+    height: 100px;
+    border: 1px solid beige
+  }
 }
 .footer {
   margin-top: 20px;
   @include flex-center;
 }
-.imgArea {
-  border: 1px solid black;
-  width: 500px;
-  height: 4000px;
+
+
+//预览样式
+.Preview {
+  width: 446px;
+  height: 676px;
+  background-image: url("../../assets/preview/mobile-ccs.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
 }
-.addCont {
-  display: block;
-}
-.detailContent {
+.content{
   position: relative;
-  width: 360px;
-  .delete {
-    position: absolute;
-    left: 366px;
-    bottom: 24px;
-    font-size: 24px;
-  }
-}
-.mobile {
-  border: 1px solid black;
-  overflow-y: scroll !important;
-}
-.banner {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  .banner-img {
-    width: 100%;
-    height: 160px;
-  }
-}
-.pre-content {
-  position: absolute;
-  background-color: red;
+  top: -25px;
   border-radius: 10px 10px 0 0;
-  top: 140px;
-  .pre-title {
-    color: #333;
-    font-weight: bolder;
-    font-size: 26px
-  }
-  .pre-description {
-    margin-top: -8px;
-    font-weight: bolder;
-    font-size: 16px;
-    color: #5C5C5C;
-  }
-  .pre-description span {
-    position: absolute;
-  }
-  .pre-description-detail {
-    padding: 2px 0 0 5px;
-  }
-  .pre-scene {
-    margin-top: 8px;
-    padding-bottom: 5px;
-    width: 100%;
-    border-bottom: 2px solid #f3f3f3;
-    .scene {
-      display: inline-block;
-      margin-right: 8px;
-      padding: 4px 6px;
-      font-size: 12px;
-      color: #fa5051;
-      background-color: #ffe8e4;
-      border-radius: 50px;
-    }
-  }
-  .pre-detail {
-    height: 200px;
-    font-size: 30px;
-    .pre_item{
-      padding-top: 18px;
-      margin-bottom: 6px;
-    }
-    .pre_content_title{
-      font-size: 18px;
-      color: #333;
-      line-height: 26px;
-    }
-    .pre_content_txt{
-      font-size: 16px;
-      color: #5C5C5C;
-      margin-top: 12px;
-      line-height: 28px;
-    }
-    .pre_product_title{
-      color: #7D8B72;
-      font-size: 16px;
-      line-height: 23px;
-      margin-bottom: 16px;
-    }
-    .pre_product_img{
-      width: 100%;
-    }
-    .article-title {
-      margin-bottom: 24px;
-      font-size: 36px;
-      font-weight: bold;
-      color: #333333;
-    }
-    .article-paragraph {
-      margin-bottom: 48px;
-      font-size: 32px;
-      line-height: 58px;
-      color: #5c5c5c;
-      .partList {
-        margin-bottom: 20px;
-      }
-    }
-    .article-lable {
-      margin-bottom: 24px;
-      font-size: 32px;
-      line-height: 45px;
-      color: #7d8b72;
-    }
-    .article-goods {
-      position: relative;
-      margin-bottom: 88px;
-      .goods-img {
-        display: block;
-        margin: 0 auto;
-        width: 686px;
-        height: 686px;
-      }
-      .goods-price {
-        position: absolute;
-        bottom: 160px;
-        right: 20px;
-        padding: 9px 24px;
-        font-size: 24px;
-        color: #fff;
-        background-color: rgba(172, 170, 176, 0.5);
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-radius: 50px;
-      }
-      .goods-price-line {
-        position: absolute;
-        right: 142px;
-        bottom: 185px;
-        width: 35px;
-        height: 2px;
-        background-color: #fff;
-      }
-      .goods-price-Circle1 {
-        position: absolute;
-        right: 175px;
-        bottom: 172px;
-        width: 30px;
-        height: 30px;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: 50%;
-      }
-      .goods-price-Circle2 {
-        position: relative;
-        top: 9px;
-        left: 9px;
-        width: 12px;
-        height: 12px;
-        background-color: #fff;
-        border-radius: 50%;
-      }
-    }
-  }
-  // .foot {
-  //   margin-top: 25px;
-  //   border: 1px solid green;
-  //   border-top: 2px solid #f3f3f3;
-  //   height: 30px;
-  // }
+  border: 1px solid white;
 }
+.pre-title{
+  font-weight: bolder;
+  font-size: 24px;
+  margin: 10px 0;
+  color: black;
+  .pre-description{
+    font-weight: bold
+  }
+}
+.pre-scene {
+			margin-top: 6px;
+			margin-bottom: 10px;
+			padding-bottom: 10px;
+			width: 100%;
+			border-bottom: 2px solid #F3F3F3;
+			.scene {
+				display: inline-block;
+				margin-right: 10px;
+				padding: 2px 6px;
+				font-size: 12px;
+				color: #FA5051;
+				background-color: #FFE8E4;
+				border-radius: 10px;
+			}
+		}
+.pre_item{
+  margin-bottom: 15px;
+}
+.article-goods-title{
+  font-weight: bold;
+  color: #7D8B72;
+  margin-bottom:10px 
+}
+.pre_content_title{
+  font-weight: bold;
+  color: #333333;
+  margin-bottom:10px 
+}    
+
+
+
+
 </style>
 
 
@@ -328,8 +220,12 @@
             <el-button
               class="btn"
               @click="chectProduct(index)"
-            >{{item.product.length>0?'已选'+item.product.length+'件商品':'选择商品'}}</el-button>
+            >{{item.showImgArea>0?'已选择：'+item.checkProductName+'':'选择商品'}}
+            </el-button>
             <span class="describe">选择产品</span>
+          </el-form-item>
+          <el-form-item v-if="item.showImgArea" label="产品图片">
+            <img  :src="item.checkProductImg" class="productImgArea" />
           </el-form-item>
           <el-form-item label="排序" prop="sort">
             <el-input class="inputs" v-model="item.sort"></el-input>
@@ -347,16 +243,17 @@
       <el-dialog title="预览" class="previewBox" :visible.sync="previewCode" width="446px">
         <div class="previewBox">
           <div class="Preview" id="Preview">
-            <div class="mobile pre-mobile">
+            <div class="mobile">
               <div class="wins">
-                <div class="banner">
-                  <img class="banner-img" :src="imageUrl" alt />
+                <div class="layui-carousel" id="p-banner" >
+                  <div height="150px">
+                    <img class="bannerImg" :src="imageUrl" alt />
+                  </div>
                 </div>
-                <div class="content pre-content">
-                  <h2 class="pre-title">{{formData.title}}</h2>
+                <div class="content">
+                  <div class="pre-title">{{formData.title}}</div>
                   <div class="pre-description">
-                    <span>|</span>
-                    <div class="pre-description-detail">{{formData.description}}</div>
+                    <div style="font-weight = blod" class="pre-description-detail"><span>|</span><div style="margin:-15px 0 0 10px">{{formData.description}}</div></div>
                   </div>
                   <div class="pre-scene">
                     <div class="scene" v-for="(item, index) in checkedScene" :key="index">{{item}}</div>
@@ -364,9 +261,9 @@
                   <div class="pre-detail">
                     <div v-for="(item, index) in previewList" :key="index">
                       <div class="pre_item" v-if="item.articleType == 'PRODUCT'">
-                        <p class="pre_product_title">{{item.articleDetailTitle}}</p>
-                        <div v-if="item.product&&item.product.length>0">
-                          <img class="pre_product_img" :src="item.product[0].content||item.product[0].headPath" alt="">
+                        <p class="article-goods-title">{{item.articleDetailTitle}}</p>
+                        <div class="goods-img">
+                            <img :src="item.checkProductImg" style="width:100%;height:auto;" alt="" />
                         </div>
                       </div>
                       <div class="pre_item" v-if="item.articleType == 'ARTICLE'">
@@ -377,7 +274,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="foot"></div>
+                  <!-- <div class="foot"></div> -->
                 </div>
               </div>
             </div>
@@ -388,6 +285,10 @@
     <el-dialog title="选择商品" :visible.sync="productCode" width="90%">
       <product-list v-if="productCode" checkItem @selectData="selectData" :selectArr="selects"></product-list>
     </el-dialog>
+
+
+
+    
   </div>
 </template>
 
@@ -452,7 +353,9 @@ export default {
         productImg: "",
         productPrice: ""
       },
-      previewList:[]
+      previewList:[],
+      chenckProductImg:"",
+      showImgArea:false
     };
   },
   created() {
@@ -506,13 +409,12 @@ export default {
             articleType: item.articleType,
             detailContent: item.detailContent,
             sort: item.sort,
-            product: []
+            product: [],
+            checkProductImg:item.checkProductImg,
+            checkProductName:item.checkProductName,
+            salePrice:item.salePrice,
+            showImgArea:true
           };
-          forArticlePreview({productIds:item.detailContent}).then((res) => {
-            if(res.data){
-              info.product = res.data
-            }
-          }).catch((err) => {});
           productList.push(info);
         });
         this.articleProduct = productList;
@@ -572,10 +474,14 @@ export default {
         detailContent: "",
         articleType: "PRODUCT",
         sort: "",
-        product: []
+        product: [],
+        checkProductImg:"",
+        checkProductName:"",
+        salePrice:"",
       };
       this.articleProduct.push(item);
     },
+    //选择一个产品
     selectData(val) {
       if (val.length > 1) {
         this.$message.error("一次选择一个产品");
@@ -583,9 +489,21 @@ export default {
       }
       this.productCode = false;
       this.articleProduct[this.categoryIndex].product = val;
+      //分别赋值，产品id，产品图，，产品名字，产品价格
       this.articleProduct[this.categoryIndex].detailContent = JSON.parse(
         JSON.stringify(val)
       )[0].productId;
+      this.articleProduct[this.categoryIndex].checkProductImg = JSON.parse(
+        JSON.stringify(val)
+      )[0].headPath
+      this.articleProduct[this.categoryIndex].checkProductName = JSON.parse(
+        JSON.stringify(val)
+      )[0].name
+      this.articleProduct[this.categoryIndex].salePrice = JSON.parse(
+        JSON.stringify(val)
+      )[0].salePrice
+    //选择了产品显示产品图片
+    this.articleProduct[this.categoryIndex].showImgArea = true;
     },
     chectProduct(i) {
       this.selects = JSON.parse(JSON.stringify(this.articleProduct[i].product));
@@ -620,6 +538,7 @@ export default {
     },
     //修改或者发布文章
     releaseData() {
+      let that = this;
       //发布文章请求参数组装
       let data = {
         labelIds: "",
@@ -634,10 +553,11 @@ export default {
       };
       //labelIds转为1,2,3的格式
       data.labelIds = this.formData.sceneId.join(",");
-      //detailsJson数组转为字符串
-      //            "[{"articleDetailTitle": "articleDetailTitle", "detailContent": "detailContent", "articleType": "articleType", "sort": "0"},]"
-      //组装数据
-      let arr = [];
+      //      return false;
+      //如果文章id不为空，那就是修改
+      if (data.articleId != "") {
+        //修改文章数据组装
+      let arrForUpdate = [];
       this.articleInfo.forEach(item => {
         let article = {
           articleDetailId: item.articleDetailId,
@@ -653,7 +573,7 @@ export default {
             article.detailContent = e.txt;
           }
         });
-        arr.push(article);
+        arrForUpdate.push(article);
       });
       this.articleProduct.forEach(item => {
         let article = {
@@ -663,13 +583,9 @@ export default {
           articleType: item.articleType,
           sort: item.sort
         };
-        arr.push(article);
+        arrForUpdate.push(article);
       });
-      data.detailsJson = JSON.stringify(arr);
-      console.log(data);
-      //      return false;
-      //如果文章id不为空，那就是修改
-      if (data.articleId != "") {
+      data.detailsJson = JSON.stringify(arrForUpdate);
         articleEdit(data).then(result => {
           if (result.code == 200) {
             this.$message({
@@ -680,12 +596,42 @@ export default {
               location.reload();
               this.updataInfo = 2;
             }, 2000);
+            //跳转到列表
+          that.$ruter.push({path:'ARTICLE_LIST'});
           } else {
             this.$message.error(result.description);
             this.updataInfo = 2;
           }
         });
       } else {
+        //发布文章组装数据
+      let arrForReleas = [];
+      this.articleInfo.forEach(item => {
+        let article = {
+          articleDetailTitle: item.articleDetailTitle,
+          detailContent: "",
+          articleType: item.articleType,
+          sort: item.sort
+        };
+        item.detailContent.forEach(e => {
+          if (article.detailContent) {
+            article.detailContent += "##" + e.txt;
+          } else {
+            article.detailContent = e.txt;
+          }
+        });
+        arrForReleas.push(article);
+      });
+      this.articleProduct.forEach(item => {
+        let article = {
+          articleDetailTitle: item.articleDetailTitle,
+          detailContent: item.detailContent,
+          articleType: item.articleType,
+          sort: item.sort
+        };
+        arrForReleas.push(article);
+      });
+      data.detailsJson = JSON.stringify(arrForReleas);
         postArticleRelease(data)
           .then(result => {
             if (result.code == 200) {
@@ -697,6 +643,7 @@ export default {
                 location.reload();
                 this.updataInfo = 2;
               }, 2000);
+              //跳转到列表
             } else {
               this.$message.error(result.description);
               this.updataInfo = 2;
@@ -736,6 +683,7 @@ export default {
           };
         }
       var list = []
+      var productId = ''
       this.articleProduct.forEach(e => {
         console.log(e);
         list.push(e)
