@@ -7,11 +7,9 @@
 
 .searchBox {
   width: 100%;
-  height: 60px;
   margin-top: 20px;
   padding: 0 20px;
   border-radius: 4px;
-  @include flex-align;
   .select {
     width: 120px;
     margin-right: 15px;
@@ -45,7 +43,7 @@
     margin-right: 6px;
   }
 }
-.coefficient{
+.coefficient {
   width: 100%;
   height: 100%;
   border: none;
@@ -66,61 +64,81 @@
     </div>
 
     <el-form :model="data" ref="searchs" class="searchBox">
-      <el-select class="select" size="mini" prop="lableId" v-model="data.lableId" placeholder="请选择">
-        <el-option
-          v-for="item in lableList"
-          :key="item.labelId"
-          :label="item.name"
-          :value="item.labelId"
-        ></el-option>
-      </el-select>
+      <div class="align-center">
+        <el-select
+          class="select"
+          size="mini"
+          prop="sceneId"
+          v-model="data.sceneId"
+          placeholder="请选择"
+          @change="changeScene"
+        >
+          <el-option
+            v-for="item in sceneList"
+            :key="item.sceneId"
+            :label="item.name"
+            :value="item.sceneId"
+          ></el-option>
+        </el-select>
+        <el-select
+          class="select"
+          size="mini"
+          prop="labelId"
+          v-model="data.labelId"
+          placeholder="请选择"
+          @change="getList"
+        >
+          <el-option
+            v-for="item in lableList"
+            :key="item.labelId"
+            :label="item.name"
+            :value="item.labelId"
+          ></el-option>
+        </el-select>
 
-
-      <!-- <el-select
-        class="select"
-        size="mini"
-        prop="categoryId"
-        v-model="data.categoryId"
-        placeholder="请选择"
-      >
-        <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id"></el-option>
-      </el-select> -->
-
-
-      <el-cascader
-        class="select"
-        size="mini"
-        v-model="data.category"
-        v-if="categoryList.length>0"
-        :show-all-levels="false"
-        :options="categoryList"
-        :props="{ expandTrigger: 'hover',checkStrictly: true }"
-        @change="handleChange">
-      </el-cascader>
-      <el-input class="inputs" placeholder="请输入内容" size="mini" prop="name" v-model="data.name">
-        <template slot="prepend">商品名称</template>
-      </el-input>
-      <el-input class="inputs" placeholder="请输入内容" size="mini" prop="number" v-model="data.number">
-        <template slot="prepend">商品货号</template>
-      </el-input>
-      <el-input
-        class="inputs"
-        placeholder="请输入内容"
-        size="mini"
-        prop="supplyMerchant"
-        v-model="data.supplyMerchant"
-      >
-        <template slot="prepend">供货商</template>
-      </el-input>
-      <el-form-item prop="minPrice" verify :maxDecimalLength="2" can-be-empty>
+        <el-cascader
+          class="select"
+          size="mini"
+          v-model="data.category"
+          v-if="categoryList.length>0"
+          :show-all-levels="false"
+          :options="categoryList"
+          :props="{ expandTrigger: 'hover',checkStrictly: true }"
+          @change="getList()"
+        ></el-cascader>
+        <el-input class="inputs" placeholder="请输入内容" size="mini" prop="name" v-model="data.name">
+          <template slot="prepend">商品名称</template>
+        </el-input>
+        <el-input
+          class="inputs"
+          placeholder="请输入内容"
+          size="mini"
+          prop="number"
+          v-model="data.number"
+        >
+          <template slot="prepend">商品货号</template>
+        </el-input>
+        <el-input
+          class="inputs"
+          placeholder="请输入内容"
+          size="mini"
+          prop="supplyMerchant"
+          v-model="data.supplyMerchant"
+        >
+          <template slot="prepend">供货商</template>
+        </el-input>
+      </div>
+      <div class="align-center">
+        <!-- <el-form-item prop="minPrice" verify :maxDecimalLength="2" can-be-empty> -->
         <el-input class="inputs number" placeholder="请输入最低价格" size="mini" v-model="data.minPrice"></el-input>
-      </el-form-item>
-      <el-form-item prop="maxPrice" verify :maxDecimalLength="2" can-be-empty :gt="+data.minPrice">
+        <!-- </el-form-item> -->
+        <!-- <el-form-item prop="maxPrice" verify :maxDecimalLength="2" can-be-empty :gt="+data.minPrice"> -->
         <el-input class="inputs number" placeholder="请输入最高价格" size="mini" v-model="data.maxPrice"></el-input>
-      </el-form-item>
-      <el-button type="primary" size="mini" @click="searchs()">搜索</el-button>
-      <el-button type="primary" size="mini" @click="$router.push({name:'PRODUCT_RELEASE'})">发布新商品</el-button>
-      <el-button type="primary" size="mini" @click="download('downLoad')">导出商品</el-button>
+        <!-- </el-form-item> -->
+        <el-button type="primary" size="mini" @click="searchs()">搜索</el-button>
+        <el-button type="primary" size="mini" @click="$router.push({name:'PRODUCT_RELEASE'})">发布新商品</el-button>
+        <el-button type="primary" size="mini" @click="download('downLoad')">导出商品</el-button>
+      </div>
     </el-form>
 
     <el-table
@@ -173,12 +191,22 @@
         </template>
       </el-table-column>
       <el-table-column align="center" prop="coefficient" label="排序" width="80">
-        <template slot-scope="scope"><input class="coefficient" @blur="changeSlot(scope.row)" type="number" v-model.number="scope.row.coefficient"></template>
+        <template slot-scope="scope">
+          <input
+            class="coefficient"
+            @blur="changeSlot(scope.row)"
+            type="number"
+            v-model.number="scope.row.coefficient"
+          />
+        </template>
       </el-table-column>
       <el-table-column align="center" prop="supplyMerchant" label="供应商" width="260"></el-table-column>
       <el-table-column align="center" prop="name" label="操作" width="100" v-if="!checkItem">
         <template slot-scope="scope">
-          <router-link class="editBtn" :to="{name: 'PRODUCT_RELEASE', query: {id: scope.row.productId}}">编辑商品</router-link>
+          <router-link
+            class="editBtn"
+            :to="{name: 'PRODUCT_RELEASE', query: {id: scope.row.productId}}"
+          >编辑商品</router-link>
         </template>
       </el-table-column>
     </el-table>
@@ -218,23 +246,25 @@ import {
   produckList,
   produckCounter,
   produckTree,
-  produckTabel,
+  produckLabel,
   produckSetStatus,
   produckRecommend,
   produckUnRecommend,
   produckBatchUp,
   produckSetCoefficient,
   productDelete,
+  productScenelList,
   productDownLoad
 } from "@/api/table";
-import { stringify } from 'querystring';
+import { stringify } from "querystring";
 export default {
   name: "PRODUCT_LIST",
   data() {
     return {
       data: {
         listType: "", // 顶部4按钮
-        lableId: "", // 场景
+        sceneId: "", // 场景
+        labelId: "", // 对象
         categoryId: "", // 分类
         category: [], // 分类
         status: "", // 上下架状态
@@ -247,13 +277,14 @@ export default {
       },
       counter: {},
       lableList: [],
+      sceneList: [],
       categoryList: [],
       tableData: [],
       checkAll: false,
       isIndeterminate: false,
       count: 0,
       multipleSelection: [],
-      upCode: false,
+      upCode: false
     };
   },
   props: {
@@ -261,14 +292,14 @@ export default {
     selectArr: Array
   },
   created() {
-    if(this.selectArr&&this.selectArr.length>=0){
-      this.multipleSelection=this.selectArr
+    if (this.selectArr && this.selectArr.length >= 0) {
+      this.multipleSelection = this.selectArr;
     }
-    if(window.sessionStorage.getItem('searchData')){
+    if (window.sessionStorage.getItem("searchData")) {
       try {
-        this.data = JSON.parse(window.sessionStorage.getItem('searchData'))
+        this.data = JSON.parse(window.sessionStorage.getItem("searchData"));
       } catch (error) {
-        window.sessionStorage.removeItem('searchData')
+        window.sessionStorage.removeItem("searchData");
       }
     }
     this.getData();
@@ -276,43 +307,50 @@ export default {
   },
   methods: {
     getList() {
-      window.sessionStorage.setItem('searchData',JSON.stringify(this.data))
+      window.sessionStorage.setItem("searchData", JSON.stringify(this.data));
       var data = JSON.parse(JSON.stringify(this.data));
       data.minPrice = data.minPrice ? +data.minPrice * 100 : "";
       data.maxPrice = data.maxPrice ? +data.maxPrice * 100 : "";
       // 后端page从0开始，所以需要减一
       data.page--;
-      data.categoryId = data.category[data.category.length-1]
-      delete data.category
-      produckList(data).then(result => {
-        this.count = result.data.count;
-        this.tableData = result.data.list;
-        if(this.selectArr&&this.selectArr.length>=0){
-          var ids = []
+      data.categoryId = data.category[data.category.length - 1];
+      delete data.category;
+      produckList(data).then(res => {
+        this.count = res.data.count;
+        this.tableData = res.data.list;
+        if (this.selectArr && this.selectArr.length >= 0) {
+          var ids = [];
           this.selectArr.forEach(e => {
-            ids.push(e.productId)
+            ids.push(e.productId);
           });
-          result.data.list.forEach(e => {
-            if(ids.indexOf(e.productId)!=-1){
+          res.data.list.forEach(e => {
+            if (ids.indexOf(e.productId) != -1) {
               this.$refs.multipleTable.toggleRowSelection(e);
             }
           });
         }
       });
     },
-    download(type){
-        if (this.upCode) {
-            return;
-        }
-        this.upCode = true;
+    changeScene(e){
+      console.log(e);
+      produckLabel({sceneId:e}).then(res => {
+        this.data.labelId = ''
+        res.data.unshift({ name: "所有对象", labelId: "" });
+        this.lableList = res.data;
+        this.getList();
+      });
+    },
+    download(type) {
+      if (this.upCode) {
+        return;
+      }
+      this.upCode = true;
       var data = JSON.parse(JSON.stringify(this.data));
       data.page--;
-      console.log("========"+data)
+      console.log("========" + data);
       if (type == "downLoad") {
         // 触发下载
-        var str =
-          process.env[this.$base] +
-          "/product/info/table?access_token=";
+        var str = process.env[this.$base] + "/product/info/table?access_token=";
         str += this.$store.getters.token;
         for (const k in data) {
           str += "&" + k + "=" + data[k];
@@ -343,16 +381,17 @@ export default {
         }
       });
     },
-    changeSlot(row){
-      produckSetCoefficient({productId:row.productId,coefficient:row.coefficient}).then((res) => {
-
-      }).catch((err) => {
-
-      });
+    changeSlot(row) {
+      produckSetCoefficient({
+        productId: row.productId,
+        coefficient: row.coefficient
+      })
+        .then(res => {})
+        .catch(err => {});
     },
     setStatus(row) {
       produckSetStatus({ productId: row.productId, status: row.status })
-        .then(result => {
+        .then(res => {
           this.$message({
             message: "操作成功",
             type: "success"
@@ -376,7 +415,7 @@ export default {
         data.productIds += e.productId + ",";
       });
       produckBatchUp(data)
-        .then(result => {
+        .then(res => {
           this.$message({
             message: "操作成功",
             type: "success"
@@ -395,40 +434,42 @@ export default {
         });
         return;
       }
-      var data = { status: status, productIds: "" ,deleteReason:""};
+      var data = { status: status, productIds: "", deleteReason: "" };
       this.$refs.multipleTable.selection.forEach(e => {
         data.productIds += e.productId + ",";
       });
       this.$prompt("此操作将删除选中商品?确认删除，请填写删除原因", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then((e)=> {
-          console.log("产品id===="+data)
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(e => {
+          console.log("产品id====" + data);
           data.deleteReason = e.value;
-         productDelete(data)
-        .then(result => {
-          this.$message({
-            message: "操作成功",
-            type: "success"
-          });
-          this.$refs.multipleTable.selection.forEach(e => {
-            e.status = status;
-          });
-          this.getList()
+          productDelete(data)
+            .then(res => {
+              this.$message({
+                message: "操作成功",
+                type: "success"
+              });
+              this.$refs.multipleTable.selection.forEach(e => {
+                e.status = status;
+              });
+              this.getList();
+            })
+            .catch(err => {});
         })
-        .catch(err => {});
-        }).catch(() => {
-        this.$message({
-        type: "info",
-        message: "已取消删除"
-      });
-      });
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
     recommends(row) {
       if (row.isRecommend == "Y") {
         produckRecommend({ productId: row.productId })
-          .then(result => {
+          .then(res => {
             this.$message({
               message: "操作成功",
               type: "success"
@@ -437,7 +478,7 @@ export default {
           .catch(err => {});
       } else {
         produckUnRecommend({ productId: row.productId })
-          .then(result => {
+          .then(res => {
             this.$message({
               message: "操作成功",
               type: "success"
@@ -448,38 +489,41 @@ export default {
     },
     getData() {
       // 获取各类属性分类
-      produckCounter().then(result => {
-        this.counter = result.data;
+      produckCounter().then(res => {
+        this.counter = res.data;
       });
-      produckTree().then(result => {
-        result.data.unshift({ name: "所有分类", id: "" });
-        var list = []
-        result.data.forEach(e => {
+      produckTree().then(res => {
+        res.data.unshift({ name: "所有分类", id: "" });
+        var list = [];
+        res.data.forEach(e => {
           var one = {
             value: e.id,
             label: e.name,
             children: []
-          }
-          if(e.children){
+          };
+          if (e.children) {
             e.children.forEach(c => {
               var two = {
                 value: c.id,
-                label: c.name
+                label: c.name,
+                children: []
+              };
+              if (c.children) {
+                c.children.forEach(d => {
+                  two.children.push(d);
+                });
               }
-              one.children.push(two)
+              one.children.push(two);
             });
           }
-          list.push(one)
+          list.push(one);
         });
         this.categoryList = list;
       });
-      produckTabel().then(result => {
-        result.data.unshift({ name: "所有场景", labelId: "" });
-        this.lableList = result.data;
+      productScenelList().then(res => {
+        res.data.unshift({ name: "所有场景", sceneId: "" });
+        this.sceneList = res.data;
       });
-    },
-    handleChange(){
-
     },
     //点击复选框触发，复选框样式的改变
     handleSelectionChange(val) {

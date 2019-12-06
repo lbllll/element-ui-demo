@@ -71,6 +71,7 @@
 }
 .mobile {
   border: 1px solid black;
+  overflow-y: scroll !important;
 }
 .banner {
   position: absolute;
@@ -120,7 +121,6 @@
   }
   .pre-detail {
     height: 200px;
-    overflow-y: scroll;
     font-size: 30px;
     .pre_item{
       padding-top: 18px;
@@ -136,6 +136,15 @@
       color: #5C5C5C;
       margin-top: 12px;
       line-height: 28px;
+    }
+    .pre_product_title{
+      color: #7D8B72;
+      font-size: 16px;
+      line-height: 23px;
+      margin-bottom: 16px;
+    }
+    .pre_product_img{
+      width: 100%;
     }
     .article-title {
       margin-bottom: 24px;
@@ -206,12 +215,12 @@
       }
     }
   }
-  .foot {
-    margin-top: 25px;
-    border: 1px solid green;
-    border-top: 2px solid #f3f3f3;
-    height: 30px;
-  }
+  // .foot {
+  //   margin-top: 25px;
+  //   border: 1px solid green;
+  //   border-top: 2px solid #f3f3f3;
+  //   height: 30px;
+  // }
 }
 </style>
 
@@ -355,7 +364,10 @@
                   <div class="pre-detail">
                     <div v-for="(item, index) in previewList" :key="index">
                       <div class="pre_item" v-if="item.articleType == 'PRODUCT'">
-
+                        <p class="pre_product_title">{{item.articleDetailTitle}}</p>
+                        <div v-if="item.product&&item.product.length>0">
+                          <img class="pre_product_img" :src="item.product[0].content||item.product[0].headPath" alt="">
+                        </div>
                       </div>
                       <div class="pre_item" v-if="item.articleType == 'ARTICLE'">
                         <p class="pre_content_title">{{item.articleDetailTitle}}</p>
@@ -496,6 +508,11 @@ export default {
             sort: item.sort,
             product: []
           };
+          forArticlePreview({productIds:item.detailContent}).then((res) => {
+            if(res.data){
+              info.product = res.data
+            }
+          }).catch((err) => {});
           productList.push(info);
         });
         this.articleProduct = productList;
@@ -719,7 +736,6 @@ export default {
           };
         }
       var list = []
-      var productId = ''
       this.articleProduct.forEach(e => {
         console.log(e);
         list.push(e)

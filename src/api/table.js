@@ -178,7 +178,7 @@ export function deleteCategory(data) {
 }
 
 // 标签场景查询接口
-export function produckTabel(data) {
+export function produckLabel(data) {
   return http.post('/product/label/list', data, 'formData')
 }
 
