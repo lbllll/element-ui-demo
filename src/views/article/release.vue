@@ -126,7 +126,7 @@
         <el-upload
           :action="upImgUrl"
           :data="access_token"
-          :show-file-list="false"
+          :show-file-list="false" 
           :on-change="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
           :on-success="uploadSuccess"
