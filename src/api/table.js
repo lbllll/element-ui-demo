@@ -482,6 +482,31 @@ export function getHistorys(data) {
 export function getHistoryDetail(data) {
   return http.post('/coupon/bind/record/detail', data, 'formData')
 }
+//获取客户列表
+export function getCustomerList(data) {
+  return http.post('/customer/info/list', data, 'formData')
+}
+//删除客户
+export function customerDel(data) {
+  return http.post('/customer/info/del', data, 'formData')
+}
+//添加客户
+export function customerAdd(data) {
+  return http.post('/customer/info/customerAdd', data, 'formData')
+}
+//客户信息编辑
+export function customerEdit(data) {
+  return http.post('/customer/info/edit', data, 'formData')
+}
+//获取客户详情
+export function getCustomerDetail(data) {
+  return http.post('/customer/info/detail', data, 'formData')
+}
+//绑定时获取客户名单
+export function customerForBand(data) {
+  return http.post('/customer/info/customerForBand', data, 'formData')
+}
+
 
 
 /**
