@@ -284,7 +284,20 @@
         </el-form-item>
 
         <el-form-item label="绑定企业客户" verify prop="bindCustomer">
-          <el-input v-model="forms.bindCustomer" style="width:300px"></el-input>
+          <el-select
+              class="inputs"
+              v-model="forms.bindCustomer"
+              placeholder="请选择企业客户"
+              size="small"
+            >
+              <el-option
+                v-for="item in customerBandList"
+                :key="item.customerId"
+                :label="item.cusName"
+                :value="item.customerId"
+              ></el-option>
+            </el-select>
+          <!-- <el-input v-model="forms.bindCustomer" style="width:300px"></el-input> -->
         </el-form-item>
         <el-form-item label="客户联系电话" verify prop="bindMobile">
           <el-input v-model="forms.bindMobile" style="width:300px"></el-input>
@@ -366,7 +379,8 @@ import {
   getHistorys,
   getHistoryDetail,
   disabled,
-  couponDetail
+  couponDetail,
+  customerForBand
 } from "@/api/table";
 import productList from "@/views/product/list";
 
@@ -435,7 +449,8 @@ export default {
         PRESENT_ONE: "打包送一人",
         PRESENT_MANY: "群发多人抢",
         INIT: "初始化类型"
-      }
+      },
+      customerBandList:[]
     };
   },
   components: {
@@ -444,8 +459,12 @@ export default {
   created() {
     this.data.batchId = this.$route.query.id;
     this.forms.batchId = this.$route.query.id;
-
     this.getList();
+    customerForBand().then(res =>{
+      if (res.code == 200) {
+            this.customerBandList = res.data;
+          }
+    })
   },
   methods: {
     getList() {

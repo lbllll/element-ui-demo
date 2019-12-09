@@ -94,23 +94,19 @@
     <el-form :model="formData" ref="formData" label-width="100px" class="demo-formData">
       <p class="title">客户基本信息</p>
         <el-input type="hidden" class="inputs" v-model="formData.customerId"></el-input>
-      <el-form-item verify label="客户/公司名" prop="cusName">
+      <el-form-item verify label="客户名" prop="cusName">
         <el-input class="inputs" v-model="formData.cusName"></el-input>
         <span class="describe"></span>
       </el-form-item>
-      <!-- <el-form-item verify label="客户密码" prop="cusPassword">
+      <el-form-item verify label="客户密码" prop="cusPassword">
         <el-input class="inputs" v-model="formData.cusPassword"></el-input>
         <span class="describe">密码</span>
-      </el-form-item> -->
-      <el-form-item verify label="公司联系人" prop="cusSaleName">
-        <el-input class="inputs" v-model="formData.cusSaleName"></el-input>
-        <span class="describe">联系人</span>
       </el-form-item>
-      <el-form-item verify label="联系电话" prop="cusPhone">
+      <el-form-item verify label="客户电话" prop="cusPhone">
         <el-input class="inputs" v-model="formData.cusPhone"></el-input>
         <span class="describe">电话</span>
       </el-form-item>
-      <el-form-item label="客户邮箱" prop="cusEmail">
+      <el-form-item verify label="客户邮箱" prop="cusEmail">
         <el-input class="inputs" v-model="formData.cusEmail"></el-input>
         <span class="describe">邮箱</span>
       </el-form-item>
@@ -131,24 +127,6 @@
                 :key="item.cusType"
                 :label="item.name"
                 :value="item.cusType"
-              ></el-option>
-            </el-select>
-        </div>
-      </el-form-item>
-      <el-form-item  verify label="客户等级
-      " prop="cusLevel" >
-        <div class="">
-            <el-select
-              class="inputs"
-              v-model="formData.cusLevel"
-              placeholder="请选择客户等级"
-              size="small"
-            >
-              <el-option
-                v-for="item in cusLevels"
-                :key="item.cusLevel"
-                :label="item.name"
-                :value="item.cusLevel"
               ></el-option>
             </el-select>
         </div>
@@ -179,8 +157,7 @@ export default {
       formData: {
         customerId: "",
         cusName: "",
-        // cusPassword: "",
-        cusSaleName:"",
+        cusPassword: "",
         cusPhone: "",
         cusEmail: "",
         cusAddress: "",
@@ -188,22 +165,16 @@ export default {
       },
       cusTypes:[
         {
-          cusType:"BUSINESS",
-          name:"企业客户"
-        },
-        {
-          cusType:"PERSONAL",
-          name:"个人客户"
-        }
-      ],
-      cusLevels:[
-        {
-          cusLevel:"NORMAL",
+          cusType:"礼卡客户",
           name:"普通客户"
         },
         {
-          cusLevel:"VIP",
-          name:"VIP客户"
+          cusType:"2",
+          name:"超级客户"
+        },
+        {
+          cusType:"3",
+          name:"超级无敌客户"
         }
       ],
       checkedScene: [],
@@ -267,13 +238,11 @@ export default {
         let data = {
         customerId: this.formData.customerId,
         cusName: this.formData.cusName,
-        // cusPassword: this.formData.cusPassword,
-        cusSaleName:this.formData.cusSaleName,
+        cusPassword: this.formData.cusPassword,
         cusPhone: this.formData.cusPhone,
         cusEmail: this.formData.cusEmail,
         cusAddress: this.formData.cusAddress,
-        cusType: this.formData.cusType,
-        cusLevel: this.formData.cusLevel
+        cusType: this.formData.cusType
       }
       customerEdit(data).then(res => {
         if (res.code == 200) {
@@ -285,7 +254,6 @@ export default {
               this.updataInfo = 2;
            //跳转到列表
           // that.$ruter.push({path:'COUPON_CUSTOMER_LIST'});
-          this.$router.go(-1); 
             }, 2000);
           }
       })
@@ -293,13 +261,11 @@ export default {
         //否则就是添加接口
         let data = {
         cusName: this.formData.cusName,
-        // cusPassword: this.formData.cusPassword,
-        cusSaleName:this.formData.cusSaleName,
+        cusPassword: this.formData.cusPassword,
         cusPhone: this.formData.cusPhone,
         cusEmail: this.formData.cusEmail,
         cusAddress: this.formData.cusAddress,
-        cusType: this.formData.cusType,
-        cusLevel: this.formData.cusLevel
+        cusType: this.formData.cusType
       }
       customerAdd(data).then(res => {
         if (res.code == 200) {
@@ -311,7 +277,6 @@ export default {
               this.updataInfo = 2;
            //跳转到列表
           // that.$ruter.push({path:'COUPON_CUSTOMER_LIST'});
-          this.$router.go(-1); 
             }, 2000);
           }
       })
