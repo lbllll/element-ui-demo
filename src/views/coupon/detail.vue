@@ -147,7 +147,7 @@
       <!-- @selection-change="handleSelectionChange"
       @row-click="handleRowClick"-->
       <el-table-column align="center" type="index" width="40"></el-table-column>
-      <el-table-column align="center" prop="sequence" label="卡号"></el-table-column>
+      <el-table-column align="center" prop="sequence" label="卡号" width="90"></el-table-column>
       <el-table-column align="center" prop="bindCustomer" label="关联绑定客户" width="180"></el-table-column>
       <el-table-column align="center" prop="amount" label="礼卡面额" width="160">
         <template slot-scope="scope">￥{{$util.prices(scope.row.amount)}}</template>
@@ -276,6 +276,11 @@
           <el-button
             @click="productListShow=true"
           >{{multipleSelection.length>0?('已选择'+multipleSelection.length+'件商品'):'选择礼卡商品'}}</el-button>
+          <div>
+            <p v-for="(item, index) in multipleSelection" :key="index">
+              {{item.name}}；编号:{{item.number}}
+            </p>
+          </div>
         </el-form-item>
 
         <el-form-item label="绑定企业客户" verify prop="bindCustomer">
@@ -283,6 +288,12 @@
         </el-form-item>
         <el-form-item label="客户联系电话" verify prop="bindMobile">
           <el-input v-model="forms.bindMobile" style="width:300px"></el-input>
+        </el-form-item>
+        <el-form-item label="销售人员" verify prop="saleName">
+          <el-input v-model="forms.saleName" style="width:300px"></el-input>
+        </el-form-item>
+        <el-form-item label="销售公司" verify prop="saleCompany">
+          <el-input v-model="forms.saleCompany" style="width:300px"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -506,6 +517,7 @@ export default {
         .catch(err => {});
     },
     selectData(arr) {
+      console.log(arr);
       this.multipleSelection = arr;
       this.forms.productListJson = [];
       arr.forEach(e => {
