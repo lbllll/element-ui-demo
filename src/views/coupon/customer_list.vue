@@ -69,6 +69,23 @@
             </el-select>
           </el-form-item>
         </div>
+        <div class="scene">
+          <el-form-item  prop="cusLevel" >
+            <el-select
+              class="data"
+              v-model="data.cusLevel"
+              placeholder="请选择客户类型"
+              size="small"
+            >
+              <el-option
+                v-for="item in cusLevels"
+                :key="item.cusLevel"
+                :label="item.name"
+                :value="item.cusLevel"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </div>
         <div class="search">
           <el-button type="primary"  size="small" @click="searchs()">搜索</el-button>
         </div>
@@ -82,7 +99,7 @@
       :row-key="getRowKeys"
     >
       <el-table-column label="客户名称"  prop="cusName" align="center"></el-table-column>
-      <el-table-column label="密码"  prop="cusPassword" align="center"></el-table-column>
+      <el-table-column label="联系人"  prop="cusSaleName" align="center"></el-table-column>
       <el-table-column label="电话"  prop="cusPhone" align="center"></el-table-column>
       <!-- <el-table-column label="文章上下架" width="100" align="center">
         <template slot-scope="scope">
@@ -101,10 +118,13 @@
       <el-table-column label="客户类型"  prop="cusType" align="center">
         <template slot-scope="scope">{{cusTypeList[scope.row.cusType]}}</template>
       </el-table-column>
+      <el-table-column label="客户等级"  prop="cusLevel" align="center">
+        <template slot-scope="scope">{{cusLevelList[scope.row.cusLevel]}}</template>
+      </el-table-column>
       <el-table-column  align="center" width="150" label="操作">
         <template slot-scope="scope">
           <router-link class="editBtn" type="primary" round icon="el-icon-edit" :to="{name: 'COUPON_CUSTOMER_EDIT', query: {id: scope.row.customerId}}">
-            <el-button type="primary" round icon="el-icon-edit" size="mini"  @click="edit(scope.row.customerId)"></el-button>
+            <el-button type="primary" round icon="el-icon-edit" size="mini"></el-button>
           </router-link>
           <el-button type="danger" icon="el-icon-delete" size="mini" round @click="del(scope.row.customerId)"></el-button>
         </template>
@@ -135,31 +155,49 @@ export default {
       data: {
         // listType: "", // 顶部按钮
         cusName: "", // 客户名
+        cusSaleName: "", // 联系人名
         cusPhone: "", // 电话
         cusEmail: "", // 邮箱
         cusAddress:"",//地址
         cusType:"",
+        cusLevel:"",
         page: 1
       },
       cusTypes:[
         {
-            // cusType:"1",
-          cusType:"礼卡客户",
+          cusType:"",
+          name:"全部"
+        },
+        {
+          cusType:"BUSINESS",
+          name:"企业客户"
+        },
+        {
+          cusType:"PERSONAL",
+          name:"个人客户"
+        }
+      ],
+      cusLevels:[
+        {
+          cusLevel:"",
+          name:"全部"
+        },
+        {
+          cusLevel:"NORMAL",
           name:"普通客户"
         },
         {
-          cusType:"2",
-          name:"超级客户"
-        },
-        {
-          cusType:"3",
-          name:"超级无敌客户"
+          cusLevel:"VIP",
+          name:"VIP客户"
         }
       ],
       cusTypeList: {
-        礼卡客户: "普通客户",
-        2: "超级客户",
-        3: "超级无敌客户"
+        BUSINESS: "企业客户",
+        PERSONAL: "个人客户",
+      },
+      cusLevelList: {
+        NORMAL: "普通客户",
+        VIP: "VIP客户",
       },
       tableData: [],
       checkAll: false,

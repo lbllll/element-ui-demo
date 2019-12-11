@@ -21,6 +21,15 @@
     color: #333;
   }
 }
+.articleContent{
+  height: 666px;
+  overflow-y:scroll;
+  .articleDetailInfo{
+    float: left;
+    width: 600px;
+    margin-left: 25px;
+  }
+}
 .articleDetailBtn {
   margin: 0 auto;
 }
@@ -99,6 +108,44 @@
 		}
 .pre_item{
   margin-bottom: 15px;
+  position: relative;
+    .goods-price{
+    position: absolute;
+    right: 5px;
+    bottom: 60px;
+    padding: 4px;
+    border-radius: 12px;
+    font-size: 8px;
+    color: #fff;
+		background-color: rgba(172,170,176,0.5);
+		border:2px solid rgba(255,255,255,0.5);
+  };
+  .goods-price-line {
+		position: absolute;
+		right: 50px;
+		bottom: 70px;
+		width: 18px;
+		height: 1px;
+		background-color: #fff;
+		};
+    .goods-price-Circle1 {
+		position: absolute;
+		right: 65px;
+		bottom: 65px;
+		width: 12px;
+    height: 12px;
+		background-color:  rgba(0,0,0,0.3);
+		border-radius: 50%;
+      .goods-price-Circle2 {
+					position: absolute;
+					top: 3px;
+					left: 3px;
+					width: 6px;
+					height: 6px;
+					background-color: #fff;
+					border-radius: 50%;
+				}
+		}
 }
 .article-goods-title{
   font-weight: bold;
@@ -184,11 +231,12 @@
       <div>
         <p class="title">文章描述/添加产品</p>
       </div>
-      <div class="articleDetailInfo">
-        <div class="articleDetailBtn">
+      <div class="articleDetailBtn">
           <el-button type="primary" @click="articleAddWithDetail">添加文章描述</el-button>
           <el-button type="primary" @click="articleAddWithProduct">添加相关产品</el-button>
-        </div>
+      </div>
+      <div class="articleContent" >
+      <div class="articleDetailInfo">
         <div class="articleAddWithDetail" v-for="(info,index) in articleInfo" :key="index">
           <el-form-item label="描述小标题" prop="articleDetailTitle">
             <el-input class="inputs" v-model="info.articleDetailTitle"></el-input>
@@ -208,6 +256,8 @@
           <el-input class="inputs articleType" v-model="info.articleType" type="hidden"></el-input>
           <el-input class="inputs" v-model="info.articleDetailId" type="hidden"></el-input>
         </div>
+      </div> 
+      <div class="articleDetailInfo">
         <div
           class="articleAddWithProduct"
           v-for="(item,index) in articleProduct"
@@ -235,6 +285,8 @@
           <el-input class="inputs" v-model="item.articleDetailId" type="hidden"></el-input>
         </div>
       </div>
+      </div>
+      
       <div class="footer">
         <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
         <el-button type="primary" @click="previewData()">预览</el-button>
@@ -264,12 +316,17 @@
                         <p class="article-goods-title">{{item.articleDetailTitle}}</p>
                         <div class="goods-img">
                             <img :src="item.checkProductImg" style="width:100%;height:auto;" alt="" />
+                            <div class="goods-price">￥{{item.salePrice/100}}</div>
+                            <div class="goods-price-line"></div>
+                            <div class="goods-price-Circle1">
+                              <div class="goods-price-Circle2"></div>
+                            </div>
                         </div>
                       </div>
                       <div class="pre_item" v-if="item.articleType == 'ARTICLE'">
                         <p class="pre_content_title">{{item.articleDetailTitle}}</p>
                         <div v-if="item.detailContent">
-                          <p class="pre_content_txt" v-for="(txt, t) in item.detailContent" :key="t">{{txt.txt}}</p>
+                          <p class="pre_content_txt" style="margin-top:10px" v-for="(txt, t) in item.detailContent" :key="t">{{txt.txt}}</p>
                         </div>
                       </div>
                     </div>
@@ -593,11 +650,10 @@ export default {
               type: "success"
             });
             setTimeout(() => {
-              location.reload();
               this.updataInfo = 2;
+              this.$router.go(-1); 
             }, 2000);
             //跳转到列表
-          that.$ruter.push({path:'ARTICLE_LIST'});
           } else {
             this.$message.error(result.description);
             this.updataInfo = 2;
@@ -640,8 +696,8 @@ export default {
                 type: "success"
               });
               setTimeout(() => {
-                location.reload();
                 this.updataInfo = 2;
+                this.$router.go(-1); 
               }, 2000);
               //跳转到列表
             } else {

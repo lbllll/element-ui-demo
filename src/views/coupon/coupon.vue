@@ -37,7 +37,18 @@
         <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.batchNo">
           <template slot="prepend">生成批次</template>
         </el-input>
-        <el-button type="primary" size="mini" @click="getList">搜索</el-button>
+        <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.code">
+          <template slot="prepend">批次编码</template>
+        </el-input>
+        <el-select v-model="data.couponType" size="mini" placeholder="请选择">
+          <el-option
+            v-for="item in couponTypes"
+            :key="item.couponType"
+            :label="item.name"
+            :value="item.couponType"
+          ></el-option>
+        </el-select>
+        <el-button style="margin-left:20px" type="primary" size="mini" @click="getList">搜索</el-button>
       </div>
       <div class="flex-center">
         <el-button type="primary" @click="rechargeCode=true">实卡字段</el-button>
@@ -116,6 +127,8 @@ export default {
     return {
       data: {
         batchNo: "", // 生成批次
+        code:"",
+        couponType:"",
         page: 1
       },
       tableData: [],
@@ -127,7 +140,11 @@ export default {
       couponType: {
         BALANCE_CARD: "通兑卡",
         PRODUCT_CARD: "单品卡"
-      }
+      },
+      couponTypes:[
+        {couponType:"",name:"全部"},
+        {couponType:"BALANCE_CARD",name:"通兑卡"},
+        {couponType:"PRODUCT_CARD",name:"单品卡"}]
     };
   },
   created() {

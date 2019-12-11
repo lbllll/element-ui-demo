@@ -118,6 +118,9 @@
         <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.bindCustomer">
           <template slot="prepend">关联企业</template>
         </el-input>
+        <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.bindSaleName">
+          <template slot="prepend">销售人员</template>
+        </el-input>
         <el-select v-model="data.status" size="mini" placeholder="请选择">
           <el-option
             v-for="item in options"
@@ -126,6 +129,18 @@
             :value="item.value"
           ></el-option>
         </el-select>
+        <el-date-picker
+        v-model="data.times"
+        type="daterange"
+        align="right"
+        size="mini"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :picker-options="pickerOptions"
+        value-format="yyyy-MM-dd"
+      ></el-date-picker>
         <el-button type="primary" size="mini" @click="getList" style="margin-left:15px">搜索</el-button>
       </div>
       <div class="flex-center">
@@ -149,6 +164,7 @@
       <el-table-column align="center" type="index" width="40"></el-table-column>
       <el-table-column align="center" prop="sequence" label="卡号" width="90"></el-table-column>
       <el-table-column align="center" prop="bindCustomer" label="关联绑定客户" width="180"></el-table-column>
+      <el-table-column align="center" prop="bindSaleName" label="绑定时销售人员" width="180"></el-table-column>
       <el-table-column align="center" prop="amount" label="礼卡面额" width="160">
         <template slot-scope="scope">￥{{$util.prices(scope.row.amount)}}</template>
       </el-table-column>
@@ -251,6 +267,32 @@
         <el-form-item label="可用礼卡号段">
           <p>{{bindingInfo.usableBeginSequence}} 至 {{bindingInfo.usableEndSequence}}</p>
         </el-form-item>
+
+        <el-form-item label="绑定已有客户" verify prop="bindCustomer">
+          <el-select
+              class="inputs"
+              v-model="forms.bindCustomer"
+              placeholder="请选择企业客户"
+              size="small"
+            >
+              <el-option
+                v-for="item in customerBandList"
+                :key="item.customerId"
+                :label="item.cusName"
+                :value="item.customerId"
+              ></el-option>
+            </el-select>
+            
+          <!-- <el-input v-model="forms.bindCustomer" style="width:300px"></el-input> -->
+          <el-button type="primary" size="small"><router-link :to="{name: 'COUPON_CUSTOMER_EDIT', query: {id: ''}}" >去新增企业客户</router-link></el-button>
+          <!-- <el-button type="primary" size="small" @click="addCustomer">去新增企业客户</el-button>
+          <div>
+            <el-dialog title="新增客户" :visible.sync="addCustomerCode" center :append-to-body="true" width="80%">
+              <customerEdit></customerEdit>
+            </el-dialog>
+          </div> -->
+        </el-form-item>
+
         <el-form-item label="关联礼卡数量" verify prop="bindCount">
           <el-input v-model.number="forms.bindCount" style="width:300px"></el-input>
         </el-form-item>
@@ -281,32 +323,6 @@
               {{item.name}}；编号:{{item.number}}
             </p>
           </div>
-        </el-form-item>
-
-        <el-form-item label="绑定企业客户" verify prop="bindCustomer">
-          <el-select
-              class="inputs"
-              v-model="forms.bindCustomer"
-              placeholder="请选择企业客户"
-              size="small"
-            >
-              <el-option
-                v-for="item in customerBandList"
-                :key="item.customerId"
-                :label="item.cusName"
-                :value="item.customerId"
-              ></el-option>
-            </el-select>
-          <!-- <el-input v-model="forms.bindCustomer" style="width:300px"></el-input> -->
-        </el-form-item>
-        <el-form-item label="客户联系电话" verify prop="bindMobile">
-          <el-input v-model="forms.bindMobile" style="width:300px"></el-input>
-        </el-form-item>
-        <el-form-item label="销售人员" verify prop="saleName">
-          <el-input v-model="forms.saleName" style="width:300px"></el-input>
-        </el-form-item>
-        <el-form-item label="销售公司" verify prop="saleCompany">
-          <el-input v-model="forms.saleCompany" style="width:300px"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -383,6 +399,7 @@ import {
   customerForBand
 } from "@/api/table";
 import productList from "@/views/product/list";
+import customerEdit from "@/views/coupon/customer_edit";
 
 export default {
   name: "COUPON_COUPON_DETAIL",
@@ -392,14 +409,50 @@ export default {
         batchId: "", // 生成批次
         sequence: "",
         bindCustomer: "",
+        bindSaleName: "",
         status: "",
-        page: 1
+        times: "",
+        page: 1,
+        beginDate:"",
+        endDate:""
+      },
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            }
+          }
+        ]
       },
       forms: {
         productListJson: "",
         recordName: "",
         bindMobile: "",
         bindCustomer: "",
+        bindSaleName: "",
         unitAmount: "",
         bindCount: "",
         batchId: ""
@@ -415,7 +468,11 @@ export default {
         },
         {
           value: "BINDED",
-          label: "未兑换"
+          label: "已绑定"
+        },
+        {
+          value: "NOT_BIND",
+          label: "未绑定"
         }
       ],
       details: {},
@@ -450,11 +507,13 @@ export default {
         PRESENT_MANY: "群发多人抢",
         INIT: "初始化类型"
       },
-      customerBandList:[]
+      customerBandList:[],
+      addCustomerCode:false
     };
   },
   components: {
-    productList
+    productList,
+    customerEdit
   },
   created() {
     this.data.batchId = this.$route.query.id;
@@ -471,6 +530,9 @@ export default {
       var data = JSON.parse(JSON.stringify(this.data));
       // 后端page从0开始，所以需要减一
       data.page--;
+      data.beginDate = data.times[0] || "";
+      data.endDate = data.times[1] || "";
+      delete data.times;
       companyBatchDetails({ batchId: this.$route.query.id })
         .then(res => {
           if (res.code == 200) {
@@ -599,9 +661,17 @@ export default {
         .catch(err => {});
     },
     downLoad() {
+      var data = JSON.parse(JSON.stringify(this.data));
+      // 后端page从0开始，所以需要减一
+      data.page--;
+      this.data.beginDate = data.times[0] || "";
+      this.data.endDate = data.times[1] || "";
+      delete data.times;
       var str = `${process.env[this.$base]}/coupon/info/tables?access_token=${
         this.$store.getters.token
-      }&batchId=${this.data.batchId}`;
+      }&batchId=${this.data.batchId}&sequence=${this.data.sequence}
+      &bindCustomer=${this.data.bindCustomer}&bindSaleName=${this.data.bindSaleName}
+      &beginDate=${this.data.beginDate}&endDate=${this.data.endDate}&status=${this.data.status}`;
       window.open(str);
     },
     //点击复选框触发，复选框样式的改变
@@ -639,6 +709,10 @@ export default {
         this.isIndeterminate = false;
         this.checkAll = false;
       }
+    },
+    addCustomer(){
+      console.log("新增企业客户");
+      this.addCustomerCode = true;
     }
   }
 };
