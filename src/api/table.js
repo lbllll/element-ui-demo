@@ -511,7 +511,10 @@ export function getCustomerDetail(data) {
 export function customerForBand(data) {
   return http.post('/customer/info/customerForBand', data, 'formData')
 }
-
+//批量删除客户信息
+export function customerDelAll(data) {
+  return http.post('/customer/info/delAll', data, 'formData')
+}
 
 
 /**
@@ -541,8 +544,14 @@ export function articleDetail(data){
 export function forArticlePreview(data){
   return http.post('/product/info/forArticlePreview', data, 'formData')
 }
-
-
+//批量删除文章
+export function articleDelAll(data) {
+  return http.post('/article/info/delAll', data, 'formData')
+}
+//批量上下架文章
+export function articleChangeStatus(data) {
+  return http.post('/article/info/changeStatus', data, 'formData')
+}
 
 
 

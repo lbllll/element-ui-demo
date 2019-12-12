@@ -19,10 +19,13 @@
     width: 300px;
   }
   .title,.scene,.search{
-    margin-left: 45px;
+    margin-left: 25px;
     float: left;
     height: 50px;
   }
+}
+.footer {
+  height: 50px;
 }
 </style>
 
@@ -86,6 +89,9 @@
         <div class="search">
           <el-button type="primary"  size="small" @click="searchs()">搜索</el-button>
         </div>
+        <div class="search">
+        <el-button type="primary" size="small" @click="$router.push({name:'ARTICLE_RELEASE'})">发布文章</el-button>
+        </div>
       </el-form>
     </div>
     <el-table
@@ -94,7 +100,14 @@
       border
       :header-cell-style="{background:'#afafaf',color:'#606266'}"
       :row-key="getRowKeys"
+      ref="multipleTable"
+      @selection-change="handleSelectionChange"
     >
+      <el-table-column
+        type="selection"
+        width="50"
+        align="center">
+      </el-table-column>
       <el-table-column label="封面图" width="120" align="center">
         <template slot-scope="scope">
           <span>
@@ -135,16 +148,28 @@
           <el-button type="danger" icon="el-icon-delete" size="mini" round @click="del(scope.row.articleId)"></el-button>
         </template>
       </el-table-column>
-
     </el-table>
-    <el-pagination
-      @current-change="handleCurrentChange"
-      :current-page="data.page"
-      :page-size="10"
-      background
-      layout="total, prev, pager, next, jumper"
-      :total="count"
-    ></el-pagination>
+    <div class="footer flex-between">
+      <div>
+        <el-checkbox
+          :indeterminate="isIndeterminate"
+          v-model="checkAll"
+          @change="handleCheckAllChange"
+        >全选</el-checkbox>
+        <el-button type="primary" v-if="!checkItem" size="mini" @click="putwayAll('PUTAWAY')">上架</el-button>
+        <el-button type="primary" v-if="!checkItem" size="mini" @click="putwayAll('SOLD_OUT')">下架</el-button>
+        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll('Y')">删除</el-button>
+      </div>
+      <el-pagination
+        @current-change="handleCurrentChange"
+        :current-page="data.page"
+        :page-size="10"
+        background
+        layout="total, prev, pager, next, jumper"
+        :total="count"
+      ></el-pagination>
+    </div>
+    
   </div>
 </template>
 
@@ -154,8 +179,11 @@ import {
   articleList,
   postApi,
   articleDel,
-  productScenelList
+  productScenelList,
+  articleDelAll,
+  articleChangeStatus
 } from "@/api/table";
+import { stringify } from "querystring";
 export default {
   name: "ARTICLE_LIST",
   data() {
@@ -265,7 +293,6 @@ export default {
         .then(() => {
         articleDel({ articleId: articleId })
         .then(res => {
-        console.log(res);
         this.$message({
         type: "success",
         message: "操作成功"
@@ -281,10 +308,96 @@ export default {
       });
     });
     },
+    //全选,取消选择
+    toggleSelection(rows) {
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      //右下按钮全选，切换保证和表格的全选一致
+      handleCheckAllChange(val) {
+      if (this.checkAll) {
+        this.$refs.multipleTable.toggleAllSelection();
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
+      this.isIndeterminate = false;
+    },
+    //监听选择的内容
+      handleSelectionChange(val) {
+       //val 为选中数据的集合
+        this.multipleSelection = val;
+        console.log(this.multipleSelection)
+      },
+    //批量上/下架
+    putwayAll(status){
+      if(this.$refs.multipleTable.selection.length == 0){
+        this.$message({
+          message: "请选择需要操作的文章",
+          type: "warning"
+        });
+        return;
+      }
+      let data = {articleIds:"",status:status}
+      this.$refs.multipleTable.selection.forEach(e => {
+        data.articleIds += e.articleId + ","
+      });
+      articleChangeStatus(data)
+      .then(result => {
+        if (result.code == 200) {
+            this.$message({
+              message: "操作成功",
+              type: "success"
+            });
+            setTimeout(() => {
+              this.updataInfo = 2;
+              this.init(); 
+            }, 2000);
+            //跳转到列表
+          } else {
+            this.$message.error(result.description);
+            this.updataInfo = 2;
+          }
+    })
+    .catch(err => {});
+    },
+    //批量删除
+    delAll(status){
+      if(this.$refs.multipleTable.selection.length == 0){
+        this.$message({
+          message: "请选择需要操作的文章",
+          type: "warning"
+        });
+        return;
+      }
+      let data = {articleIds:"",status:status}
+      this.$refs.multipleTable.selection.forEach(e => {
+        data.articleIds += e.articleId + ","
+      });
+      articleDelAll(data)
+      .then(result => {
+        if (result.code == 200) {
+            this.$message({
+              message: "操作成功",
+              type: "success"
+            });
+            setTimeout(() => {
+              this.updataInfo = 2;
+              this.init(); 
+            }, 2000);
+            //跳转到列表
+          } else {
+            this.$message.error(result.description);
+            this.updataInfo = 2;
+          }
+    })
+    .catch(err => {});
+    },
   },
-  mounted() {
-    this.init();
-  }
 };
 </script>
 
