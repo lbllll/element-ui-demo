@@ -163,7 +163,7 @@
       @row-click="handleRowClick"-->
       <el-table-column align="center" type="index" width="40"></el-table-column>
       <el-table-column align="center" prop="sequence" label="卡号" width="90"></el-table-column>
-      <el-table-column align="center" prop="bindCustomer" label="关联绑定客户" width="180"></el-table-column>
+      <el-table-column align="center" prop="bindCustomer" label="关联绑定客户"></el-table-column>
       <el-table-column align="center" prop="bindSaleName" label="绑定时销售人员" width="180"></el-table-column>
       <el-table-column align="center" prop="amount" label="礼卡面额" width="160">
         <template slot-scope="scope">￥{{$util.prices(scope.row.amount)}}</template>

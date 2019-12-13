@@ -449,6 +449,7 @@
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
         :on-change="handleListenChange"
+        :on-remove="handleRemove"
         :before-upload="beforeAvatarUpload"
         :limit="5"
         :file-list="fileList"
@@ -1339,6 +1340,10 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
       // 查看原图
+    },
+    handleRemove(file, fileList) {
+      console.log(fileList,'fileListfileListfileList');
+      this.fileList = fileList;
     },
     async handleListenChange(file, fileList) {
       var self = this;
