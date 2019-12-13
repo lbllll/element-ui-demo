@@ -267,13 +267,20 @@
         <el-form-item label="可用礼卡号段">
           <p>{{bindingInfo.usableBeginSequence}} 至 {{bindingInfo.usableEndSequence}}</p>
         </el-form-item>
-
+        <el-form-item label="关联礼卡数量" verify prop="bindCount">
+          <el-input v-model.number="forms.bindCount" style="width:300px"></el-input>
+        </el-form-item>
+        <el-form-item label="关联礼卡名称" verify prop="recordName">
+          <el-input v-model="forms.recordName" style="width:300px"></el-input>
+        </el-form-item>
         <el-form-item label="绑定已有客户" verify prop="bindCustomer">
           <el-select
               class="inputs"
               v-model="forms.bindCustomer"
               placeholder="请选择企业客户"
               size="small"
+              filterable 
+              :filter-method="chcekCustomerByName"
             >
               <el-option
                 v-for="item in customerBandList"
@@ -282,24 +289,14 @@
                 :value="item.customerId"
               ></el-option>
             </el-select>
-            
-          <!-- <el-input v-model="forms.bindCustomer" style="width:300px"></el-input> -->
           <el-button type="primary" size="small"><router-link :to="{name: 'COUPON_CUSTOMER_EDIT', query: {id: ''}}" >去新增企业客户</router-link></el-button>
-          <!-- <el-button type="primary" size="small" @click="addCustomer">去新增企业客户</el-button>
-          <div>
-            <el-dialog title="新增客户" :visible.sync="addCustomerCode" center :append-to-body="true" width="80%">
-              <customerEdit></customerEdit>
-            </el-dialog>
-          </div> -->
         </el-form-item>
-
-        <el-form-item label="关联礼卡数量" verify prop="bindCount">
-          <el-input v-model.number="forms.bindCount" style="width:300px"></el-input>
+        <el-form-item label="销售人员" verify prop="saleName">
+          <el-input v-model="forms.saleName" style="width:300px"></el-input>
         </el-form-item>
-        <el-form-item label="关联礼卡名称" verify prop="recordName">
-          <el-input v-model="forms.recordName" style="width:300px"></el-input>
+        <el-form-item label="销售公司" verify prop="saleCompany">
+          <el-input v-model="forms.saleCompany" style="width:300px"></el-input>
         </el-form-item>
-
         <el-form-item
           v-if="details.couponType=='BALANCE_CARD'"
           label="单张礼卡面额"
@@ -519,7 +516,8 @@ export default {
     this.data.batchId = this.$route.query.id;
     this.forms.batchId = this.$route.query.id;
     this.getList();
-    customerForBand().then(res =>{
+
+    customerForBand({cusName:""}).then(res =>{
       if (res.code == 200) {
             this.customerBandList = res.data;
           }
@@ -537,6 +535,7 @@ export default {
         .then(res => {
           if (res.code == 200) {
             this.details = res.data;
+
           }
         })
         .catch(err => {});
@@ -545,6 +544,9 @@ export default {
           if (result.code == 200) {
             this.countNum = result.data.count;
             this.tableData = result.data.data;
+            this.tableData.forEach(item => {
+              item.convertName = this.deCodes(item.convertName);
+            })
           }
         })
         .catch(err => {});
@@ -713,6 +715,23 @@ export default {
     addCustomer(){
       console.log("新增企业客户");
       this.addCustomerCode = true;
+    },
+    chcekCustomerByName(val){
+       this.value = val;
+       if (val) { //val存在
+          customerForBand({cusName:val}).then(res =>{
+          if (res.code == 200) {
+            this.customerBandList = res.data;
+          }
+          })
+        }
+        else{
+          customerForBand({cusName:""}).then(res =>{
+          if (res.code == 200) {
+            this.customerBandList = res.data;
+          }
+          })
+        }
     }
   }
 };

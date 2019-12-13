@@ -102,7 +102,7 @@
         <el-input class="inputs" v-model="formData.cusPassword"></el-input>
         <span class="describe">密码</span>
       </el-form-item> -->
-      <el-form-item verify label="销售联系人" prop="cusSaleName">
+      <el-form-item verify label="公司联系人" prop="cusSaleName">
         <el-input class="inputs" v-model="formData.cusSaleName"></el-input>
         <span class="describe">联系人</span>
       </el-form-item>
@@ -110,7 +110,7 @@
         <el-input class="inputs" v-model="formData.cusPhone"></el-input>
         <span class="describe">电话</span>
       </el-form-item>
-      <el-form-item verify label="客户邮箱" prop="cusEmail">
+      <el-form-item label="客户邮箱" prop="cusEmail">
         <el-input class="inputs" v-model="formData.cusEmail"></el-input>
         <span class="describe">邮箱</span>
       </el-form-item>
