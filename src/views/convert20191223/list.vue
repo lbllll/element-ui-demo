@@ -85,7 +85,6 @@
   <div class="bodyBox" id="PRODUCT_ORDER_LIST">
     <div class="searchBox">
       <div class="flex-center">
-        <!-- <p>订单状态：</p> -->
         <el-select class="select" size="mini" v-model="data.status" placeholder="请选择" @change="getList">
           <el-option
             v-for="item in statusList"
@@ -94,11 +93,28 @@
             :value="item.value"
           ></el-option>
         </el-select>
+        <el-select class="select" size="mini" v-model="data.convertType" placeholder="奖品等级" @change="getList">
+          <el-option
+            v-for="item in convertTypeList"
+            :key="item.value"
+            :label="item.name"
+            :value="item.value"
+          ></el-option>
+        </el-select>
       </div>
-      <el-input class="inputs" placeholder="请输入内容" size="mini" v-model="data.convertCode">
-        <template slot="prepend">兑奖编码</template>
-      </el-input>
-      <el-button type="primary" size="mini" @click="getList">搜索</el-button>
+      <el-date-picker
+        v-model="data.times"
+        type="daterange"
+        align="right"
+        size="mini"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :picker-options="pickerOptions"
+        value-format="yyyy-MM-dd"
+      ></el-date-picker>
+      <el-button type="primary" size="mini" @click="getList" style="margin-left:15px">搜索</el-button>
       <el-button type="primary" size="mini" @click="downloadExcel()">导出兑奖信息</el-button>
       <!-- 导入文件 -->
       <el-form :model="form">
@@ -126,7 +142,7 @@
       <!-- @selection-change="handleSelectionChange"
       @row-click="handleRowClick"-->
       <el-table-column align="center" type="selection" width="50"></el-table-column>
-      <el-table-column align="center" prop="convertCode" width="200" label="兑奖编号"></el-table-column>
+      <!-- <el-table-column align="center" prop="convertCode" width="200" label="兑奖编号"></el-table-column> -->
       <el-table-column align="center" prop="convertImg" width="100" label="奖品图片">
         <template slot-scope="scope">
           <span>
@@ -134,16 +150,16 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="convertContent" width="200" label="奖品内容"></el-table-column>
+      <el-table-column align="center" prop="convertContent"  label="奖品内容"></el-table-column>
       <el-table-column align="center" prop="convertType" width="200" label="奖品描述"></el-table-column>
       <el-table-column align="center" label="是否兑奖" width="100">
         <template slot-scope="scope">{{status[scope.row.status]}}</template>
       </el-table-column>
-      <el-table-column align="center" prop="convertTime" width="200" label="兑奖时间"></el-table-column>
+      <el-table-column align="center" prop="convertTime"  label="兑奖时间"></el-table-column>
       <el-table-column align="center" label="是否发货" width="100">
         <template slot-scope="scope">{{deliveryStatus[scope.row.deliveryStatus]}}</template>
       </el-table-column>
-      <el-table-column align="center" prop="postTime" width="200" label="发货时间"></el-table-column>
+      <el-table-column align="center" prop="postTime"  label="发货时间"></el-table-column>
       <el-table-column align="center" label="操作" width="100">
         <template slot-scope="scope">
           <el-button type="primary" @click="getDetail(scope.row.convertCode)"  width="200" size="mini">查看处理</el-button>
@@ -272,8 +288,42 @@ export default {
       data: {
         status: "", // 兑换状态
         convertCode: "", // 兑换码
-        page: 1
+        page: 1,
+        beginDate:"",
+        endDate:"",
+        convertType:"",
+        times:""
       },
+      convertTypeList:[
+        {
+          value: "",
+          name: "全部等级"
+        },
+        {
+          value: "欢乐奖",
+          name: "欢乐奖"
+        },
+        {
+          value: "如意奖",
+          name: "如意奖"
+        },
+        {
+          value: "纳福奖",
+          name: "纳福奖"
+        },
+        {
+          value: "鸿运奖",
+          name: "鸿运奖"
+        },
+        {
+          value: "锦绣奖",
+          name: "锦绣奖"
+        },
+        {
+          value: "幸福奖",
+          name: "幸福奖"
+        }
+      ],
       buyTypeList: [
         {
           value: "",
@@ -359,7 +409,38 @@ export default {
       access_token: {
         access_token: this.$store.getters.token
       },
-      insertExcel:process.env[this.$base] + "/convert/info/insertExcel"
+      insertExcel:process.env[this.$base] + "/convert/info/insertExcel",
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            }
+          }
+        ]
+      }
     };
   },
   created() {
@@ -377,6 +458,10 @@ export default {
       var data = JSON.parse(JSON.stringify(this.data));
       // 后端page从0开始，所以需要减一
       data.page--;
+      this.data.beginDate = data.times[0] || "";
+      this.data.endDate = data.times[1] || "";
+      delete data.times;
+      delete data.convertCode
       convertInfoList(data)
         .then(result => {
           if (result.code == 200) {
@@ -514,7 +599,7 @@ export default {
       delete data.page;
       var str = `${process.env[this.$base]}/convert/info/downloadConvertedExcel?access_token=${
         this.$store.getters.token
-      }&status=${this.data.status}&convertCode=${this.data.convertCode}`;
+      }&status=${this.data.status}&convertType=${this.data.convertType}&beginDate=${this.data.beginDate}&endDate=${this.data.endDate}`;
       window.open(str);
     },
     // 文件状态改变时的钩子
