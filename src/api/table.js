@@ -554,6 +554,29 @@ export function articleChangeStatus(data) {
 }
 
 
+//建行20191223新年活动订单列表
+export function convertInfoList(data) {
+  return http.post('/convert/info/list', data, 'formData')
+}
+//建行20191223新年活动兑奖详情
+export function deliveryDetail(data) {
+  return http.post('/convert/info/deliveryDetail', data, 'formData')
+}
+//建行20191223新年活动订单发货
+export function convertDeliveryPost(data) {
+  return http.post('/convert/info/post', data, 'formData')
+}
+//建行20191223新年活动导入兑奖信息
+export function insertExcel(data) {
+  return http.post('/convert/info/insertExcel', data, 'formData')
+}
+//建行20191223新年活动导出兑奖信息
+export function downloadConvertedExcel(data) {
+  return http.post('/convert/info/downloadConvertedExcel', data, 'formData')
+}
+
+
+
 
 // 非固定请求路径
 export function postApi(data,url) {
