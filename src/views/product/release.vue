@@ -209,6 +209,9 @@
   font-size: 24px;
   margin-left: 15px;
 }
+.cascader{
+  width: 360px;
+}
 </style>
 
 
@@ -303,23 +306,14 @@
         <span class="describe">商品所属标签，可多选</span>
       </el-form-item>
 
-      <el-form-item label="商品类别">
-        <el-select class="category" v-model="categoryId" @change="changeCategory">
-          <el-option v-for="item in category" :key="item.id" :label="item.name" :value="item.id"></el-option>
-        </el-select>
-        <el-select
-          class="category"
+      <el-form-item label="商品类别" verify prop="categoryId">
+         <el-cascader
+          class="cascader"
           v-model="sizeForm.categoryId"
-          @change="getAttribute"
-          placeholder="请选择"
-        >
-          <el-option
-            v-for="item in categoryChild"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          ></el-option>
-        </el-select>
+          :options="category"
+          :props="{ expandTrigger: 'hover',value:'id',label:'name' }"
+          >
+        </el-cascader>
       </el-form-item>
 
       <el-form-item label="供货商" verify prop="supplyMerchant">
@@ -712,7 +706,7 @@ export default {
         salePrice: "",
         classif: [],
         sceneId: [],
-        categoryId: "",
+        categoryId: [],
         supplyMerchant: "",
         usableStock: "",
         postPrice: "",
@@ -731,8 +725,6 @@ export default {
       classif: [],
       scene: [],
       category: [],
-      categoryId: "",
-      categoryChild: [],
       useless: [
         "a",
         "b",
@@ -979,41 +971,33 @@ export default {
       produckTree().then(result => {
         try {
           this.category = result.data;
-          if (this.$route.query.id) {
-            // 编辑时，取商品信息下的类别
-            result.data.forEach(e => {
-              if (e.id == this.detailInfo.info.categoryId) {
-                this.categoryId = e.id;
-                this.categoryChild = e.children;
-                this.sizeForm.categoryId = e.children[0].id;
-              }
-              e.children.forEach(i => {
-                if (i.id == this.detailInfo.info.categoryId) {
-                  this.categoryId = e.id;
-                  this.categoryChild = e.children;
-                  this.sizeForm.categoryId = i.id;
+          var ids = []
+          // 编辑时，取商品信息下的类别
+          result.data.forEach((e,a) => {
+            e.children.forEach((i,b) => {
+              i.children.forEach((t,c) => {
+                if (this.$route.query.id){
+                  if (t.id == this.detailInfo.info.categoryId) {
+                    ids = [e.id,i.id,t.id]
+                  }
+                }else{
+                  // 发布商品时，取第一个有效值
+                  if(ids.length==0){
+                    ids = [e.id,i.id,t.id]
+                  }
                 }
               });
             });
-          } else {
-            // 发布新商品时，默认取第一个类别
-            this.categoryId = result.data[0].id;
-            this.categoryChild = result.data[0].children;
-            this.sizeForm.categoryId = result.data[0].children[0].id;
+          });
+          this.sizeForm.categoryId = ids
+          var id = ids[2]
+          if(id){
+            this.getAttribute(id);
           }
-          this.getAttribute(this.sizeForm.categoryId);
-        } catch (error) {}
-      });
-    },
-    changeCategory(val) {
-      for (let i = 0; i < this.category.length; i++) {
-        if (this.category[i].id == val) {
-          this.categoryChild = this.category[i].children;
-          this.sizeForm.categoryId = this.category[i].children[0].id;
-          this.getAttribute(this.sizeForm.categoryId);
-          break;
+        } catch (error) {
+          console.log(error);
         }
-      }
+      });
     },
     getKey(item, index) {
       var k = "";
@@ -1190,6 +1174,7 @@ export default {
             data.postPrice = this.postType ? 0 : data.postPrice * 100;
             data.postType = this.postType ? "FREE" : "PAY";
             data.attributes = [];
+            data.categoryId = data.categoryId[2]
             // 处理属性值
             for (let index = 0; index < this.sizeForm.attrList.length; index++) {
               var k = this.useless[index];
