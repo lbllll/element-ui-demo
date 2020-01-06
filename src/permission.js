@@ -25,7 +25,12 @@ router.beforeEach(async(to, from, next) => {
   if (hasToken) {
     if (to.path === '/login') {
       // 如果已登录，重定向到主页
-      next({ path: '/' })
+      var route = JSON.parse(window.sessionStorage.getItem('route'))
+      try {
+        next({ name: route[0].name })        
+      } catch (error) {
+        next({ path: '/' })
+      }
       NProgress.done()
     } else {
       const hasGetUserInfo = store.getters.name
