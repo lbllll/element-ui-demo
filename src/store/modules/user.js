@@ -54,7 +54,6 @@ const actions = {
           window.sessionStorage.setItem('avatar',response.data.headPath)
           commit('SET_AVATAR', response.data.headPath)
           userPermission().then((result) => {
-            console.log(result,'sssssssssssssssssss');
             commit('SET_ROUTE', result.data)
             window.sessionStorage.setItem('route', JSON.stringify(result.data))
             resetRouter()
@@ -66,9 +65,9 @@ const actions = {
             //   background: 'rgba(255,255,255, 0.8)'
             // });
 
-            location.reload()
             setTimeout(() => {
               resolve()
+              location.reload()
               // loading.close();
             }, 500);
           }).catch((err) => {

@@ -110,8 +110,20 @@ export default {
         if (valid) {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
+            try {
+              var route = JSON.parse(window.sessionStorage.getItem('route'))
+              console.log(JSON.stringify(route),'111111111');
+              
+              try {
+                this.$router.push({ name: route[0].name })
+              } catch (error) {
+                console.log(error,'222222222222');
+                this.$router.push({ path: this.redirect || '/' })
+              }
+              this.loading = false
+            } catch (error) {
+              console.log(error,'3333333333');
+            }
           }).catch((err) => {
             this.$message.error(err.message)
             this.loading = false
