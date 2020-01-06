@@ -113,7 +113,6 @@
         end-placeholder="结束日期"
         :picker-options="pickerOptions"
         value-format="yyyy-MM-dd"
-        @change="checkTimeChange"
       ></el-date-picker>
       <el-button type="primary" size="mini" @click="getList" style="margin-left:15px">搜索</el-button>
       <el-button type="primary" size="mini" @click="downloadExcel()">导出兑奖信息</el-button>
@@ -462,7 +461,7 @@ export default {
       this.data.beginDate = data.times[0] || "";
       this.data.endDate = data.times[1] || "";
       delete data.times;
-      delete data.convertCode;
+      delete data.convertCode
       convertInfoList(data)
         .then(result => {
           if (result.code == 200) {
@@ -472,11 +471,6 @@ export default {
           }
         })
         .catch(err => {});
-    },
-    checkTimeChange(){
-      let times = this.data.times;
-      this.data.beginDate = times[0] || "";
-      this.data.endDate = times[1] || "";
     },
     getDetail(convertCode) {
       deliveryDetail({ convertCode: convertCode })
