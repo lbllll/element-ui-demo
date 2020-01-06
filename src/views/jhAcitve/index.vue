@@ -269,8 +269,8 @@
 
 
 <script>
-import { 
-  orderList, 
+import {
+  orderList,
   orderDetails,
   convertInfoList,
   deliveryDetail,
@@ -282,7 +282,7 @@ import {
    } from "@/api/table";
 
 export default {
-  name: "PRODUCT_ORDER_LIST",
+  name: "jhAcitve",
   data() {
     return {
       data: {
@@ -605,7 +605,7 @@ export default {
     // 文件状态改变时的钩子
     onBeforeUploadImage(file){
       let Xls = file.name.split('.');
- 
+
         if(Xls[1] === 'xlsx'){
           return file
         }else {
@@ -625,7 +625,7 @@ export default {
           handleSuccess();
         }
       })
-      .catch(err => { 
+      .catch(err => {
         this.$message({
             message: res.msg,
             type: 'error'
