@@ -118,3 +118,11 @@
 .el-date-editor .el-range-separator{
   width: 24px;
 }
+
+#HOME_AUTH_LIST{
+  .el-tree-node__children{
+    display: flex;
+    flex-wrap: wrap;
+    height: 40px;
+  }
+}

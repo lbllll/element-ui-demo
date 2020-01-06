@@ -54,6 +54,7 @@ const actions = {
           window.sessionStorage.setItem('avatar',response.data.headPath)
           commit('SET_AVATAR', response.data.headPath)
           userPermission().then((result) => {
+            console.log(result,'sssssssssssssssssss');
             commit('SET_ROUTE', result.data)
             window.sessionStorage.setItem('route', JSON.stringify(result.data))
             resetRouter()
