@@ -1,0 +1,153 @@
+@import './variables.scss';
+@import './mixin.scss';
+@import './transition.scss';
+@import './element-ui.scss';
+@import './sidebar.scss';
+
+body {
+  height: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+label {
+  font-weight: 700;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+//main-container全局样式
+.app-main{
+  // min-height: 100%;
+  background: #fff;
+  box-shadow: 0 0 3px 4px #dde6f9;
+  position: relative;
+  border-radius: 5px;
+  min-height: 85vh;
+  min-width: 1200px;
+  padding: 10px 15px;
+  margin: 15px 15px 0;
+}
+
+// main-container global css
+.app-container {
+  padding: 20px;
+}
+
+
+
+
+.flex{
+  display: flex;
+}
+.flex-center{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-between{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flex_1{
+  flex:1;
+}
+/* 垂直居中 */
+.align_center{
+  align-items: center;
+}
+/* 与交叉轴两端对齐，轴线之间的间隔平均分布 */
+.align_content{
+  align-content:space-between;
+}
+/* 交叉轴的终点对齐。 */
+.align_end{
+  align-items: flex-end;
+}
+/* 交叉轴的终点对齐。 */
+.justify_end{
+  justify-content: flex-end;
+}
+/* 换行，第一行在上方 */
+.flex_wrap{
+  flex-wrap: wrap;
+}
+
+.flex_flow-column{
+  flex-flow:column;
+}
+/* 两端对齐，项目之间的间隔都相等 */
+.justify_content_between{
+  justify-content: space-between;
+}
+/* 右对齐 */
+.justify_flex_end{
+  justify-content: flex-end;
+}
+/* 主轴为垂直方向，起点在上沿 */
+.direction_column{
+  flex-direction: column
+}
+/* 水平居中 */
+.justify_center{
+  justify-content: center;
+}
+/* 每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍 */
+.justify_content_around{
+  justify-content: space-around;
+}
+.nowrap{
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.none{
+  display: none !important;
+}
+p{
+  margin: 0;
+}
