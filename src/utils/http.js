@@ -18,7 +18,7 @@ export default {
       }
       return axiosDown.get(url, {
         headers: {
-          usertoken: getToken()
+          access_token: getToken()
         },
         responseType: 'arraybuffer'
       }).then((res) => {
@@ -42,20 +42,21 @@ export default {
     };
   },
   post(url, data, dataType) {
-    if (data) {
+/*    if (data) {
       data.access_token = getToken()
     } else {
       data = { access_token: getToken() }
-    }
+    }*/
     if (dataType == 'formData') {
       return axios.post(url, qs.stringify(data))
     }
-    return axios.post(url, data)
+    return axios.post(url, qs.stringify(data))
   },
   put(url, data) {
-    return axios.put(url, data)
+    return axios.put(url, qs.stringify(data))
   },
-  delete(url, data) {
-    return axios.delete(url, { params: data })
+  delete(url, config) {
+    console.log(config)
+    return axios.delete(url, config)
   }
 }

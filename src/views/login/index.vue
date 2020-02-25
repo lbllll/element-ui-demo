@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">登 陆</h3>
+        <h3 class="title">登 录</h3>
       </div>
 
       <el-form-item prop="username">
@@ -41,7 +41,7 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登陆</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登 录</el-button>
 
       <!-- <div class="tips">
         <span style="margin-right:20px;">username: admin</span>
@@ -83,13 +83,18 @@ export default {
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      otherQuery: {}
     }
   },
   watch: {
     $route: {
       handler: function(route) {
-        this.redirect = route.query && route.query.redirect
+          const query = route.query
+          if (query) {
+              this.redirect = query.redirect
+              this.otherQuery = this.getOtherQuery(query)
+          }
       },
       immediate: true
     }
@@ -108,15 +113,68 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
-          this.loading = true
+          this.loading = true;
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            try {
-              var route = JSON.parse(window.sessionStorage.getItem('route'))
-              
               try {
-                this.$router.push({ name: route[0].name })
+              let route = JSON.parse(window.sessionStorage.getItem('route'))
+                try {
+                  // console.log(JSON.stringify(route));
+                  //组装菜单列表
+                  let menuParentArr = [];
+                  let menuChildArr = [];
+                  let menu = [];
+                  route.forEach(e => {
+                      //组装一级菜单
+                      if(e.moduleType === "MENU" && e.moduleParentTreeCode == -1) {
+                          e.child = [];
+                          menuParentArr.push(e)
+                      }
+                      //非一级菜单
+                      if(e.moduleType === "MENU" && e.moduleParentTreeCode != -1){
+                          menuChildArr.push(e)
+                      }
+                  });
+                  //遍历一级菜单，插入所属二级菜单
+                  menuParentArr.forEach(item  => {
+                      menuChildArr.forEach(child => {
+                          if(item.moduleTreeCode === child.moduleParentTreeCode){
+                              item.child.push(child);
+                          }
+                      });
+                  });
+                  //组装路由
+                  menuParentArr.forEach(e => {
+                      let routeItem = {
+                          path: e.moduleUrl,
+                          meta: { title: e.moduleName },
+                          redirect:'',
+                          children: []
+                      };
+                      e.child.forEach( (i, index) => {
+                          /*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 */
+                          routeItem.children.push(
+                              {
+                                  path: i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1],
+                                  component: () => import(`@/views${i.moduleUrl}`),
+                                  name: i.routeCode,
+                              });
+                          //如果有首页菜单权限那就跳首页
+                          if(index === 0 && e.moduleUrl === '/'){
+                              routeItem.redirect = '/index'
+                          }
+                          if(index === 0 && routeItem.redirect === ''){
+                              routeItem.redirect = i.moduleUrl
+                          }
+                      });
+                      menu.push(routeItem);
+                  });
+                  // console.log("menu============"+JSON.stringify(menu));
+                  // return false;
+                  this.$router.push({ path: menu[0].redirect});
+                  //刷新当前页面
+                  this.$router.go(0);
               } catch (error) {
-                this.$router.push({ path: this.redirect || '/' })
+                this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               }
               this.loading = false
             } catch (error) {
@@ -131,7 +189,15 @@ export default {
           return false
         }
       })
-    }
+    },
+      getOtherQuery(query) {
+          return Object.keys(query).reduce((acc, cur) => {
+              if (cur !== 'redirect') {
+                  acc[cur] = query[cur]
+              }
+              return acc
+          }, {})
+      }
   }
 }
 </script>

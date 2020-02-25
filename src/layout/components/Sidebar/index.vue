@@ -48,44 +48,41 @@ export default {
   },
   methods: {
     getList() {
-      /* 
+      /*
         刷新页面后，vuex里存储的数据会重置，需要遍历匹配当前页面所对应的路由
       */
-      var self = this;
+      let self = this;
       setTimeout(() => {
-        var route = JSON.parse(JSON.stringify(self.$router.options.routes));
-        var list = [];
+        let route = JSON.parse(JSON.stringify(self.$router.options.routes));
+        let list = [];
         route.forEach(e => {
-          if (self.$route.meta.type == "HOME") {
-            self.$store.commit("user/SetNavIndex", "HOME");
-          } else if (self.$route.path.indexOf(e.path) != -1 && e.path != "/") {
-            self.$store.commit("user/SetNavIndex", e.type);
-          }
+            self.$store.commit("user/SetNavIndex");
         });
-        try {
-          /* 
+        /*try {
+          /!*
           改造导航栏结构，抽取一级导航栏，从二级导航栏开始展示
           一级导航栏改为顶部展示。
           写路由时，第一层添加type值，对应一级分类名称。
           遍历路由数组，取出被选中的菜单子级。
-        */
+        *!/
           route.forEach(e => {
             if (e.type == self.$store.state.user.navIndex) {
               self.path = e.path;
-              if (e.children && e.children.length > 0) {
+                list.push(e);
+/!*              if (e.children && e.children.length > 0) {
                 e.children.forEach(c => {
                   c.path = JSON.parse(JSON.stringify(e.path)) + "/" + c.path;
                   list.push(c);
                 });
               } else {
                 list.push(e);
-              }
+              }*!/
             }
           });
         } catch (error) {
           console.log(error);
-        }
-        self.routeList = list;
+        }*/
+        self.routeList = route;
       }, 100);
     }
   },
@@ -115,4 +112,3 @@ export default {
   }
 };
 </script>
- 

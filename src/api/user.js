@@ -11,13 +11,13 @@ export function login(data,url) {
 
 
 export function userPermission(data) {
-  return http.post('/sys/permission/userPermission', data, 'formData')
+  return http.get('/api/sys/modules/list', data, 'formData')
 }
 
 
 export function getInfo(token) {
   return request({
-    url: '/user/info',
+    url: '/sys/user/info',
     method: 'get',
     params: { token }
   })
@@ -25,7 +25,7 @@ export function getInfo(token) {
 
 export function logout() {
   return request({
-    url: '/user/logout',
+    url: '/sys/user/logout',
     method: 'post'
   })
 }

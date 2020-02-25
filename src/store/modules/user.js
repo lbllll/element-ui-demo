@@ -1,6 +1,6 @@
 import { login, logout, getInfo, userPermission } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
+import router, { resetRouter } from '@/router'
 import { Loading } from 'element-ui';
 
 const state = {
@@ -35,47 +35,21 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       try {
-        var url = '/sys/user/login'
-        console.log(window.location.href);
-        console.log(process.env.VUE_APP_URLCONT);
-        // if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
-        //   url = '/sys/user/login'
-        // } else {
-        //   url = '/merchant/info/login'
-        // }
+        let url = '/api/sys/session'
         login({ userName: username, password: password }, url).then(response => {
-          const { data } = response
-          console.log(JSON.stringify(response.data.headPath));
+          const { data } = response;
           if(response.data.isSuccessful!=='Y'){
-            reject(response.data)
+            reject(response.data);
             return
           }
           setToken(data.access_token)
-          window.sessionStorage.setItem('avatar',response.data.headPath)
+          window.sessionStorage.setItem('avatar',response.data.headPath);
+          window.sessionStorage.setItem('token',response.data.access_token);
           commit('SET_AVATAR', response.data.headPath)
-          userPermission().then((result) => {
-            commit('SET_ROUTE', result.data)
-            window.sessionStorage.setItem('route', JSON.stringify(result.data))
-            resetRouter()
-
-            // const loading = Loading.service({
-            //   lock: true,
-            //   text: '正在登陆',
-            //   spinner: 'el-icon-loading',
-            //   background: 'rgba(255,255,255, 0.8)'
-            // });
-
-            setTimeout(() => {
-              resolve()
-              location.reload()
-              // loading.close();
-            }, 500);
-          }).catch((err) => {
-            commit('SET_TOKEN', '')
-            removeToken()
-            reject(error)
-            console.log(err);
-          });
+          commit('SET_ROUTE', response.data.sysPermissionList)
+          window.sessionStorage.setItem('route', JSON.stringify(response.data.sysPermissionList))
+          resetRouter();
+          resolve();
         }).catch(error => {
           reject(error)
         })

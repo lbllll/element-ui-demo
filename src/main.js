@@ -19,7 +19,10 @@ import store from './store'
 
 import '@/icons' // icon
 import '@/permission' // permission control
-
+//图片预览所需插件
+import VueDirectiveImagePreviewer from 'vue-directive-image-previewer'
+import 'vue-directive-image-previewer/dist/assets/style.css'
+Vue.use(VueDirectiveImagePreviewer)
 var base = ''
 
 if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
@@ -27,7 +30,9 @@ if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
 } else {
   base = 'VUE_APP_SHOP_API'
 }
-Vue.prototype.$base = base
+Vue.prototype.$base = base;
+import TimeUtil from './utils/time'
+Vue.prototype.$timeUtil = TimeUtil;
 
 
 let Message = {
@@ -44,7 +49,7 @@ let Message = {
   phone: '请输入正确的手机号',
   email: '请输入正确的邮箱',
   verifyCode: '请输入正确的验证码'
-}
+};
 
 
 

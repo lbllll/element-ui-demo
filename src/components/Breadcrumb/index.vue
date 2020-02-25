@@ -33,7 +33,7 @@ export default {
       const first = matched[0]
 
       if (!this.isDashboard(first)) {
-        matched = [{ path: '/home', meta: { title: 'Home' }}].concat(matched)
+        matched = [].concat(matched)
       }
 
       this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
@@ -44,9 +44,9 @@ export default {
         return false
       }
       // return name.trim().toLocaleLowerCase() === 'Home'.toLocaleLowerCase()
-      /* 
+      /*
         cp 2019-9-2
-        原版为了区分是不是在首页菜单下，因更改导航结构，不需要处理这部分，全部返回ture 
+        原版为了区分是不是在首页菜单下，因更改导航结构，不需要处理这部分，全部返回ture
       */
       return true
     },
