@@ -5,13 +5,8 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-var base = 'VUE_APP_BASE_API'
-//如果是本地环境有VUE_APP_URLCONT就执行本地，不是则执行线上环境的VUE_APP_SHOP_API
-if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
-  base = 'VUE_APP_BASE_API'
-} else {
-  base = 'VUE_APP_SHOP_API'
-}
+let base = 'VUE_APP_BASE_API';
+
 
 const service = axios.create({
   baseURL: process.env[base], // url = base url + request url

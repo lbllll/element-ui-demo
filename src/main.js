@@ -23,13 +23,7 @@ import '@/permission' // permission control
 import VueDirectiveImagePreviewer from 'vue-directive-image-previewer'
 import 'vue-directive-image-previewer/dist/assets/style.css'
 Vue.use(VueDirectiveImagePreviewer)
-var base = ''
-
-if (window.location.href.indexOf(process.env.VUE_APP_URLCONT) != -1) {
-  base = 'VUE_APP_BASE_API'
-} else {
-  base = 'VUE_APP_SHOP_API'
-}
+let base = 'VUE_APP_BASE_API';
 Vue.prototype.$base = base;
 import TimeUtil from './utils/time'
 Vue.prototype.$timeUtil = TimeUtil;
