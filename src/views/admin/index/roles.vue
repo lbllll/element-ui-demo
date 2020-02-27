@@ -1,7 +1,7 @@
 <template>
   <div class="bodyBox">
     <div class="header">
-      <el-button type="primary" size="small" @click="$router.push({name:'ROLES_ADD'})">新增角色</el-button>
+      <el-button type="primary" size="small" @click="openAdd()">新增角色</el-button>
     </div>
 
     <el-table
@@ -61,6 +61,7 @@
       :open="openThisDialog"
       :close="closeThisDialog"
       :destroy-on-close="true"
+      @close="nodeCollapse"
     >
 
       <el-tree
@@ -72,6 +73,7 @@
         :default-checked-keys="curUserPermissions"
         :default-expanded-keys="curUserPermissions"
         @check-change="handleCheckChange"
+        :check-strictly="true"
         >
       </el-tree>
 
@@ -83,6 +85,12 @@
         <el-button @click="closeCheckModules">取 消</el-button>
         <el-button type="primary" @click="submitBtn">确 定</el-button>
       </span>
+    </el-dialog>
+
+    <el-dialog
+      title="编辑角色信息"
+      :visible.sync="openAddPage">
+      <rolesAdd></rolesAdd>
     </el-dialog>
 
 
@@ -97,9 +105,10 @@
         roleUpdate,
         roleInfo
     } from "@/api/table";
+    import rolesAdd from "./rolesAdd";
     export default {
         name: "ROLES_LIST",
-        components: {},
+        components: {rolesAdd},
         data() {
             return {
                 formData:{
@@ -167,6 +176,8 @@
                 },
                 //暂存角色id，用于修改角色权限
                 currRoleId: "",
+                /*弹出编辑页面*/
+                openAddPage:false,
             }
         },
         props: {
@@ -267,9 +278,6 @@
             },
             //弹出分配权限界面
             openDialog(roleId) {
-
-                //弹出
-                this.controlDialog = true;
                 this.currRoleId = roleId;
                 //查询相应权限数据，并给当前角色的权限赋值
                 roleInfo({roleId:roleId}).then(res => {
@@ -280,11 +288,13 @@
                             arr.push(item.moduleId);
                         });
                         this.curUserPermissions = arr;
+                        //弹出
                         // console.log(res);
                     } else {
                         this.$message.error(res.description);
                     }
                 });
+                this.controlDialog = true;
             },
             //弹出层的一些方法
             closeCheckModules(){
@@ -369,12 +379,19 @@
                 }
                 //todo 组装keys，调用删除接口
             },
+            nodeCollapse(data) {
+                this.curUserPermissions =[];
+            },
             //全选树
             checkAllTree() {
                 this.$refs.tree.setCheckedNodes(this.permissionList)
             },
             cancelAllTree() {
                 this.$refs.tree.setCheckedNodes([])
+            },
+            /*打开资源编辑弹出层*/
+            openAdd(){
+                this.openAddPage = true;
             },
         },
     }

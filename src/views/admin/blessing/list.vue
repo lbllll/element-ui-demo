@@ -144,7 +144,7 @@
          <el-button type="primary"  size="small" @click="search()">搜索</el-button>
        </div>
        <div class="searchStyle">
-         <el-button type="primary" size="small" @click="$router.push({name:'BLESSING_ADD'})">新增作品</el-button>
+         <el-button type="primary" size="small" @click="openAdd()">新增作品</el-button>
        </div>
      </div>
     </el-form>
@@ -331,6 +331,12 @@
         <el-button type="primary" @click="setMarkerTypeSubmit">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="编辑资源信息"
+      :visible.sync="openAddPage">
+      <blessAdd></blessAdd>
+    </el-dialog>
   </div>
 </template>
 
@@ -344,9 +350,12 @@
         blessingDelete,
         labelListAll,
     } from "@/api/table";
+    import blessAdd from "./add";
 export default {
   name: 'BLESSING_LIST',
-  components: {},
+  components: {
+      blessAdd
+  },
   data() {
     return {
         formData:{
@@ -487,6 +496,8 @@ export default {
         ],
         //设置标签选中当前资源信息
         curResourceInfo:{},
+        /*弹出编辑页面*/
+        openAddPage:false,
 
     }
   },
@@ -508,6 +519,7 @@ export default {
       },
   },
   created() {
+      console.log('sssssss')
       //遍历所有标签，进行标签树组装
       labelListAll().then(result => {
           if(result.code == 200){
@@ -532,6 +544,7 @@ export default {
           }
       }).catch(err => {});
       //表格数据初始化
+      console.log('kkkkk')
       this.init();
     },
   methods: {
@@ -748,7 +761,11 @@ export default {
       },
       cancelAllTree() {
           this.$refs.tree.setCheckedNodes([])
-      }
+      },
+      /*打开资源编辑弹出层*/
+      openAdd(){
+        this.openAddPage = true;
+      },
     }
 }
 </script>

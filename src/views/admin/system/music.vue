@@ -1,7 +1,7 @@
 <template>
   <div class="bodyBox">
     <div class="header">
-      <el-button type="primary" size="small" @click="$router.push({name:'MUSIC_ADD'})">添加音乐</el-button>
+      <el-button type="primary" size="small" @click="openAdd()">添加音乐</el-button>
     </div>
 
     <el-table
@@ -39,9 +39,10 @@
       <el-table-column prop="musicGroup" align="center" label="音乐分组"></el-table-column>
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
-          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'MUSIC_ADD', query: {musicInfo: scope.row}}">
+<!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'MUSIC_ADD', query: {musicInfo: scope.row}}">
             <el-button type="text" size="small">编辑</el-button>
-          </router-link>
+          </router-link>-->
+          <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="delAll(scope.row.musicId)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -54,11 +55,11 @@
           v-model="checkAll"
           @change="handleCheckAllChange"
         >全选</el-checkbox>
-        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>
+<!--        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>-->
       </div>
       <el-pagination
         @current-change="handleCurrentChange"
-        :current-page="formData.page"
+        :current-page="data.page"
         :page-size="10"
         background
         layout="total, prev, pager, next, jumper"
@@ -97,6 +98,120 @@
       </span>
     </el-dialog>
 
+    <el-dialog
+      title="新增音乐"
+      :visible.sync="openAddPage">
+      <musicAdd></musicAdd>
+    </el-dialog>
+
+    <el-dialog
+      title="编辑音乐信息"
+      :visible.sync="openEditPage">
+      <div class="bodyBox">
+        <el-form ref="form" :model="formData" class="formBox" label-width="80px">
+
+          <el-form-item label="歌名" prop="musicName" verify>
+            <el-input
+              class="formItem"
+              v-model="formData.musicName"
+              maxlength="20"
+              placeholder="请输入歌名"
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item label="歌手" prop="musicSinger" verify>
+            <el-input
+              class="formItem"
+              v-model="formData.musicSinger"
+              maxlength="20"
+              placeholder="请输入歌手"
+            ></el-input>
+          </el-form-item>
+
+          <el-form-item label="上传歌曲" prop="musicUrl" verify>
+            <el-upload
+              :action="uploadUrl"
+              :data="access_token"
+              :before-upload="beforeAvatarUpload"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :before-remove="beforeRemove"
+              :on-success="uploadSuccess"
+              :on-exceed="handleExceed"
+              :file-list="fileList">
+              <el-button size="small" type="primary">点击上传</el-button>
+              <!--          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> upload-demo-->
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="歌曲类型" verify prop="musicType">
+            <el-input
+              class="formItem"
+              v-model="formData.musicType"
+              maxlength="20"
+              placeholder="请输入歌曲类型"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="时长" verify prop="musicTimeSeconds">
+            <el-input
+              type="number"
+              class="formItem"
+              v-model="formData.musicTimeSeconds"
+              maxlength="20"
+              placeholder="请输入歌曲时长"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="上传者" verify prop="uploadName">
+            <el-input
+              class="formItem"
+              v-model="formData.uploadName"
+              maxlength="20"
+              placeholder="上传者"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="来源" verify prop="sourceName">
+            <el-input
+              class="formItem"
+              v-model="formData.sourceName"
+              maxlength="20"
+              placeholder="请输入歌曲来源"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="音乐分组" verify prop="musicGroup">
+            <el-input
+              class="formItem"
+              v-model="formData.musicGroup"
+              maxlength="20"
+              placeholder="请输入音乐分组"
+            ></el-input>
+          </el-form-item>
+
+          <!--      <el-form-item label="歌曲分组" verify prop="musicGroup">
+                  <el-select
+                    class="formItem"
+                    v-model="formData.musicGroup"
+                    placeholder="请设置歌曲分组"
+                    @change="checkMusicGroups"
+                  >
+                    <el-option
+                      v-for="item in musicGroupList"
+                      :key="item.musicGroup"
+                      :label="item.name"
+                      :value="item.musicGroup"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>-->
+
+          <!--   发布按钮     -->
+          <div class="footer">
+            <el-button type="primary" @click="editSubmit">确认修改</el-button>
+            <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
+          </div>
+        </el-form>
+      </div>
+    </el-dialog>
+
+
 
   </div>
 </template>
@@ -105,14 +220,16 @@
     import {
         musicList,
         musicDelete,
-        fileInfo
+        fileInfo,
+        musicUpdate
     } from "@/api/table";
+    import musicAdd from "./musicAdd";
     export default {
         name: "MUSIC_LIST",
-        components: {},
+        components: {musicAdd},
         data() {
             return {
-                formData:{
+                data:{
                     musicId:"",
                     musicName:"",
                     musicUrlId:"",
@@ -124,144 +241,20 @@
                     sourceName:"",//来源
                     page:1
                 },
-                cardList:[
-                    {
-                        cardId:"1",
-                        categoryId:"1",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"heka",
-                        cardName:"贺卡1",
-                        memberId:"老王id",
-                        nickName:"老王名字",
-                        headPath:"头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"in",
-                        labelIds:"1,2,3",
-                        labels:"1,2,3",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                    {
-                        cardId:"2",
-                        categoryId:"2",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"chahua",
-                        cardName:"贺卡2",
-                        memberId:"老李id",
-                        nickName:"老李",
-                        headPath:"老李头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"out",
-                        labelIds:"1,2,3",
-                        labels:"1,2,3",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                    {
-                        cardId:"3",
-                        categoryId:"1",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"heka",
-                        cardName:"贺卡3",
-                        memberId:"老张id",
-                        nickName:"老张",
-                        headPath:"老张头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"in",
-                        labelIds:"1,2",
-                        labels:"1,2",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                ],
-                labelList:[
-                    {
-                        labelId:"1",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"祝福标签",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"0",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"2",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"幽默",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"2",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"3",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"春节",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"3",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"4",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"浪漫",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"4",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                ],
-                fontList:[
-                    {
-                        fontId:"1",
-                        fontName:"第一个字体名字",
-                        fontSize:"第一个字体大小",
-                        fontUrl:"第一个字体地址",
-                    },
-                    {
-                        fontId:"2",
-                        fontName:"第二个字体名字",
-                        fontSize:"第二个字体大小",
-                        fontUrl:"第二个字体地址",
-                    },{
-                        fontId:"3",
-                        fontName:"第三个字体名字",
-                        fontSize:"第三个字体大小",
-                        fontUrl:"第三个字体地址",
-                    },
-
-                ],
+                formData:{
+                    musicId:"",
+                    musicName:"",
+                    musicUrlId:"",
+                    musicUrl:"",//需组装
+                    musicTimeSeconds:"",//音乐长度可能单词写错 应该为seconds
+                    musicSinger:"",
+                    musicType:"",//音乐分类MPEG、MP3、WMA
+                    musicGroup:"",//音乐分组
+                    uploadName:"",//上传人
+                    sourceName:"",//来源
+                },
+                cardList:[],
+                labelList:[],
                 categoryList:[
                     {
                         categoryId:"1",
@@ -293,64 +286,8 @@
                     in:"上架",
                     out:"下架",
                 },
-                userList: [
-                    {
-                        userId:"1",
-                        accountName: "admin",
-                        headImageUrl: "头像1",
-                        lastLoginTime: "2020-2-3",
-                        nickName: "管理员",
-                        password: "123456",
-                        state: "1",
-                        type: "1",
-                    },
-                    {
-                        userId:"2",
-                        accountName: "normal",
-                        headImageUrl: "头像2",
-                        lastLoginTime: "2020-2-3",
-                        nickName: "普通用户",
-                        password: "123456",
-                        state: "2",
-                        type: "2",
-                    },
-                    {
-                        userId:"3",
-                        accountName: "bl",
-                        headImageUrl: "头像3",
-                        lastLoginTime: "2020-2-3",
-                        nickName: "blblbl",
-                        password: "123456",
-                        state: "3",
-                        type: "3",
-                    },
-                ],
-                rolesList:[
-                    {
-                        roleId:"1",
-                        roleName:"超级管理员",
-                        roleDesc:"超级管理员",
-                        roleType:"1",
-                        createTime:"2020-02-02",
-                        isDeleted:"1",
-                    },
-                    {
-                        roleId:"2",
-                        roleName:"运营人员",
-                        roleDesc:"运营人员",
-                        roleType:"2",
-                        createTime:"2020-02-02",
-                        isDeleted:"1",
-                    },
-                    {
-                        roleId:"3",
-                        roleName:"平台创作者",
-                        roleDesc:"平台创作者",
-                        roleType:"3",
-                        createTime:"2020-02-02",
-                        isDeleted:"1",
-                    },
-                ],
+                userList: [],
+                rolesList:[],
                 musicList:[],
                 usersType:{
                     "1":"用户类型1",
@@ -375,123 +312,7 @@
                 //弹出层控制
                 controlDialog:false,
                 //权限列表
-                permissionList:[
-                    {
-                        moduleId:"1",
-                        moduleName:"首页",
-                        moduleDescription:"首页",
-                        moduleIconName:"首页",
-                        moduleParentTreeCode:"-1",
-                        moduleTreeCode:"100",
-                        moduleType:"MENU",
-                        moduleUrl:"/admin/index",
-                        child:[
-                            {
-                                moduleName:"账号管理",
-                                moduleId:"11",
-
-                                moduleDescription:"账号管理",
-                                moduleIconName:"账号管理图标",
-                                moduleParentTreeCode:"100",
-                                moduleTreeCode:"100100",
-                                moduleType:"MENU",
-                                moduleUrl:"/admin/index/users",
-                                child:[
-                                    {
-                                        moduleName:"添加账号",
-                                        moduleId:"111",
-                                        moduleDescription:"添加账号",
-                                        moduleIconName:"添加账号图标",
-                                        moduleParentTreeCode:"100100",
-                                        moduleTreeCode:"100100100",
-                                        moduleType:"AUTH",
-                                        moduleUrl:"/admin/index/users/add",
-                                        child:[]
-                                    },
-                                    {
-                                        moduleName:"禁用账号",
-                                        moduleId:"112",
-                                        moduleDescription:"禁用账号",
-                                        moduleIconName:"禁用账号图标",
-                                        moduleParentTreeCode:"100100",
-                                        moduleTreeCode:"100100101",
-                                        moduleType:"AUTH",
-                                        moduleUrl:"/admin/index/users/disable",
-                                        child:[]
-                                    },
-                                ]
-                            },
-                            {
-                                moduleName:"角色管理",
-                                moduleId:"12",
-                                moduleDescription:"角色管理",
-                                moduleIconName:"角色管理图标",
-                                moduleParentTreeCode:"100",
-                                moduleTreeCode:"100101",
-                                moduleType:"MENU",
-                                moduleUrl:"/admin/index/roles",
-                                child:[
-                                    {
-                                        moduleName:"添加角色",
-                                        moduleId:"121",
-                                        moduleDescription:"添加角色",
-                                        moduleIconName:"添加角色图标",
-                                        moduleParentTreeCode:"100101",
-                                        moduleTreeCode:"100101100",
-                                        moduleType:"AUTH",
-                                        moduleUrl:"/admin/index/roles/add",
-                                        child:[]
-                                    },
-                                    {
-                                        moduleName:"修改角色",
-                                        moduleId:"122",
-                                        moduleDescription:"修改角色",
-                                        moduleIconName:"修改角色图标",
-                                        moduleParentTreeCode:"100101",
-                                        moduleTreeCode:"100101101",
-                                        moduleType:"AUTH",
-                                        moduleUrl:"/admin/index/users/update",
-                                        child:[]
-                                    },
-                                    {
-                                        moduleName:"删除角色",
-                                        moduleId:"123",
-                                        moduleDescription:"删除角色",
-                                        moduleIconName:"删除角色图标",
-                                        moduleParentTreeCode:"100101",
-                                        moduleTreeCode:"100101102",
-                                        moduleType:"AUTH",
-                                        moduleUrl:"/admin/index/users/del",
-                                        child:[]
-                                    },
-                                ]
-                            },
-                        ],
-                    },
-                    {
-                        moduleName:"作品管理",
-                        moduleId:"2",
-                        moduleDescription:"作品管理",
-                        moduleIconName:"作品管理图标",
-                        moduleParentTreeCode:"-1",
-                        moduleTreeCode:"101",
-                        moduleType:"MENU",
-                        moduleUrl:"/admin/card",
-                        child:[
-                            {
-                                moduleName:"作品管理列表",
-                                moduleId:"21",
-                                moduleDescription:"作品管理列表",
-                                moduleIconName:"作品管理列表图标",
-                                moduleParentTreeCode:"101",
-                                moduleTreeCode:"101100",
-                                moduleType:"MENU",
-                                moduleUrl:"/admin/card/list",
-                                child:[]
-                            }
-                        ],
-                    },
-                ],
+                permissionList:[],
                 //组装权限列表的载体
                 checkPermissions:[],
                 //模拟 用户当前拥有权限
@@ -510,6 +331,18 @@
                     "1":"流行",
                     "2":"轻音乐"
                 },
+                //控制打开添加页
+                openAddPage: false,
+                openEditPage: false,
+                curMusicUid:'',
+                curMusicInfo:{},
+                musicUrl:'',
+                //上传文件所需
+                uploadUrl: process.env[this.$base] + "/medias/image/upload",
+                access_token: {
+                    access_token: this.$store.getters.token
+                },
+                fileList:[],
             }
         },
         props: {
@@ -524,7 +357,7 @@
             init(){
                 //todo 初始化count
                 //获取用户信息，加载表格数据
-                let data = JSON.parse(JSON.stringify(this.formData));
+                let data = JSON.parse(JSON.stringify(this.data));
                 data.page --;
                 musicList(data).then(result => {
                     if(result.code == 200){
@@ -543,7 +376,7 @@
             },
             //加载第几页
             handleCurrentChange(val) {
-                this.formData.page = val;
+                this.data.page = val;
                 //修改页数，重新加载
                 this.init();
             },
@@ -614,7 +447,78 @@
 
                 }
                 //todo 组装keys，调用删除接口
-            }
+            },
+            /*打开资源编辑弹出层*/
+            openAdd(){
+                this.openAddPage = true;
+            },
+            //上传文件的一些钩子
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                // return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            //上传之前格式和大小判断
+            beforeAvatarUpload(file) {
+                const isLt1M = file.size / 1024 / 1024 < 1;
+                if (!isLt1M) {
+                    this.$message.error("上传文件大小不能超过 1MB!");
+                }
+                return isLt1M;
+            },
+            uploadSuccess(response, file, fileList) {
+                if (response.code == "200") {
+                    this.formData.musicUrlId = response.data.fileUid;
+                    this.musicUrl= response.data.fileUrl;
+                    this.formData.musicUrl= response.data.fileUrl;
+                }
+                console.log(this.formData.musicUrlId);
+                console.log(this.musicUrl)
+            },
+            edit(musicInfo){
+                this.formData  = musicInfo;
+                console.log(this.curMusicInfo );
+                this.openEditPage = true;
+            },
+            editSubmit(){
+                //组装修改参数
+                let data = {
+                    musicId:this.formData.musicId,
+                    musicName:this.formData.musicName,
+                    musicUrlId:this.formData.musicUrlId,//用来关联的
+                    musicTimeSeconds:this.formData.musicTimeSeconds,//音乐长度可能单词写错 应该为seconds
+                    musicSinger:this.formData.musicSinger,
+                    uploadName:this.formData.uploadName,//上传人
+                    sourceName:this.formData.sourceName,//来源
+                    musicType:this.formData.musicType,//音乐分类MPEG、MP3、WMA
+                    musicUrl:this.formData.musicUrl,//
+                    musicGroup:this.formData.musicGroup,//音乐分组
+                };
+                console.log(data);
+                // return false;
+                //编辑
+                musicUpdate(data).then(res => {
+                    if (res.data.isSuccessful === "Y") {
+                        this.$message({
+                            message: "修改成功！",
+                            type: "success"
+                        });
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                        //跳转到列表
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                });
+            },
         },
     }
 </script>

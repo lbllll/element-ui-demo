@@ -1,9 +1,9 @@
 <template>
   <div class="bodyBox">
-    <form  :model="formData" >
+    <form  :model="data" >
     </form>
     <div class="header">
-      <el-button type="primary" size="small" @click="$router.push({name:'USER_ADD'})">新增用户</el-button>
+      <el-button type="primary" size="small"  @click="openAdd">新增用户</el-button>
     </div>
 
     <el-table
@@ -47,9 +47,10 @@
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
 <!--          <el-button type="text" @click="checkRoles(scope.row.userId)" size="small">设置角色</el-button>-->
-          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'USER_ADD', query: {id: scope.row.userId}}">
-            <el-button type="text" size="small">编辑</el-button>
-          </router-link>
+<!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'USER_ADD', query: {id: scope.row.userId}}">
+            <el-button type="text" size="small" >编辑</el-button>
+          </router-link>-->
+          <el-button @click="openEdit(scope.row.userId)"   type="text" size="small">编辑</el-button>
           <el-button @click="delAll(scope.row.userId)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -68,7 +69,7 @@
       </div>
       <el-pagination
         @current-change="handleCurrentChange"
-        :current-page="formData.page"
+        :current-page="data.page"
         :page-size="10"
         background
         layout="total, prev, pager, next, jumper"
@@ -101,6 +102,61 @@
       </span>
     </el-dialog>
 
+    <el-dialog
+      title="新增用户信息"
+      :visible.sync="openAddPage">
+      <userAdd :message="this.curUserId" v-if="this.curUserId !== ''"></userAdd>
+    </el-dialog>
+
+    <el-dialog
+      title="编辑用户信息"
+      :visible.sync="openEditPage">
+      <el-form ref="form" :model="formData" class="formBox" label-width="80px">
+        <!--      <p class="title">用户信息</p>-->
+
+        <el-form-item label="用户昵称" prop="userNickName" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.userNickName"
+            maxlength="20"
+            placeholder="请设置昵称"
+          ></el-input>
+          <span class="describe">长度不超过30</span>
+        </el-form-item>
+
+        <el-form-item verify  label="设置头像" prop="userHeadImageUrl">
+          <p class="describe">提示：本地上传图片大小不能超过1M【图片尺寸比例建议：(1:1)】</p>
+          <el-upload
+            :action="upImgUrl"
+            :data="access_token"
+            :show-file-list="false"
+            :on-change="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+            :on-success="uploadSuccess"
+          >
+            <img v-if="userHeadImageUrl" :src="userHeadImageUrl" class="avatar" />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <el-input class="inputs none imgArea" v-model="formData.userHeadImageUrl"></el-input>
+          </el-upload>
+        </el-form-item>
+        <el-form-item  label="新密码" prop="newPassword" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.newPassword"
+            maxlength="20"
+            placeholder="请设置新密码"
+            type="password"
+          ></el-input>
+          <span class="describe">长度不低于6位</span>
+        </el-form-item>
+
+        <!--   发布按钮     -->
+        <div class="footer">
+          <el-button type="primary" @click="edit">确认修改</el-button>
+          <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
+        </div>
+      </el-form>
+    </el-dialog>
 
 
   </div>
@@ -112,15 +168,30 @@
         userState,
         roleList,
         userDelete,
-        userDetail
+        userDetail,
+        userInfo,
+        userUpdate
     } from "@/api/table";
+    import userAdd from "./userAdd";
     export default {
         name: "USERS_LIST",
-        components: {},
+        components: {userAdd},
         data() {
             return {
-                formData:{
+                data:{
                     page: 1
+                },
+                formData:{
+                    userId:"",
+                    userAccountName: "",
+                    userHeadImageUrl: "",
+                    userLastLoginTime: "",
+                    userNickName: "",
+                    userPassword: "",
+                    userState: "",
+                    userType: "",
+                    newPassword:"",
+                    roleId:""//测试用的角色id
                 },
                 cardList:[
                     {
@@ -305,6 +376,18 @@
                 isIndeterminate: false,
                 checkAll: false,
                 curUserInfo:{},
+                /*弹出新增页面*/
+                openAddPage:false,
+                //当前用户id
+                curUserId:'',
+                /*弹出编辑页面*/
+                openEditPage:false,
+                userHeadImageUrl:"",
+                //上传图片所需
+                upImgUrl: process.env[this.$base] + "/medias/image/upload",
+                access_token: {
+                    access_token: this.$store.getters.token
+                },
 
             }
         },
@@ -318,7 +401,7 @@
         methods: {
             init(){
                 //获取用户信息，加载表格数据
-                let data = JSON.parse(JSON.stringify(this.formData));
+                let data = JSON.parse(JSON.stringify(this.data));
                 data.page --;
                 userList(data).then(result => {
                     if(result.code == 200){
@@ -418,7 +501,7 @@
             },
             //加载第几页
             handleCurrentChange(val) {
-                this.formData.page = val;
+                this.data.page = val;
                 //修改页数，重新加载
                 this.init();
             },
@@ -468,6 +551,78 @@
                 }
                 //todo 组装keys，调用删除接口
             },
+            /*打开资源编辑弹出层*/
+            openAdd(userId){
+                //有则是修改
+                if(userId){
+                    this.curUserId = userId;
+                }else {
+                    console.log("yy")
+                }
+                this.openAddPage = true;
+            },
+            /*打开编辑页面*/
+            openEdit(userId){
+                this.curUserId = userId;
+                //查询用户信息,并赋值
+                userInfo({userId:userId}).then(res => {
+                    if(res.code == 200){
+                        console.log(JSON.stringify(res));
+                        this.formData = res.data.data;
+                        this.userHeadImageUrl = res.data.data.userHeadImageUrl
+                    }
+                }).catch(err => {});
+                this.openEditPage = true;
+            },
+            //上传图片
+            handleAvatarSuccess(file, fileList) {},
+            beforeAvatarUpload(file) {
+                var type = "image/jpg,image/jpeg,image/png,image/gif";
+                const isJPG = type.indexOf(file.type) != -1;
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error("上传图片只能是 JPG,JPEG,PNG,GIF 格式!");
+                }
+                if (!isLt2M) {
+                    this.$message.error("上传图片大小不能超过 2MB!");
+                }
+                return isJPG && isLt2M;
+            },
+            uploadSuccess(response, file, fileList) {
+                if (response.code == "200") {
+                    this.formData.userHeadImageUrl = response.data.fileUrl;
+                    this.userHeadImageUrl = response.data.fileUrl;
+                }
+            },
+            edit(){
+                //修改
+                this.formData.userId = this.curUserId;
+                //组装修改所需参数
+                let data = {
+                    userId:this.formData.userId,
+                    headPath:this.formData.userHeadImageUrl,
+                    userNickName:this.formData.userNickName,
+                    password:this.formData.userPassword,
+                    newPassword: this.formData.newPassword
+                };
+                console.log(data);
+                // return false;
+                userUpdate(data).then(res => {
+                    if (res.code == 200) {
+                        this.$message({
+                            message: "修改成功",
+                            type: "success"
+                        });
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                        //跳转到列表
+                    } else {
+                        this.$message.error(res.description);
+                    }
+                })
+            },
         },
     }
 </script>
@@ -496,5 +651,30 @@
       width: 160px;
       padding: 6px 0;
     }
+  }
+
+  .bodyBox >.title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formBox {
+    margin-top: 15px;
+  }
+  .formBox .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formItem {
+    width: 360px;
+  }
+  .describe {
+    color: #999;
+    margin-left: 10px;
+  }
+  .footer {
+    margin-top: 20px;
+    @include flex-center;
   }
 </style>

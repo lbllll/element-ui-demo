@@ -24,7 +24,7 @@
       <el-form-item label="上传歌曲" prop="musicUrl" verify>
         <el-upload
           :action="uploadUrl"
-          :headers="access_token"
+          :data="access_token"
           :before-upload="beforeAvatarUpload"
           :on-preview="handlePreview"
           :on-remove="handleRemove"
@@ -318,7 +318,7 @@
                                     type: "success"
                                 });
                                 setTimeout(() => {
-                                    this.$router.go(-1);
+                                    this.$router.go(0);
                                 }, 2000);
                                 //跳转到列表
                             } else {
@@ -347,7 +347,7 @@
                                     type: "success"
                                 });
                                 setTimeout(() => {
-                                    this.$router.go(-1);
+                                    this.$router.go(0);
                                 }, 2000);
                                 //跳转到列表
                             } else {

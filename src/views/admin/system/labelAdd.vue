@@ -399,7 +399,7 @@
                                 type: "success"
                             });
                             setTimeout(() => {
-                                this.$router.go(-1);
+                                this.$router.go(0);
                             }, 2000);
                             //跳转到列表
                         } else {
@@ -424,7 +424,7 @@
                                 type: "success"
                             });
                             setTimeout(() => {
-                                this.$router.go(-1);
+                                this.$router.go(0);
                             }, 2000);
                             //跳转到列表
                         } else {

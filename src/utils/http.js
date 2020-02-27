@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth';
 import { Message } from 'element-ui';
 import qs from 'qs';
 export default {
-  get(url, data) {
+  get(url, data={}) {
     var code = true
     if (data && data.is_export && code) {
       if (url.indexOf('?') != -1) {
@@ -38,25 +38,29 @@ export default {
         console.log(res, '错误！！！')
       })
     } else {
+      data.access_token = getToken();
       return axios.get(url, { params: data })
     };
   },
-  post(url, data, dataType) {
+  post(url, data={}, dataType) {
 /*    if (data) {
       data.access_token = getToken()
     } else {
       data = { access_token: getToken() }
     }*/
     if (dataType == 'formData') {
+      data.access_token = getToken();
       return axios.post(url, qs.stringify(data))
     }
     return axios.post(url, qs.stringify(data))
   },
-  put(url, data) {
+  put(url, data={}) {
+    data.access_token = getToken();
     return axios.put(url, qs.stringify(data))
   },
   delete(url, config) {
     console.log(config)
+    url =  url+'&access_token='+getToken();
     return axios.delete(url, config)
   }
 }

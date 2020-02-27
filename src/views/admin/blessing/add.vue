@@ -72,7 +72,7 @@
           <p class="describe">提示：本地上传图片大小不能超过1M【图片尺寸比例建议：贺卡(9：16)；插画：(16：9)；条漫：(1：1)】</p>
           <el-upload
             :action="upImgUrl"
-            :headers="access_token"
+            :data="access_token"
             :show-file-list="false"
             :on-change="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
@@ -90,7 +90,7 @@
             <p class="describe">提示：本地上传图片大小不能超过1M</p>
             <el-upload
               :action="upImgUrl"
-              :headers="access_token"
+              :data="access_token"
               :show-file-list="false"
               :on-change="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
@@ -105,7 +105,7 @@
           <div v-if="formData.resourceType === 4">
             <el-upload
               :action="uploadVideo"
-              :headers="access_token"
+              :data="access_token"
               :before-upload="beforeAvatarUploadVideo"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
@@ -213,21 +213,6 @@
             ></el-option>
           </el-select>
         </el-form-item>
-<!--        <el-form-item label="选择字体" verify prop="fontId">
-          <el-select
-            class="formItem"
-            v-model="formData.fontId"
-            placeholder="请选择字体类型"
-            @change="checkFont"
-          >
-            <el-option
-              v-for="item in fontList"
-              :key="item.fontId"
-              :label="item.fontName"
-              :value="item.fontId"
-            ></el-option>
-          </el-select>
-        </el-form-item>-->
 <!--   发布按钮     -->
         <div class="footer">
           <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
@@ -524,7 +509,7 @@
                                       type: "success"
                                   });
                                   setTimeout(() => {
-                                      this.$router.go(-1);
+                                      this.$router.go(0);
                                   }, 2000);
                                   //跳转到列表
                               } else {

@@ -1,6 +1,6 @@
 import { login, logout, getInfo, userPermission } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import router, { resetRouter } from '@/router'
+import { resetRouter } from '@/router'
 import { Loading } from 'element-ui';
 
 const state = {
@@ -42,14 +42,17 @@ const actions = {
             reject(response.data);
             return
           }
-          setToken(data.access_token)
+          setToken(response.data.access_token)
           window.sessionStorage.setItem('avatar',response.data.headPath);
-          window.sessionStorage.setItem('token',response.data.access_token);
+          // window.sessionStorage.setItem('token',response.data.access_token);
           commit('SET_AVATAR', response.data.headPath)
           commit('SET_ROUTE', response.data.sysPermissionList)
           window.sessionStorage.setItem('route', JSON.stringify(response.data.sysPermissionList))
           resetRouter();
-          resolve();
+          setTimeout(()=>{
+            resolve();
+            location.reload();
+          },500);
         }).catch(error => {
           reject(error)
         })

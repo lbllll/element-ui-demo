@@ -1,7 +1,7 @@
 <template>
   <div class="bodyBox">
     <el-form ref="form" :model="formData" class="formBox" label-width="80px">
-      <p class="title">用户信息</p>
+<!--      <p class="title">用户信息</p>-->
 
       <el-form-item label="用户昵称" prop="userNickName" verify>
         <el-input
@@ -13,11 +13,11 @@
         <span class="describe">长度不超过30</span>
       </el-form-item>
 
-      <el-form-item verify v-if="$route.query.id" label="设置头像" prop="userHeadImageUrl">
+      <el-form-item verify v-if="this.curUserId" label="设置头像" prop="userHeadImageUrl">
         <p class="describe">提示：本地上传图片大小不能超过2M【图片尺寸比例建议：(1:1)】</p>
         <el-upload
           :action="upImgUrl"
-          :headers="access_token"
+          :data="access_token"
           :show-file-list="false"
           :on-change="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
@@ -29,7 +29,7 @@
         </el-upload>
       </el-form-item>
 
-      <el-form-item label="账号" v-if="!$route.query.id" prop="userAccountName" verify>
+      <el-form-item label="账号" v-if="!this.curUserId" prop="userAccountName" verify>
         <el-input
           class="formItem"
           v-model="formData.userAccountName"
@@ -39,7 +39,7 @@
         <span class="describe">长度不超过20</span>
       </el-form-item>
 
-      <el-form-item label="登录密码" v-if="!$route.query.id" prop="userPassword" verify>
+      <el-form-item label="登录密码" v-if="!this.curUserId" prop="userPassword" verify>
         <el-input
           class="formItem"
           v-model="formData.userPassword"
@@ -50,7 +50,7 @@
         <span class="describe">长度不低于6位</span>
       </el-form-item>
 
-      <el-form-item label="选择角色" v-if="!$route.query.id" prop="roleId">
+      <el-form-item label="选择角色" v-if="!this.curUserId" prop="roleId">
         <el-select
           class="selectStyle"
           v-model="formData.roleId"
@@ -68,7 +68,7 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item v-if="$route.query.id" label="新密码" prop="newPassword" verify>
+      <el-form-item v-if="this.curUserId" label="新密码" prop="newPassword" verify>
         <el-input
           class="formItem"
           v-model="formData.newPassword"
@@ -112,56 +112,8 @@
                     newPassword:"",
                     roleId:""//测试用的角色id
                 },
-                labelList:[
-                    {
-                        labelId:"1",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"祝福标签",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"0",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"2",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"幽默",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"2",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"3",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"春节",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"3",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                    {
-                        labelId:"4",
-                        parentLabelId:"-1",
-                        labelType:"心意类型",
-                        name:"浪漫",
-                        description:"祝福标签的描述",
-                        icon:"图标地址",
-                        sort:"4",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                    },
-                ],
+                curUserId:'',
+                labelList:[],
                 cardTypeList:[
                     {
                         cardType:"heka",
@@ -236,22 +188,29 @@
                 curUserInfo:'',
             }
         },
+        props: ['message',],
+/*        watch: {
+            message: function (newVal) {
+                console.log(newVal)
+                this.curUserId = newVal;//newVal就是获取的动态新数据，赋值给newdata
+            },
+        },*/
         created() {
             //获取角色列表，用于设置角色
             roleList().then(res => {
                 if(res.data.isSuccessful === "Y"){
                     this.rolesList = res.data.data;
-                    console.log(JSON.stringify(this.rolesList))
+                    // console.log(JSON.stringify(this.rolesList))
                 }else {
                     this.$message.error(res.data.message);
                 }
             }).catch(err => {});
             //如果有请求参数那么就是用户信息编辑，需要查询对应用户信息
-            if (this.$route.query.id) {
-                let uid = this.$route.query.id;
+            if (this.curUserId) {
+                let uid = this.curUserId;
                 userInfo({userId:uid}).then(res => {
                     if(res.code == 200){
-                        // console.log(JSON.stringify(res))
+                        console.log(JSON.stringify(res));
                         this.formData = res.data.data;
                         this.userHeadImageUrl = res.data.data.userHeadImageUrl
                     }
@@ -288,9 +247,9 @@
             addUser() {
                 //组装添加数据：
                 //如果userId不为空，那就是修改
-                if (this.$route.query.id) {
+                if (this.curUserId) {
                     //修改
-                    this.formData.userId = this.$route.query.id;
+                    this.formData.userId = this.curUserId;
                     //组装修改所需参数
                     let data = {
                         userId:this.formData.userId,
@@ -306,7 +265,7 @@
                                 type: "success"
                             });
                             setTimeout(() => {
-                                this.$router.go(-1);
+                                this.$router.go(0);
                             }, 2000);
                             //跳转到列表
                         } else {
@@ -329,7 +288,7 @@
                                 type: "success"
                             });
                             setTimeout(() => {
-                                this.$router.go(-1);
+                                this.$router.go(0);
                             }, 2000);
                             //跳转到列表
                         } else {

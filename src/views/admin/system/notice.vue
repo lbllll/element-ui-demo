@@ -31,7 +31,7 @@
         <el-button type="primary"  size="small" @click="search()">搜索</el-button>
       </div>
       <div class="searchStyle">
-        <el-button type="primary" size="small" @click="$router.push({name:'NOTICE_ADD'})">发布通知</el-button>
+        <el-button type="primary" size="small" @click="openAdd()">发布通知</el-button>
       </div>
     </el-form>
     <!--  数据表格  -->
@@ -113,6 +113,12 @@
         ></el-pagination>
       </div>
     </div>
+
+    <el-dialog
+      title="编辑通知信息"
+      :visible.sync="openAddPage">
+      <noticeAdd></noticeAdd>
+    </el-dialog>
   </div>
 </template>
 
@@ -125,10 +131,10 @@
         noticeList,
         noticeState
     } from "@/api/table";
-
+    import noticeAdd from "./noticeAdd";
     export default {
         name: "NOTICE_LIST",
-        components: {},
+        components: {noticeAdd},
         data() {
             return {
                 formData:{
@@ -167,6 +173,8 @@
                         name:"下架",
                     }
                 ],
+                /*打开编辑页面*/
+                openAddPage:false,
 
             }
 
@@ -248,6 +256,10 @@
                         }
                     })
                     .catch(err => {});
+            },
+            /*打开资源编辑弹出层*/
+            openAdd(){
+                this.openAddPage = true;
             },
         },
     }

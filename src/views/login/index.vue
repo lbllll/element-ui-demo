@@ -160,7 +160,7 @@ export default {
                               });
                           //如果有首页菜单权限那就跳首页
                           if(index === 0 && e.moduleUrl === '/'){
-                              routeItem.redirect = '/index'
+                              routeItem.redirect = i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1];
                           }
                           if(index === 0 && routeItem.redirect === ''){
                               routeItem.redirect = i.moduleUrl
@@ -168,11 +168,11 @@ export default {
                       });
                       menu.push(routeItem);
                   });
-                  // console.log("menu============"+JSON.stringify(menu));
-                  // return false;
-                  this.$router.push({ path: menu[0].redirect});
-                  //刷新当前页面
-                  this.$router.go(0);
+                  console.log(menu);
+                  // debugger
+                  this.$router.push({ path: menu[0].children[0].path});
+                  //第二次重定向
+                  this.$router.push({ path: menu[0].children[0].path});
               } catch (error) {
                 this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               }

@@ -19,7 +19,7 @@
     <!--  数据表格  -->
     <div class="tableStyle">
       <div class="header">
-        <el-button type="primary" size="small" @click="$router.push({name:'LABEL_ADD'})">新增标签</el-button>
+        <el-button type="primary" size="small" @click="openAdd()">新增标签</el-button>
       </div>
 
       <el-table
@@ -62,37 +62,12 @@
             ></el-switch>
           </template>
         </el-table-column>
-
-<!--        <el-table-column prop="markerId" align="center" label="标签图标">
-          <template slot-scope="scope">
-          <span>
-            <img :src="scope.row.icon" width="50" height="50" />
-          </span>
-          </template>
-        </el-table-column>
-        &lt;!&ndash;      <el-table-column align="center" label="标签排序">
-                <template slot-scope="scope">
-                  <input class="sorts" type="number" v-model.number="scope.row.sort" />
-                </template>
-              </el-table-column>&ndash;&gt;
-        <el-table-column prop="labelType" align="center" label="标签类型">
-          <template slot-scope="scope">{{labelTypes[scope.row.labelType]}}</template>
-        </el-table-column>
-        <el-table-column label="是否启用" align="center">
-          <template slot-scope="scope">
-            <el-switch
-              v-model="scope.row.state"
-              active-value="1"
-              inactive-value="2"
-              @change="setStatus(scope.row)"
-            ></el-switch>
-          </template>
-        </el-table-column>-->
         <el-table-column label="操作" width="150" align="center">
           <template slot-scope="scope">
-            <router-link  type="primary" round  :to="{name: 'LABEL_ADD', query: {labelInfo: scope.row}}">
+<!--            <router-link  type="primary" round  :to="{name: 'LABEL_ADD', query: {labelInfo: scope.row}}">
               <el-button type="text" size="small">编辑</el-button>
-            </router-link>
+            </router-link>-->
+            <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
 <!--            <el-button @click="delAll(scope.row.labelId)" type="text" size="small">删除</el-button>-->
 <!--            <br>-->
             <el-button
@@ -123,7 +98,7 @@
         </div>
         <el-pagination
           @current-change="handleCurrentChange"
-          :current-page="formData.page"
+          :current-page="data.page"
           :page-size="10"
           background
           layout="total, prev, pager, next, jumper"
@@ -131,7 +106,43 @@
         ></el-pagination>
       </div>
     </div>
+
+
+    <el-dialog
+      title="新增标签"
+      :visible.sync="openAddPage">
+      <labelAdd></labelAdd>
+    </el-dialog>
+
+    <el-dialog
+      title="编辑标签信息"
+      :visible.sync="openEditPage">
+      <el-form ref="form" :model="formData" class="formBox" label-width="80px">
+
+        <el-form-item label="标签名" prop="labelText" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.labelText"
+            maxlength="20"
+            placeholder="请设置标签名"
+          ></el-input>
+          <span class="describe">长度不宜太长，且不能同一级重复</span>
+        </el-form-item>
+
+        <el-form-item label="排序" prop="labelDisplayIndex"  verify>
+          <el-input class="formItem" type="number" v-model="formData.labelDisplayIndex" placeholder="排序"></el-input>
+          <span class="describe">越大越靠前</span>
+        </el-form-item>
+
+        <!--   发布按钮     -->
+        <div class="footer">
+          <el-button type="primary" @click="editSubmit()">确认修改</el-button>
+          <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
+        </div>
+      </el-form>
+    </el-dialog>
   </div>
+
 </template>
 
 <script>
@@ -139,15 +150,16 @@
         labelListByParent,
         labelListAll,
         setLabelState,
-        changeSort
+        changeSort,
+        labelUpdateText
     } from "@/api/table";
-
+    import labelAdd from "./labelAdd";
     export default {
         name: "LABEL_LIST",
-        components: {},
+        components: {labelAdd},
         data() {
             return {
-                formData:{
+                data:{
                     labelId:"",
                     parentTreeCode:"",
                     labelType:"",
@@ -159,6 +171,17 @@
                     updateTime:"",
                     isDeleted:"",
                     page:1,
+                },
+                formData:{
+                    labelId:"",
+                    labelText:"",
+                    labelPathText:"",
+                    labelBusinessType:"",
+                    labelStatus:"",
+                    labelDisplayIndex:"",
+                    labelType:"",
+                    labelTreeCode:"",
+                    labelParentTreeCode:"",
                 },
                 cardList:[],
                 labelList:[],
@@ -198,6 +221,10 @@
                     "GROUNDED":"启用",
                     "UNGROUNDED":"停用",
                 },
+                //打开编辑页面
+                openAddPage:false,
+                openEditPage:false,
+                curLabelInfo:{},
             }
 
         },
@@ -248,7 +275,7 @@
             },
             //加载第几页
             handleCurrentChange(val) {
-                this.formData.page = val;
+                this.data.page = val;
                 //修改页数，重新加载
                 this.init();
             },
@@ -421,7 +448,41 @@
                     this.childLabelList.splice(index + 1, 1);
                     this.childLabelList.splice(index,0, downDate);
                 }
-            }
+            },
+            /*打开资源编辑弹出层*/
+            openAdd(){
+                this.openAddPage = true;
+            },
+            edit(labelInfo){
+                this.formData = labelInfo;
+                this.openEditPage =true;
+            },
+            editSubmit(){
+                //组装数据
+                let data = {
+                    labelId:this.formData.labelId,
+                    labelText:this.formData.labelText,
+                    labelDisplayIndex:this.formData.labelDisplayIndex
+                };
+                //修改 labelUpdateText
+                console.log(data);
+                // return false;
+                //编辑
+                labelUpdateText(data).then(res => {
+                    if (res.data.isSuccessful === "Y") {
+                        this.$message({
+                            message: "修改成功！",
+                            type: "success"
+                        });
+                        setTimeout(() => {
+                            this.$router.go(0);
+                        }, 2000);
+                        //跳转到列表
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                });
+            },
         },
     }
 </script>
@@ -449,5 +510,30 @@
   .tableStyle{
     width: 85%;
     float: right;
+  }
+  /*编辑弹出层*/
+  .bodyBox >.title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formBox {
+    margin-top: 15px;
+  }
+  .formBox .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formItem {
+    width: 360px;
+  }
+  .describe {
+    color: #999;
+    margin-left: 10px;
+  }
+  .footer {
+    margin-top: 20px;
+    @include flex-center;
   }
 </style>

@@ -1,7 +1,6 @@
 <template>
   <div class="bodyBox">
     <el-form ref="form" :model="formData" class="formBox" label-width="80px">
-      <p class="title">通知标题</p>
 
       <el-form-item label="通知标题" prop="noticeTitle" verify>
         <el-input
@@ -13,10 +12,10 @@
       </el-form-item>
 
       <el-form-item verify  label="设置图标" prop="iconUrl">
-        <p class="describe">提示：本地上传图片大小不能超过2M</p>
+        <p class="describe">提示：本地上传图片大小不能超过1M</p>
         <el-upload
           :action="upImgUrl"
-          :headers="access_token"
+          :data="access_token"
           :show-file-list="false"
           :on-change="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
@@ -29,10 +28,10 @@
       </el-form-item>
 
       <el-form-item verify  label="设置内容图片" prop="iconUrl">
-        <p class="describe">提示：本地上传图片大小不能超过2M</p>
+        <p class="describe">提示：本地上传图片大小不能超过1M</p>
         <el-upload
           :action="upImgUrl"
-          :headers="access_token"
+          :data="access_token"
           :show-file-list="false"
           :on-change="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
@@ -157,13 +156,13 @@
             beforeAvatarUpload(file) {
                 var type = "image/jpg,image/jpeg,image/png,image/gif";
                 const isJPG = type.indexOf(file.type) != -1;
-                const isLt2M = file.size / 1024 / 1024 < 2;
+                const isLt1M = file.size / 1024 / 1024 < 1;
 
                 if (!isJPG) {
                     this.$message.error("上传图片只能是 JPG,JPEG,PNG,GIF 格式!");
                 }
-                if (!isLt2M) {
-                    this.$message.error("上传图片大小不能超过 2MB!");
+                if (!isLt1M) {
+                    this.$message.error("上传图片大小不能超过 1MB!");
                 }
                 return isJPG && isLt2M;
             },
@@ -203,7 +202,7 @@
                                 type: "success"
                             });
                             setTimeout(() => {
-                                this.$router.go(-1);
+                                this.$router.go(0);
                             }, 2000);
                             //跳转到列表
                         } else {

@@ -18,7 +18,7 @@ router.beforeEach(async(to, from, next) => {
   document.title = getPageTitle(to.meta.title)
 
   // determine whether the user has logged in
-  const hasToken = getToken()
+  const hasToken = getToken();
   // 跳转路由之前清空store里的SetNavIndex，否则使用$router跳转页面时不会渲染左侧导航栏
   store.commit("user/SetNavIndex", '');
 
@@ -27,7 +27,7 @@ router.beforeEach(async(to, from, next) => {
       // 如果已登录，重定向到主页
       var route = JSON.parse(window.sessionStorage.getItem('route'))
       try {
-        next({ name: route[0].name })        
+        next({ name: route[0].name })
       } catch (error) {
         next({ path: '/' })
       }

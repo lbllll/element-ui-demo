@@ -95,7 +95,7 @@ menuParentArr.forEach(e => {
       });
     //如果有首页菜单权限那就跳首页
     if(index === 0 && e.moduleUrl === '/'){
-      routeItem.redirect = '/index'
+      routeItem.redirect = i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1];
     }
     if(index === 0 && routeItem.redirect === ''){
       routeItem.redirect = i.moduleUrl
@@ -176,7 +176,7 @@ export function resetRouter() {
         });
       //如果有首页菜单权限那就跳首页
       if(index === 0 && e.moduleUrl === '/'){
-        routeItem.redirect = '/index'
+        routeItem.redirect = i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1];
       }
       if(index === 0 && routeItem.redirect === ''){
         routeItem.redirect = i.moduleUrl
