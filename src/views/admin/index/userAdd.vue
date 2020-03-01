@@ -50,13 +50,14 @@
         <span class="describe">长度不低于6位</span>
       </el-form-item>
 
-      <el-form-item label="选择角色" v-if="!this.curUserId" prop="roleId">
+      <el-form-item label="选择角色" verify  prop="roleIds">
         <el-select
-          class="selectStyle"
-          v-model="formData.roleId"
-          prop="roleId"
+          class="formItem"
+          v-model="formData.roleIds"
+          prop="roleIds"
           placeholder="选择角色"
           size="small"
+          multiple
           @change="checkRole"
         >
           <el-option
@@ -82,7 +83,7 @@
       <!--   发布按钮     -->
       <div class="footer">
         <el-button type="primary" @click="addUser">{{$route.query.id?'确认修改':'确认添加'}}</el-button>
-        <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
+        <el-button  @click="cancelAdd">取 消</el-button>
       </div>
     </el-form>
   </div>
@@ -110,8 +111,9 @@
                     userState: "",
                     userType: "",
                     newPassword:"",
-                    roleId:""//测试用的角色id
+                    roleIds:""//测试用的角色id
                 },
+                openAddPage:false,
                 curUserId:'',
                 labelList:[],
                 cardTypeList:[
@@ -241,63 +243,73 @@
                 }
             },
             checkRole() {
-                console.log(this.formData.roleId)
+                console.log(this.formData.roleIds===[]?'':this.formData.roleIds.join(","));
             },
             //添加用户
             addUser() {
-                //组装添加数据：
                 //如果userId不为空，那就是修改
                 if (this.curUserId) {
-                    //修改
-                    this.formData.userId = this.curUserId;
-                    //组装修改所需参数
-                    let data = {
-                        userId:this.formData.userId,
-                        headPath:this.formData.userHeadImageUrl,
-                        userNickName:this.formData.userNickName,
-                        password:this.formData.userPassword,
-                        newPassword: this.formData.newPassword
-                    };
-                    userUpdate(data).then(res => {
-                        if (res.code == 200) {
-                            this.$message({
-                                message: "修改成功",
-                                type: "success"
-                            });
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                            //跳转到列表
-                        } else {
-                            this.$message.error(res.description);
-                        }
-                    })
+                    this.$refs['form'].validate((valid) => {
+                        if(valid) {
+                            //修改
+                            this.formData.userId = this.curUserId;
+                            //组装修改所需参数
+                            let data = {
+                                userId:this.formData.userId,
+                                headPath:this.formData.userHeadImageUrl,
+                                userNickName:this.formData.userNickName,
+                                password:this.formData.userPassword,
+                                newPassword: this.formData.newPassword
+                            };
+                            userUpdate(data).then(res => {
+                                if (res.code == 200) {
+                                    this.$message({
+                                        message: "修改成功",
+                                        type: "success"
+                                    });
+                                    setTimeout(() => {
+                                        this.$router.go(0);
+                                    }, 2000);
+                                    //跳转到列表
+                                } else {
+                                    this.$message.error(res.description);
+                                }
+                            })
+                        }});
+                    //组装添加数据：
                 }
                 else {
-                    //组装新增数据用户信息
-                    let data = {
-                        userName:this.formData.userAccountName,
-                        password:this.formData.userPassword,
-                        userNickName:this.formData.userNickName,
-                        roleId:this.formData.roleId,
-                    };
-                    userAdd(data).then( res => {
-                        if (res.code == 200) {
-                            this.$message({
-                                message: "新增成功",
-                                type: "success"
-                            });
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                            //跳转到列表
-                        } else {
-                            this.$message.error(res.description);
-                        }
-                    });
-                    //增加
+                    this.$refs['form'].validate((valid) => {
+                            if(valid) {
+                                //组装新增数据用户信息
+                                let data = {
+                                    userName:this.formData.userAccountName,
+                                    password:this.formData.userPassword,
+                                    userNickName:this.formData.userNickName,
+                                    roleIds:this.formData.roleIds===[]?'':this.formData.roleIds.join(","),
+                                };
+                                userAdd(data).then( res => {
+                                    if (res.code == 200) {
+                                        this.$message({
+                                            message: "新增成功",
+                                            type: "success"
+                                        });
+                                        setTimeout(() => {
+                                            this.$router.go(0);
+                                        }, 2000);
+                                        //跳转到列表
+                                    } else {
+                                        this.$message.error(res.description);
+                                    }
+                                });
+                                //增加
+                            }});
+
                 }
 
+            },
+            cancelAdd(){
+                this.$emit('func',this.openAddPage)
             },
         },
     }

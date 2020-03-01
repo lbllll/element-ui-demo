@@ -42,8 +42,9 @@ const actions = {
             reject(response.data);
             return
           }
-          setToken(response.data.access_token)
+          setToken(response.data.access_token);
           window.sessionStorage.setItem('avatar',response.data.headPath);
+          window.sessionStorage.setItem('userName',response.data.userName);
           // window.sessionStorage.setItem('token',response.data.access_token);
           commit('SET_AVATAR', response.data.headPath)
           commit('SET_ROUTE', response.data.sysPermissionList)

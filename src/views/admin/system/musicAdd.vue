@@ -1,8 +1,7 @@
 <template>
   <div class="bodyBox">
     <el-form ref="form" :model="formData" class="formBox" label-width="80px">
-      <p class="title">系统字体信息</p>
-
+    <p class="title">音乐基本信息</p>
       <el-form-item label="歌名" prop="musicName" verify>
         <el-input
           class="formItem"
@@ -23,6 +22,7 @@
 
       <el-form-item label="上传歌曲" prop="musicUrl" verify>
         <el-upload
+          id="audioUpload"
           :action="uploadUrl"
           :data="access_token"
           :before-upload="beforeAvatarUpload"
@@ -31,6 +31,7 @@
           :before-remove="beforeRemove"
           :on-success="uploadSuccess"
           :on-exceed="handleExceed"
+          :limit="1"
           :file-list="fileList">
           <el-button size="small" type="primary">点击上传</el-button>
           <!--          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> upload-demo-->
@@ -45,23 +46,21 @@
           placeholder="请输入歌曲类型"
         ></el-input>
       </el-form-item>
-      <el-form-item label="时长" verify prop="musicTimeSeconds">
+<!--      <el-form-item label="时长" verify prop="musicTimeSeconds">
         <el-input
           type="number"
           class="formItem"
           v-model="formData.musicTimeSeconds"
           maxlength="20"
-          placeholder="请输入歌曲时长"
         ></el-input>
-      </el-form-item>
-      <el-form-item label="上传者" verify prop="uploadName">
+      </el-form-item>-->
+<!--      <el-form-item label="上传者" verify prop="uploadName">
         <el-input
           class="formItem"
           v-model="formData.uploadName"
           maxlength="20"
-          placeholder="上传者"
         ></el-input>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="来源" verify prop="sourceName">
         <el-input
           class="formItem"
@@ -98,6 +97,7 @@
       <!--   发布按钮     -->
       <div class="footer">
         <el-button type="primary" @click="addMusic">{{$route.query.musicInfo?'确认修改':'确认添加'}}</el-button>
+        <el-button @click="cancelAndBack">取 消</el-button>
         <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
       </div>
     </el-form>
@@ -127,6 +127,7 @@
                     uploadName:"",//上传人
                     sourceName:"",//来源
                 },
+                openAddPage:false,
                 cardList:[
                 ],
                 labelList:[
@@ -203,6 +204,8 @@
                 },
                 userHeadImageUrl:"",
                 fileList:[],
+                //音乐时长
+                audioDuration:'',
                 //音乐分组和类
                 //音乐类型和分组
                 musicTypes:{
@@ -245,6 +248,8 @@
             }
         },
         created() {
+            //获取当前操作用户账户名
+           this.formData.uploadName = window.sessionStorage.getItem('userName');
             //如果有musicInfo则是修改,将表单填充
             if(this.$route.query.musicInfo){
                 let musicInfo = this.$route.query.musicInfo;
@@ -276,14 +281,38 @@
             },
             //上传之前格式和大小判断
             beforeAvatarUpload(file) {
+                // 文件类型进行判断
+                const isAudio = file.type === "audio/mp3" || file.type === "audio/mpeg";
+                // 限制上传文件大小 2M
                 const isLt1M = file.size / 1024 / 1024 < 1;
-                if (!isLt1M) {
-                    this.$message.error("上传文件大小不能超过 1MB!");
+                this.getTimes(file);
+                const isTime60S = this.audioDuration >= 60 ? true : '';
+                console.log("时间是："+this.audioDuration);
+                if (!isAudio) {
+                    this.$message.error("上传文件只能是Mp3格式!");
+                    this.fileList = [];
+                } else {
+                    if (!isLt1M) {
+                        this.$message.error("上传文件大小不能超过 1MB!");
+                        this.fileList = [];
+                    }
                 }
-                return isLt1M;
+                return isAudio && isLt1M
+            },
+            getTimes(file) {
+                var content = file;
+                //获取录音时长
+                var url = URL.createObjectURL(content);
+                //经测试，发现audio也可获取视频的时长
+                var audioElement = new Audio(url);
+                audioElement.addEventListener("loadedmetadata", (_event) => {
+                    this.audioDuration = parseInt(audioElement.duration);
+                    // console.log(this.audioDuration);
+                });
             },
             uploadSuccess(response, file, fileList) {
                 if (response.code == "200") {
+                    this.formData.musicTimeSeconds = this.audioDuration;
                     this.formData.musicUrlId = response.data.fileUid;
                     this.musicUrl= response.data.fileUrl;
                     this.formData.musicUrl= response.data.fileUrl;
@@ -291,69 +320,79 @@
                 console.log(this.formData.musicUrlId);
                 console.log(this.musicUrl)
             },
-            //新增编辑角色
+            cancelAndBack(){
+                this.formData ={};
+                this.$emit('func',this.openAddPage)
+            },
+            //新增编辑
             addMusic() {
                 //验证参数输入情况
                 this.$refs['form'].validate((valid) => {
                     //如果有roleId则是，修改
                     if(this.$route.query.musicInfo){
-                        //组装修改参数
-                        let data = {
-                            musicId:this.formData.musicId,
-                            musicName:this.formData.musicName,
-                            musicUrlId:this.formData.musicUrlId,//用来关联的
-                            musicTimeSeconds:this.formData.musicTimeSeconds,//音乐长度可能单词写错 应该为seconds
-                            musicSinger:this.formData.musicSinger,
-                            uploadName:this.formData.uploadName,//上传人
-                            sourceName:this.formData.sourceName,//来源
-                            musicType:this.formData.musicType,//音乐分类MPEG、MP3、WMA
-                            musicUrl:this.formData.musicUrl,//
-                            musicGroup:this.formData.musicGroup,//音乐分组
-                        };
-                        //编辑
-                        musicUpdate(data).then(res => {
-                            if (res.data.isSuccessful === "Y") {
-                                this.$message({
-                                    message: "修改成功！",
-                                    type: "success"
-                                });
-                                setTimeout(() => {
-                                    this.$router.go(0);
-                                }, 2000);
-                                //跳转到列表
-                            } else {
-                                this.$message.error(res.data.message);
-                            }
-                        });
+                        if(valid){
+                            //组装修改参数
+                            let data = {
+                                musicId:this.formData.musicId,
+                                musicName:this.formData.musicName,
+                                musicUrlId:this.formData.musicUrlId,//用来关联的
+                                musicTimeSeconds:this.formData.musicTimeSeconds,//音乐长度可能单词写错 应该为seconds
+                                musicSinger:this.formData.musicSinger,
+                                uploadName:this.formData.uploadName,//上传人
+                                sourceName:this.formData.sourceName,//来源
+                                musicType:this.formData.musicType,//音乐分类MPEG、MP3、WMA
+                                musicUrl:this.formData.musicUrl,//
+                                musicGroup:this.formData.musicGroup,//音乐分组
+                            };
+                            //编辑
+                            musicUpdate(data).then(res => {
+                                if (res.data.isSuccessful === "Y") {
+                                    this.$message({
+                                        message: "修改成功！",
+                                        type: "success"
+                                    });
+                                    setTimeout(() => {
+                                        this.$router.go(0);
+                                    }, 2000);
+                                    //跳转到列表
+                                } else {
+                                    this.$message.error(res.data.message);
+                                }
+                            });
+                        }
                     }
                     else {
-                        //组装增加参数
-                        let data = {
-                            musicName: this.formData.musicName,
-                            musicUrlId: this.formData.musicUrlId,//用来关联的
-                            musicTimeSeconds: this.formData.musicTimeSeconds,//音乐长度可能单词写错
-                            musicSinger: this.formData.musicSinger,
-                            uploadName: this.formData.uploadName,//上传人
-                            sourceName: this.formData.sourceName,//来源
-                            musicType: this.formData.musicType,//音乐分类MPEG、MP3、WMA
-                            musicUrl: this.formData.musicUrl,//
-                            musicGroup:this.formData.musicGroup,//音乐分组
-                        };
-                        //编辑
-                        musicAdd(data).then(res => {
-                            if (res.data.isSuccessful === "Y") {
-                                this.$message({
-                                    message: "新增成功！",
-                                    type: "success"
+                        this.$refs['form'].validate((valid) => {
+                            if(valid){
+                                //组装增加参数
+                                let data = {
+                                    musicName: this.formData.musicName,
+                                    musicUrlId: this.formData.musicUrlId,//用来关联的
+                                    musicTimeSeconds: this.formData.musicTimeSeconds,//音乐长度可能单词写错
+                                    musicSinger: this.formData.musicSinger,
+                                    uploadName: this.formData.uploadName,//上传人
+                                    sourceName: this.formData.sourceName,//来源
+                                    musicType: this.formData.musicType,//音乐分类MPEG、MP3、WMA
+                                    musicUrl: this.formData.musicUrl,//
+                                    musicGroup:this.formData.musicGroup,//音乐分组
+                                };
+                                //编辑
+                                musicAdd(data).then(res => {
+                                    if (res.data.isSuccessful === "Y") {
+                                        this.$message({
+                                            message: "新增成功！",
+                                            type: "success"
+                                        });
+                                        setTimeout(() => {
+                                            this.$router.go(0);
+                                        }, 2000);
+                                        //跳转到列表
+                                    } else {
+                                        this.$message.error(res.data.message);
+                                    }
                                 });
-                                setTimeout(() => {
-                                    this.$router.go(0);
-                                }, 2000);
-                                //跳转到列表
-                            } else {
-                                this.$message.error(res.data.message);
                             }
-                        });
+                    })
                     }
                   });
             },

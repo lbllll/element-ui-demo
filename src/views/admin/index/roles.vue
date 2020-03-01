@@ -22,17 +22,18 @@
       <el-table-column prop="roleType" align="center" label="角色类型">
         <template slot-scope="scope">{{roleType[scope.row.roleType]}}</template>
       </el-table-column>
-      <el-table-column label="操作" width="160" align="center">
+      <el-table-column label="操作" width="180" align="center">
         <template slot-scope="scope">
           <el-button type="text" @click="openDialog(scope.row.roleId)" size="small">分配权限</el-button>
 <!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'ROLES_ADD', query: {id: scope.row.roleId}}">
             <el-button type="text" size="small">编辑</el-button>
           </router-link>-->
+          <el-button @click="edit(scope.row.roleId)" type="text" size="small">编辑</el-button>
           <el-button @click="delAll(scope.row.roleId)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!--  底部操作工具栏  -->
+<!--    &lt;!&ndash;  底部操作工具栏  &ndash;&gt;
     <div class="footer flex-between">
       <div>
         <el-checkbox
@@ -40,17 +41,17 @@
           v-model="checkAll"
           @change="handleCheckAllChange"
         >全选</el-checkbox>
-<!--        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>-->
+&lt;!&ndash;        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>&ndash;&gt;
       </div>
       <el-pagination
         @current-change="handleCurrentChange"
-        :current-page="formData.page"
+        :current-page="data.page"
         :page-size="10"
         background
         layout="total, prev, pager, next, jumper"
         :total="count"
       ></el-pagination>
-    </div>
+    </div>-->
 
 
     <!--  弹出层分配权限  -->
@@ -73,7 +74,6 @@
         :default-checked-keys="curUserPermissions"
         :default-expanded-keys="curUserPermissions"
         @check-change="handleCheckChange"
-        :check-strictly="true"
         >
       </el-tree>
 
@@ -87,11 +87,45 @@
       </span>
     </el-dialog>
 
+    <!--新增角色-->
     <el-dialog
-      title="编辑角色信息"
+      title="新增角色"
       :visible.sync="openAddPage">
-      <rolesAdd></rolesAdd>
+      <rolesAdd @func="getMsgFormSon" ></rolesAdd>
     </el-dialog>
+
+    <el-dialog
+      title="编辑角色"
+      :visible.sync="openEditPage">
+      <el-form ref="form" :model="formData" class="formBox" label-width="80px">
+
+        <el-form-item label="角色名" v-if="!$route.query.id" prop="roleName" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.roleName"
+            maxlength="20"
+            placeholder="请设置角色名"
+          ></el-input>
+          <span class="describe">长度不超过20</span>
+        </el-form-item>
+
+        <el-form-item label="描述" v-if="!$route.query.id" prop="roleDesc" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.roleDesc"
+            maxlength="30"
+            placeholder="请设置角色描述"
+          ></el-input>
+          <span class="describe">长度不超过30</span>
+        </el-form-item>
+        <!--   发布按钮     -->
+        <div class="footer">
+          <el-button type="primary" @click="editRole">确认修改</el-button>
+          <el-button  @click="openEditPage = false">取消</el-button>
+        </div>
+      </el-form>
+    </el-dialog>
+
 
 
   </div>
@@ -103,7 +137,8 @@
         roleDelete,
         moduleList,
         roleUpdate,
-        roleInfo
+        roleInfo,
+        roleUpdateDetail
     } from "@/api/table";
     import rolesAdd from "./rolesAdd";
     export default {
@@ -111,12 +146,18 @@
         components: {rolesAdd},
         data() {
             return {
-                formData:{
+                data:{
                     roleId:"",
                     roleName:"",
                     roleDesc:"",
                     roleType:"",
                     page:1,
+                },
+                formData:{
+                    roleId:"",
+                    roleName:"",
+                    roleDesc:"",
+                    moduleIds:"",
                 },
                 cardList:[],
                 labelList:[],
@@ -178,6 +219,7 @@
                 currRoleId: "",
                 /*弹出编辑页面*/
                 openAddPage:false,
+                openEditPage:false,
             }
         },
         props: {
@@ -190,10 +232,34 @@
             moduleList().then(result => {
                 if(result.code == 200){
                     //组装成权限列表
-                    let menuParentArr = [];
-                    let menuChildArr = [];
-                    let authArr = [];
+                    //将数据转为map，以labelTreeCode为标识
+                    let map = {};
+                    result.data.data.forEach( item => {
+                        map[item.moduleTreeCode] = item
+                    });
+                    let menuArr = [];
+                    //然后遍历，只要当前item存在父标签parent则一直找，找到就设为其子标签
+                    result.data.data.forEach(item => {
+                        let parent = map[item.moduleParentTreeCode];
+                        if(parent){
+                            (parent.child || (parent.child = [])).push(item)
+                        }else {
+                            //没有父标签，则就是一级标签
+                            menuArr.push(item)
+                        }
+                    });
+                    //重组标签树
+                    this.permissionList = menuArr;
+/*
+                    //拼sql添加权限的语句
+                    let str = '';
                     result.data.data.forEach(e => {
+                         str += "("+e.moduleId+",1),"
+                    });
+                    console.log(str);
+*/
+
+/*                    result.data.data.forEach(e => {
                         //组装一级菜单
                         if(e.moduleType === "MENU" && e.moduleParentTreeCode == -1) {
                             e.child = [];
@@ -225,7 +291,7 @@
                             }
                         });
                     });
-                    this.permissionList = menuParentArr;
+                    this.permissionList = menuParentArr;*/
                     // console.log("========"+this.permissionList );
                 }
             }).catch(err => {});
@@ -233,7 +299,7 @@
         methods: {
             init(){
                 //获取用户信息，加载表格数据
-                let data = JSON.parse(JSON.stringify(this.formData));
+                let data = JSON.parse(JSON.stringify(this.data));
                 data.page --;
                 roleList(data).then(result => {
                     if(result.code == 200){
@@ -252,7 +318,7 @@
             },
             //加载第几页
             handleCurrentChange(val) {
-                this.formData.page = val;
+                this.data.page = val;
                 //修改页数，重新加载
                 this.init();
             },
@@ -393,6 +459,52 @@
             openAdd(){
                 this.openAddPage = true;
             },
+            getMsgFormSon(data){
+                this.openAddPage = data;
+            },
+            edit(roleId){
+                this.currRoleId = roleId;
+                //查询相应权限数据，并给当前角色的权限赋值
+                roleInfo({roleId:roleId}).then(res => {
+                    if (res.data.isSuccessful === "Y") {
+                        this.formData = res.data.data;
+                    } else {
+                        this.$message.error(res.description);
+                    }
+                });
+                this.openEditPage = true;
+            },
+            editRole(){
+                this.$refs['form'].validate((valid) => {
+                    if(valid){
+                       let arr = this.formData.permissions.length>0?this.formData.permissions:[];
+                       arr.forEach(e => {
+                          arr.push(e.moduleTreeCode)
+                       });
+                        //组装修改数据
+                        let data = {
+                            roleId:this.formData.roleId,
+                            roleName:this.formData.roleName,
+                            roleDesc:this.formData.roleDesc,
+                        };
+                        //修改
+                        roleUpdateDetail(data).then(res => {
+                            if (res.data.isSuccessful === "Y") {
+                                this.$message({
+                                    message: "修改成功！",
+                                    type: "success"
+                                });
+                                setTimeout(() => {
+                                    this.$router.go(0);
+                                }, 2000);
+                                //跳转到列表
+                            } else {
+                                this.$message.error(res.description);
+                            }
+                        });
+                    }
+                });
+            },
         },
     }
 </script>
@@ -411,6 +523,31 @@
       width: 320px;
       margin-right: 20px;
     }
+  }
+
+  .bodyBox >.title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formBox {
+    margin-top: 15px;
+  }
+  .formBox .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formItem {
+    width: 360px;
+  }
+  .describe {
+    color: #999;
+    margin-left: 10px;
+  }
+  .footer {
+    margin-top: 20px;
+    @include flex-center;
   }
 
 </style>

@@ -1,5 +1,8 @@
 <style lang="scss" scoped>
+  @import "~@/styles/mixin.scss";
   /*查询框*/
+  .searchBox{
+  }
   .selectStyle,.inputStyle,.searchStyle,.radioStyle{
     float: left;
     margin-left: 20px;
@@ -7,12 +10,10 @@
   .selectStyle,.inputStyle{
     width: 200px;
   }
-/*  .row-one{
-    clear: left;
-  }*/
+  .row-one{
+  }
   .row-two{
-    /*float: left;*/
-    margin-top: 10px;
+    margin-top: 30px;
   }
   /*表格*/
   audio {
@@ -24,19 +25,45 @@
     height: 70px;
     overflow: auto;
   }
-
-
+  .labelStyle{
+    margin: 3px 3px;
+  }
+/*编辑页面*/
+  .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formBox {
+    margin-top: 15px;
+  }
+  .formBox .title {
+    margin: 15px 0;
+    font-weight: bold;
+    color: #333;
+  }
+  .formItem {
+    width: 360px;
+  }
+  .describe {
+    color: #999;
+    margin-left: 10px;
+  }
+  .footer {
+    margin-top: 20px;
+    @include flex-center;
+  }
 </style>
 <template>
   <div>
 <!--  筛选提交表单 -->
-   <el-form :model="formData" ref="searchs" class="searchBox">
+   <el-form :model="data" ref="searchs" class="searchBox">
      <div class="row-one">
         <!--   状态   -->
        <div>
          <el-select
            class="selectStyle"
-           v-model="formData.resourceState"
+           v-model="data.resourceState"
            prop="resourceState"
            placeholder="作品状态"
            size="small"
@@ -55,7 +82,7 @@
         <div>
           <el-select
             class="selectStyle"
-            v-model="formData.resourceType"
+            v-model="data.resourceType"
             prop="resourceType"
             placeholder="作品类型"
             size="small"
@@ -74,7 +101,7 @@
        <div>
          <el-select
            class="selectStyle"
-           v-model="formData.resourceKind"
+           v-model="data.resourceKind"
            prop="resourceKind"
            placeholder="作品类别"
            size="small"
@@ -93,7 +120,7 @@
        <div>
          <el-select
            class="selectStyle"
-           v-model="formData.resourceMarkType"
+           v-model="data.resourceMarkType"
            prop="resourceMarkType"
            placeholder="标记类型"
            size="small"
@@ -111,7 +138,7 @@
        <div>
          <el-select
            class="selectStyle"
-           v-model="formData.isDeleted"
+           v-model="data.isDeleted"
            prop="isDeleted"
            placeholder="是否删除"
            size="small"
@@ -127,24 +154,28 @@
          </el-select>
        </div>
      </div>
+     <br>
      <div class="row-two">
        <!--   作品名   -->
        <div class="inputStyle">
          <el-form-item prop="resourceAuthorNickName"  can-be-empty>
-           <el-input class="inputs" placeholder="请输入作品名" size="mini" v-model="formData.resourceName"></el-input>
+           <el-input class="inputs" placeholder="请输入作品名" size="mini" v-model="data.resourceName"></el-input>
          </el-form-item>
        </div>
        <!--   作者名   -->
        <div class="inputStyle">
          <el-form-item prop="nickName"  can-be-empty>
-           <el-input class="nickName" placeholder="请输入作者" size="mini" v-model="formData.resourceAuthorNickName"></el-input>
+           <el-input class="nickName" placeholder="请输入作者" size="mini" v-model="data.resourceAuthorNickName"></el-input>
          </el-form-item>
        </div>
        <div class="searchStyle">
-         <el-button type="primary"  size="small" @click="search()">搜索</el-button>
+         <el-button type="primary"  size="small" @click="search()">搜 索</el-button>
        </div>
        <div class="searchStyle">
          <el-button type="primary" size="small" @click="openAdd()">新增作品</el-button>
+       </div>
+       <div class="searchStyle">
+         <el-button size="small" @click="resetQuery()">重 置</el-button>
        </div>
      </div>
     </el-form>
@@ -158,8 +189,8 @@
       ref="multipleTable"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column align="center" type="selection" reserve-selection width="40"></el-table-column>
-      <el-table-column prop="sourceInfo" align="center" width="200" label="资源信息">
+      <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
+      <el-table-column prop="sourceInfo" align="left" width="200" label="资源信息">
         <template slot-scope="scope">
           <span>名字：{{scope.row.resourceName}}</span>
           <br>
@@ -169,55 +200,55 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="resourceCoverImageUrl" align="center" label="封面图" width="80">
+      <el-table-column prop="resourceCoverImageUrl" align="left" label="封面图" width="80">
         <template slot-scope="scope">
           <img v-image-preview :src="scope.row.resourceCoverImageUrl" width="60" height="60" />
         </template>
       </el-table-column>
 
-      <el-table-column prop="resourceMarkType" align="center" label="标记" width="100">
+      <el-table-column prop="resourceMarkType" align="left" label="标记" width="100">
         <template slot-scope="scope">
-          <span>{{markerTypes[scope.row.resourceMarkType]}}</span>
+          <el-tag>{{markerTypes[scope.row.resourceMarkType]}}</el-tag>
           <br>
-          <span><el-button type="text" @click="setRescourceMarkerType(scope.row.resourceUid,scope.row.resourceMarkType)" size="small">设置标记</el-button></span>
+          <span><el-button type="text" @click="setRescourceMarkerType(scope.row.resourceUid,scope.row.resourceMarkType)" size="small">打标记</el-button></span>
         </template>
       </el-table-column>
 
-      <el-table-column prop="resourceDefaultBlessingText" align="center" label="默认祝福语">
+      <el-table-column prop="resourceDefaultBlessingText" align="left" width="150" label="默认祝福语">
         <template slot-scope="scope">
           <!--<span>字体：{{scope.row.fontUrl}}</span>
           <br>-->
           <el-tooltip :content="scope.row.resourceDefaultBlessingText">
-            <span>内容：{{scope.row.resourceDefaultBlessingText | controlLength}}</span>
+            <span>祝福语：{{scope.row.resourceDefaultBlessingText | controlLength}}</span>
           </el-tooltip>
         </template>
       </el-table-column>
 
-      <el-table-column prop="musicId" align="center" label="关联音乐" width="180">
+      <el-table-column prop="musicId" align="left" label="关联音乐" width="180">
         <template slot-scope="scope">
           <span>歌名：{{scope.row.resourceMusicName}}</span><br>
           <audio  :src="scope.row.resourceMusicUrl" type="audio/mpeg" controls></audio>
         </template>
       </el-table-column>
 
-      <el-table-column prop="labelsModelList" align="center" label="标签" width="150">
+      <el-table-column prop="labelsModelList"  align="left" label="标签" >
         <template slot-scope="scope">
           <div class="label-max-height">
-            <div v-for="(item,index) in scope.row.labelsModelList">{{item.labelText}}</div>
+            <el-tag class="labelStyle"  v-for="(item,index) in scope.row.labelsModelList">{{item.labelPathText}}</el-tag>
           </div>
-          <span><el-button type="text" @click="checkLabels(scope.row)" size="small">设置标签</el-button></span>
+          <span><el-button type="text" @click="checkLabels(scope.row)" size="small">打标签</el-button></span>
         </template>
       </el-table-column>
 
 
-      <el-table-column prop="memberInfo" align="center" label="创作者信息" width="80">
+      <el-table-column prop="memberInfo" align="left" label="创作者信息" width="100">
         <template slot-scope="scope">
           <div><img class="userHeadImg" v-image-preview :src="scope.row.resourceAuthorHeadPicUrl" width="60" height="60" /></div>
           <span class="nickName">{{scope.row.resourceAuthorNickName}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column prop="memberInfo" align="center" label="状态" width="180">
+      <el-table-column prop="memberInfo" align="left" label="状态" width="150">
         <template slot-scope="scope">
           <span>状态：{{resourceStates[scope.row.resourceState]}}</span><br>
           <span>更新时间：{{$timeUtil.getFormatTime(scope.row.resourceStateLastChangeTime)}}</span><br>
@@ -226,7 +257,7 @@
 <!--          <span><el-button type="text" @click="checkStatus(scope.row.cardId)" size="small">查看明细</el-button></span>-->
         </template>
       </el-table-column>
-      <el-table-column prop="memberInfo" align="center" label="汇总" width="180">
+      <el-table-column prop="memberInfo" align="left" label="汇总" width="150">
         <template slot-scope="scope">
           <span>送出:{{scope.row.resourceSendCount}}次 </span>
           <span>下载:{{scope.row.resourceDownloadCount}}次</span><br>
@@ -235,20 +266,22 @@
           <span>红包:{{scope.row.resourceAmountOfRedPacket}}</span><br>
         </template>
       </el-table-column>
-      <el-table-column prop="memberInfo" align="center" label="创建信息" >
+      <el-table-column prop="memberInfo" align="left" label="创建信息" width="150" >
         <template slot-scope="scope">
           <span>创建时间:{{$timeUtil.getFormatTime(scope.row.createTime)}}</span><br>
           <span>创建者:{{scope.row.resourceCreateUserNickName}}</span><br>
         </template>
       </el-table-column>
 
+
       <!--操作列处理-->
-      <el-table-column label="操作" align="center" width="100">
+      <el-table-column label="操作" align="left" width="100">
         <template slot-scope="scope">
 <!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'BLESSING_ADD', query: {id: scope.row.cardId}}">
             <el-button type="text" size="small">编辑</el-button>
           </router-link>-->
           <el-button @click="delAll(scope.row.resourceUid)" type="text" size="small">删除</el-button>
+          <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -265,7 +298,7 @@
       </div>
       <el-pagination
         @current-change="handleCurrentChange"
-        :current-page="formData.page"
+        :current-page="data.page"
         :page-size="10"
         background
         layout="total, prev, pager, next, jumper"
@@ -280,6 +313,7 @@
       :visible.sync="controlOpenSetLabels"
       width="50%"
       :destroy-on-close="true"
+      @close="nodeCollapse"
     >
       <el-tree
         ref="tree"
@@ -331,11 +365,215 @@
         <el-button type="primary" @click="setMarkerTypeSubmit">确 定</el-button>
       </span>
     </el-dialog>
-
+    <!--发布资源作品-->
     <el-dialog
-      title="编辑资源信息"
+      title="发布作品"
       :visible.sync="openAddPage">
-      <blessAdd></blessAdd>
+      <blessAdd  @func="getMsgFormSon" ></blessAdd>
+    </el-dialog>
+    <!--编辑草稿资源作品-->
+    <el-dialog
+      title="资源文件编辑"
+      :visible.sync="openEditPage"
+      width="50%"
+      :destroy-on-close="true"
+      @close="nodeCollapse"
+    >
+      <el-form ref="form" :model="formData" :rules="rules" class="formBox" label-width="80px">
+        <p class="title">作品基本信息</p>
+
+        <el-form-item label="作品类型"  verify prop="resourceType">
+          <el-select
+            class="selectStyle"
+            v-model="formData.resourceType"
+            prop="resourceType"
+            placeholder="作品类型"
+            size="small"
+            @change="checkCardTypeForEdit"
+          >
+            <el-option
+              v-for="item in resourceTypes"
+              :key="item.resourceType"
+              :label="item.name"
+              :value="item.resourceType"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="作品类别" verify prop="resourceKind">
+          <el-select
+            class="selectStyle"
+            v-model="formData.resourceKind"
+            prop="resourceKind"
+            placeholder="作品类别"
+            size="small"
+            @change="checkKindForEdit"
+          >
+            <el-option
+              v-for="item in resourceKinds"
+              :key="item.resourceKind"
+              :label="item.name"
+              :value="item.resourceKind"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item verify label="封面图" prop="resourceCoverImageUrlUid">
+          <p class="describe">提示：本地上传图片大小不能超过1M【图片尺寸比例建议：贺卡(9：16)；插画：(16：9)；条漫：(1：1)】</p>
+          <el-upload
+            :action="upImgUrl"
+            :data="access_token"
+            :show-file-list="false"
+            :on-change="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+            :on-success="uploadSuccessCover"
+          >
+            <img v-if="resourceCoverImageUrl" :src="resourceCoverImageUrl" class="avatar" />
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <el-input class="inputs none imgArea" v-model="formData.resourceCoverImageUrlUid"></el-input>
+          </el-upload>
+        </el-form-item>
+
+        <el-form-item verify label="资源文件" prop="resourceFileUid">
+          <!--上传图片文件-->
+          <div v-if="formData.resourceType !== 4">
+            <p class="describe">提示：本地上传图片大小不能超过1M</p>
+            <el-upload
+              :action="upImgUrl"
+              :data="access_token"
+              :show-file-list="false"
+              :on-change="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+              :on-success="uploadSuccess"
+            >
+              <img v-if="resourceImageUrl" :src="resourceImageUrl" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              <el-input class="inputs none imgArea" v-model="formData.resourceFileUid"></el-input>
+            </el-upload>
+          </div>
+          <!--上传非图片文件-->
+          <div v-if="formData.resourceType === 4">
+            <el-upload
+              :action="uploadVideo"
+              :data="access_token"
+              :before-upload="beforeAvatarUploadVideo"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :before-remove="beforeRemove"
+              :on-success="uploadSuccessVideo"
+              :on-exceed="handleExceed"
+              :file-list="fileList">
+              <el-button size="small" type="primary">点击上传</el-button>
+              <el-input class="inputs none imgArea" v-model="formData.resourceFileUid"></el-input>
+            </el-upload>
+          </div>
+        </el-form-item>
+        <el-form-item label="作品名" prop="resourceName" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.resourceName"
+            maxlength="20"
+            placeholder="请输入作品名，20字内"
+          ></el-input>
+          <span class="describe">长度不超过20</span>
+        </el-form-item>
+        <el-form-item label="作品描述" prop="resourceDesc" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.resourceDesc"
+            maxlength="100"
+            placeholder="请输入作品描述"
+          ></el-input>
+          <span class="describe">长度不超过100</span>
+        </el-form-item>
+<!--        <el-form-item label="选择标签" verify prop="resourceLabelTreeCodes">
+          <div class="header">选择标签</div>
+          <el-tree
+            ref="tree"
+            show-checkbox
+            :data="labelList"
+            node-key="labelTreeCode"
+            :props="defaultProps"
+            :default-checked-keys="curLabels"
+            :default-expanded-keys="curLabels"
+            @check-change="checkLabelsForEdit"
+            :accordion="true"
+          >
+          </el-tree>
+          <div style="margin-top: 20px">
+            <el-button type="primary" @click="checkAllTree" size="mini">全选</el-button>
+            <el-button @click="cancelAllTree" size="mini">取消全选</el-button>
+          </div>
+        </el-form-item>-->
+        <el-form-item label="祝福语" prop="resourceDefaultBlessingText" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.resourceDefaultBlessingText"
+            maxlength="20"
+            placeholder="请输入默认祝福语"
+          ></el-input>
+          <span class="describe">长度不超过100</span>
+        </el-form-item>
+
+<!--        <el-form-item label="设置标记" verify prop="resourceMarkType">
+          <el-select
+            class="formItem"
+            v-model="formData.resourceMarkType"
+            placeholder="请选择标记内容"
+            @change="checkMarker"
+          >
+            <el-option
+              v-for="item in markerList"
+              :key="item.markerId"
+              :label="item.markerName"
+              :value="item.markerId"
+            ></el-option>
+          </el-select>
+        </el-form-item>-->
+
+        <el-form-item label="选择作者"  prop="resourceAuthorUid" verify>
+          <el-select
+            class="formItem"
+            v-model="formData.resourceAuthorUid"
+            placeholder="请选择作者"
+            @change="checkAuthorForEdit"
+          >
+            <el-option
+              v-for="item in authorList"
+              :key="item.memberId"
+              :label="item.wechatNickName"
+              :value="item.memberId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+
+        <el-form-item label="绑定音乐"  prop="resourceMusicUid">
+          <el-select
+            class="formItem"
+            v-model="formData.resourceMusicUid"
+            placeholder="请选择音乐"
+            @change="checkMusicForEdit"
+          >
+            <el-option
+              v-for="item in musicList"
+              :key="item.musicId"
+              :label="item.musicName+'--歌手：'+item.musicSinger"
+              :value="item.musicId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+<!--        &lt;!&ndash;   发布按钮     &ndash;&gt;
+        <div class="footer">
+          <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
+          <el-button @click="cancelAndBack">取  消</el-button>
+          &lt;!&ndash;          <el-button type="primary" @click="previewData()">预览</el-button>&ndash;&gt;
+        </div>-->
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="openEditPage = false">取 消</el-button>
+        <el-button type="primary" @click="updateSubmit">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -349,6 +587,10 @@
         blessingLabels,
         blessingDelete,
         labelListAll,
+        labelListByBusinessType,
+        memberList,
+        musicList,
+        blessingUpdate
     } from "@/api/table";
     import blessAdd from "./add";
 export default {
@@ -358,7 +600,7 @@ export default {
   },
   data() {
     return {
-        formData:{
+        data:{
             resourceName:"",//资源名称
             resourceAuthorNickName:"",//创作者名称
 
@@ -367,8 +609,22 @@ export default {
             resourceType:"",//资源类型
             resourceState:"",//资源状态
             resourceMarkType:"",//资源标记类型
-            isDeleted:"N",//资源是否被删除
+            isDeleted:"",//资源是否被删除
             page: 1
+        },
+        formData:{
+            resourceUid:"",
+            resourceName:"",
+            resourceDesc:"",
+            resourceCoverImageUrlUid:"",
+            resourceFileUid:"",
+            resourceDefaultBlessingText:"",
+            resourceMusicUid:"",
+            resourceLabelTreeCodes:"",
+            resourceKind:"",
+            resourceAuthorUid:"",//后端接口名字需要修改
+            resourceType:"",
+            resourceMarkType:"",
         },
         cardList:[],
         labelList:[],
@@ -498,7 +754,24 @@ export default {
         curResourceInfo:{},
         /*弹出编辑页面*/
         openAddPage:false,
-
+        //打开编辑页面
+        openEditPage:false,
+        rules: {
+            resourceName: [{ required: true, message: "请输入作品名", trigger: "change" }],
+            resourceType: [{ required: true, message: "请选择资源类型", trigger: "change" }],
+        },
+        upImgUrl: process.env[this.$base] + "/medias/image/upload",
+        access_token: {
+            access_token: this.$store.getters.token
+        },
+        uploadVideo:process.env[this.$base] + "/medias/image/upload",
+        resourceCoverImageUrl:'',
+        resourceImageUrl:'',
+        resourceUrl:'',
+        curLabels:[],
+        authorList:[],
+        musicList:[],
+        fileList:[],
     }
   },
     //多选配置
@@ -519,18 +792,18 @@ export default {
       },
   },
   created() {
-      console.log('sssssss')
       //遍历所有标签，进行标签树组装
-      labelListAll().then(result => {
-          if(result.code == 200){
+      //初始化当前业务资源类型下的树
+      labelListByBusinessType({labelBusinessType:"1"}).then(result => {
+          if(result.data.isSuccessful === 'Y'){
               //将数据转为map，以labelTreeCode为标识
               let map = {};
-              result.data.data.list.forEach( item => {
+              result.data.data.forEach( item => {
                   map[item.labelTreeCode] = item
               });
               let labelArr = [];
               //然后遍历，只要当前item存在父标签parent则一直找，找到就设为其子标签
-              result.data.data.list.forEach(item => {
+              result.data.data.forEach(item => {
                   let parent = map[item.labelParentTreeCode];
                   if(parent){
                       (parent.child || (parent.child = [])).push(item)
@@ -543,15 +816,42 @@ export default {
               this.labelList = labelArr;
           }
       }).catch(err => {});
+      //组装普通作者和平台签约作者类型
+      let creater = [], sign_creater = [];
+      memberList({userType:'2'}).then(result => {
+          if(result.code == 200){
+              creater = result.data.data;
+              // console.log(JSON.stringify(creater))
+              //组装普通作者类型平台签约作者
+              memberList({userType:'3'}).then(result => {
+                  if(result.code == 200){
+                      sign_creater = result.data.data;
+                      //合并所有作者
+                      creater.forEach(e => {
+                          sign_creater.push(e);
+                      });
+                      this.authorList = sign_creater;
+                  }
+              }).catch(err => {});
+          }
+      }).catch(err => {});
+      //musicList
+      musicList({page:0}).then(result => {
+          if(result.code == 200){
+              this.musicList = result.data.data.list;
+              //页的话还需初始化count
+              this.count = result.data.data.count;
+              // console.log(JSON.stringify(this.musicList))
+          }
+      }).catch(err => {});
       //表格数据初始化
-      console.log('kkkkk')
       this.init();
     },
   methods: {
       //初始化列表数据
       init(){
           //获取用户信息，加载表格数据
-          let data = JSON.parse(JSON.stringify(this.formData));
+          let data = JSON.parse(JSON.stringify(this.data));
           data.page --;
           blessingList(data).then(result => {
               if(result.code == 200){
@@ -571,20 +871,25 @@ export default {
         },
       //选择作品类型
       checkState() {
-          console.log(this.formData.resourceState)
+          console.log(this.data.resourceState)
+          this.init()
       },
       checkType() {
-          console.log(this.formData.resourceType)
+          console.log(this.data.resourceType)
+          this.init()
       },
       checkKind() {
-          console.log(this.formData.resourceKind)
+          console.log(this.data.resourceKind)
+          this.init()
       },
       //选择标记
       checkMarker() {
-          console.log(this.formData.resourceMarkType)
+          console.log(this.data.resourceMarkType)
+          this.init()
       },
       checkIsDel(){
-          console.log(this.formData.isDeleted)
+          console.log(this.data.isDeleted)
+          this.init()
       },
       //监听选择的内容
       handleSelectionChange(val) {
@@ -594,7 +899,7 @@ export default {
       },
       //加载第几页
       handleCurrentChange(val) {
-          this.formData.page = val;
+          this.data.page = val;
           //修改页数，重新加载
           this.init();
       },
@@ -717,13 +1022,16 @@ export default {
           //弹出
           this.controlOpenSetLabels = true;
       },
+      nodeCollapse(data) {
+          this.curLabels =[];
+      },
       //提交标签设置
       checkLabelsSubmit(){
           console.log(this.checkedLabels.join(","));
           console.log(this.cardId);
           let data = {
               resourceUid:this.curResourceInfo.resourceUid,
-              labelTreeCodes:this.checkedLabels.join(","),
+              labelTreeCodes:this.checkedLabels===''?'':this.checkedLabels.join(",")
           };
           //设置标签
           blessingLabels(data).then(res => {
@@ -766,6 +1074,161 @@ export default {
       openAdd(){
         this.openAddPage = true;
       },
+      getMsgFormSon(data){
+          this.openAddPage = data;
+      },
+      resetQuery(){
+          this.data={
+              resourceName:"",//资源名称
+                  resourceAuthorNickName:"",//创作者名称
+
+                  resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
+                  resourceKind:"",//资源类别[1-官方资源, 2-第三方创作者]
+                  resourceType:"",//资源类型
+                  resourceState:"",//资源状态
+                  resourceMarkType:"",//资源标记类型
+                  isDeleted:"",//资源是否被删除
+                  page: 1
+          };
+          this.init();
+      },
+      /*编辑相关*/
+      //选择作品类型
+      checkCardType() {
+          console.log(this.formData.resourceType)
+      },
+      //上传图片
+      handleAvatarSuccess(file, fileList) {},
+      beforeAvatarUpload(file) {
+          var type = "image/jpg,image/jpeg,image/png,image/gif";
+          const isJPG = type.indexOf(file.type) != -1;
+          const isLt2M = file.size / 1024 / 1024 < 1;
+
+          if (!isJPG) {
+              this.$message.error("上传图片只能是 JPG,JPEG,PNG,GIF 格式!");
+          }
+          if (!isLt2M) {
+              this.$message.error("上传图片大小不能超过 1MB!");
+          }
+          return isJPG && isLt2M;
+      },
+      //封面图上传成功
+      uploadSuccessCover(response, file, fileList) {
+          if (response.code == "200") {
+              this.formData.resourceCoverImageUrlUid = response.data.fileUid;
+              this.resourceCoverImageUrl = response.data.fileUrl;
+          }
+      },
+      //作品图上传成功
+      uploadSuccess(response, file, fileList) {
+          if (response.code == "200") {
+              this.formData.resourceFileUid = response.data.fileUid;
+              this.resourceImageUrl = response.data.fileUrl;
+          }
+      },
+      //上传视频
+      //上传文件的一些钩子
+      handleRemove(file, fileList) {
+          console.log(file, fileList);
+      },
+      handlePreview(file) {
+          console.log(file);
+      },
+      handleExceed(files, fileList) {
+          this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
+      beforeRemove(file, fileList) {
+          // return this.$confirm(`确定移除 ${ file.name }？`);
+      },
+      //上传之前格式和大小判断
+      beforeAvatarUploadVideo(file) {
+          const isLt1M = file.size / 1024 / 1024 < 1;
+          if (!isLt1M) {
+              this.$message.error("上传文件大小不能超过 1MB!");
+          }
+          return isLt1M;
+      },
+      uploadSuccessVideo(response, file, fileList) {
+          if (response.code == "200") {
+              this.formData.resourceFileUid = response.data.fileUid;
+              this.resourceUrl= response.data.fileUrl;
+          }
+      },
+      checkCardTypeForEdit(){
+          console.log(this.formData.resourceKind)
+      },
+      //选择作品类型
+      checkKindForEdit() {
+          console.log(this.formData.resourceKind)
+      },
+      checkAuthorForEdit(){
+          console.log(this.formData.resourceAuthorUid)
+      },
+      //选择作品种类0
+      checkMusicForEdit() {
+          console.log(this.formData.musicId)
+      },
+      //选择标记
+      checkMarkerForEdit() {
+          console.log(this.formData.resourceMarkType)
+      },
+      // 标签组装
+      checkLabelsForEdit() {
+          //需要加ref="tree"
+          let arr = [];
+          //全选中和半选中状态合并则是选中的所有
+          let checkedKeys = this.$refs.tree.getCheckedKeys();
+          let hafCheckedKeys = this.$refs.tree.getHalfCheckedKeys();
+          arr = checkedKeys.concat(hafCheckedKeys);
+          this.curlabels = arr;
+          console.log(this.curlabels)
+      },
+      edit(resourceInfo){
+          this.resourceCoverImageUrl = resourceInfo.resourceCoverImageUrl;
+          this.resourceImageUrl = resourceInfo.resourceFileUrl;
+          this.resourceUrl = resourceInfo.resourceFileUrl;
+          //给当前文件赋值
+          this.curLabels = resourceInfo.resourceLabelTreeCodes===null?'':resourceInfo.resourceLabelTreeCodes.split(",");
+          this.formData = {
+                  resourceUid:resourceInfo.resourceUid,
+                  resourceName:resourceInfo.resourceName,
+                  resourceDesc:resourceInfo.resourceDesc,
+                  resourceCoverImageUrlUid:resourceInfo.resourceCoverImageUrlUid,
+                  resourceFileUid:resourceInfo.resourceFileUid,
+                  resourceDefaultBlessingText:resourceInfo.resourceDefaultBlessingText,
+                  resourceMusicUid:resourceInfo.resourceMusicUid,
+                  resourceLabelTreeCodes:resourceInfo.resourceLabelTreeCodes,
+                  resourceKind:resourceInfo.resourceKind,
+                  resourceAuthorUid:resourceInfo.resourceAuthorUid,//后端接口名字需要修改
+                  resourceType:resourceInfo.resourceType,
+                  resourceMarkType:resourceInfo.resourceMarkType,
+          };
+          console.log(resourceInfo);
+          console.log(this.formData);
+          this.openEditPage = true;
+      },
+      updateSubmit(){
+          this.$refs['form'].validate((valid) => {
+              if (valid) {
+                  console.log(this.formData);
+                  //增加
+                  blessingUpdate(this.formData).then(res => {
+                      if (res.data.isSuccessful === "Y") {
+                          this.$message({
+                              message: "修改成功！",
+                              type: "success"
+                          });
+                          setTimeout(() => {
+                              this.$router.go(0);
+                          }, 2000);
+                          //跳转到列表
+                      } else {
+                          this.$message.error(res.data.message);
+                      }
+                  });
+              }
+          })
+      }
     }
 }
 </script>

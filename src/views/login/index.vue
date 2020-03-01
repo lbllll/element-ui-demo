@@ -99,6 +99,71 @@ export default {
       immediate: true
     }
   },
+  created(){
+      if(getToken()){
+          var route = JSON.parse(window.sessionStorage.getItem('route'))
+          // console.log(JSON.stringify(route));
+          //组装菜单列表
+          let menuParentArr = [];
+          let menuChildArr = [];
+          let menu = [];
+          route.forEach(e => {
+              //组装一级菜单
+              if(e.moduleType === "MENU" && e.moduleParentTreeCode == -1) {
+                  e.child = [];
+                  menuParentArr.push(e)
+              }
+              //非一级菜单
+              if(e.moduleType === "MENU" && e.moduleParentTreeCode != -1){
+                  menuChildArr.push(e)
+              }
+          });
+          //遍历一级菜单，插入所属二级菜单
+          menuParentArr.forEach(item  => {
+              menuChildArr.forEach(child => {
+                  if(item.moduleTreeCode === child.moduleParentTreeCode){
+                      item.child.push(child);
+                  }
+              });
+          });
+          //组装路由
+          menuParentArr.forEach(e => {
+              let routeItem = {
+                  path: e.moduleUrl,
+                  meta: { title: e.moduleName },
+                  redirect:'',
+                  children: []
+              };
+              e.child.forEach( (i, index) => {
+                  /*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 */
+                  routeItem.children.push(
+                      {
+                          path: i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1],
+                          component: () => import(`@/views${i.moduleUrl}`),
+                          name: i.routeCode,
+                      });
+                  //如果有首页菜单权限那就跳首页
+                  if(index === 0 && e.moduleUrl === '/'){
+                      routeItem.redirect = i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1];
+                  }
+                  if(index === 0 && routeItem.redirect === ''){
+                      routeItem.redirect = i.moduleUrl
+                  }
+              });
+              menu.push(routeItem);
+          });
+          console.log(menu);
+          this.$router.push({ name: menu[0].children[0].name});
+/*          var name = '';
+          for (let i = 0; i < route.length; i++) {
+              if(route[i].routeCode){
+                  name = route[i].routeCode;
+                  break;
+              }
+          }
+          this.$router.push({ name: name});*/
+      }
+  },
   methods: {
     showPwd() {
       if (this.passwordType === 'password') {
@@ -169,10 +234,8 @@ export default {
                       menu.push(routeItem);
                   });
                   console.log(menu);
-                  // debugger
-                  this.$router.push({ path: menu[0].children[0].path});
-                  //第二次重定向
-                  this.$router.push({ path: menu[0].children[0].path});
+                  this.$router.push({ name: menu[0].children[0].name});
+                  // this.$router.push({ path: menu[0].children[0].path});
               } catch (error) {
                 this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               }

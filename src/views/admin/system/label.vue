@@ -1,15 +1,28 @@
 <template>
   <div class="bodyBox">
 
+    <el-form :model="data" ref="searchs" class="searchBox">
+      <div class="radio">
+        <el-radio-group
+          v-model="data.labelBusinessType"
+          @change="init"
+          size="small"
+        >
+          <el-radio label="1" border>资源标签</el-radio>
+          <el-radio label="2" border>用户标签</el-radio>
+        </el-radio-group>
+      </div>
+    </el-form>
+
 <!--  树形标签结构  -->
 
     <div class="treeStyle">
-      <div class="header">选择父级标签</div>
+      <h3 class="header"><div class="moveOn" v-if="data.labelBusinessType==='1'" @click="getFirstLabel('1')">资源标签</div><div class="moveOn" v-if="data.labelBusinessType==='2'"  @click="getFirstLabel('2')">用户标签</div></h3>
       <el-tree
         class="el-tree--highlight-current "
         ref="tree"
         :data="labelList"
-        node-key="labelId"
+        node-key="labelTreeCode "
         :props="defaultProps"
         @node-click="handleNodeClick"
         :accordion="true"
@@ -32,27 +45,27 @@
         <el-table-column
           type="selection"
           width="50"
-          align="center">
+          align="left">
         </el-table-column>
-        <el-table-column prop="labelText" align="center" label="标签名"></el-table-column>
-        <el-table-column prop="labelPathText" align="center" label="标签描述"></el-table-column>
-        <el-table-column prop="createTime" align="center" label="创建时间">
+        <el-table-column prop="labelText" align="left" label="标签名"></el-table-column>
+        <el-table-column prop="labelPathText" align="left" label="标签描述"></el-table-column>
+        <el-table-column prop="createTime" align="left" label="创建时间">
           <template slot-scope="scope">
             <span>{{$timeUtil.getFormatTime(scope.row.createTime)}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="updateTime" align="center" label="修改时间">
+        <el-table-column prop="updateTime" align="left" label="修改时间">
           <template slot-scope="scope">
             <span>{{$timeUtil.getFormatTime(scope.row.updateTime)}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="labelTreeCode" align="center" label="标签树形码"></el-table-column>
-        <el-table-column prop="labelParentTreeCode" align="center" label="父级标签树形码"></el-table-column>
-        <el-table-column prop="labelBusinessType" align="center" label="标签业务类型">
+        <el-table-column prop="labelTreeCode" align="left" label="标签树形码"></el-table-column>
+        <el-table-column prop="labelParentTreeCode" align="left" label="父级标签树形码"></el-table-column>
+        <el-table-column prop="labelBusinessType" align="left" label="标签业务类型">
           <template slot-scope="scope">{{labelBusinessTypes[scope.row.labelBusinessType]}}</template>
         </el-table-column>
-        <el-table-column prop="labelDisplayIndex" align="center" label="标签排序"></el-table-column>
-        <el-table-column prop="labelStatus" align="center" label="标签状态">
+<!--        <el-table-column prop="labelDisplayIndex" align="left" label="标签排序"></el-table-column>-->
+        <el-table-column prop="labelStatus" align="left" label="标签状态">
           <template slot-scope="scope">
             <el-switch
               v-model="scope.row.labelStatus"
@@ -62,7 +75,7 @@
             ></el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" align="center">
+        <el-table-column label="操作" width="150" align="left">
           <template slot-scope="scope">
 <!--            <router-link  type="primary" round  :to="{name: 'LABEL_ADD', query: {labelInfo: scope.row}}">
               <el-button type="text" size="small">编辑</el-button>
@@ -111,7 +124,7 @@
     <el-dialog
       title="新增标签"
       :visible.sync="openAddPage">
-      <labelAdd></labelAdd>
+      <labelAdd :message="this.labelInfo" @func="getMsgFormSon"></labelAdd>
     </el-dialog>
 
     <el-dialog
@@ -151,7 +164,8 @@
         labelListAll,
         setLabelState,
         changeSort,
-        labelUpdateText
+        labelUpdateText,
+        labelListByBusinessType
     } from "@/api/table";
     import labelAdd from "./labelAdd";
     export default {
@@ -160,18 +174,12 @@
         data() {
             return {
                 data:{
-                    labelId:"",
-                    parentTreeCode:"",
-                    labelType:"",
-                    name:"",
-                    description:"",
-                    icon:"",
-                    sort:"",
-                    createTime:"",
-                    updateTime:"",
-                    isDeleted:"",
+                    labelBusinessType:'1',
+                    parentTreeCode:'',
                     page:1,
                 },
+                //暂存当前选中标签的信息
+                labelInfo:{},
                 formData:{
                     labelId:"",
                     labelText:"",
@@ -192,7 +200,7 @@
                   "4":"标签类型3" ,
                 },
                 //分页
-                count: 6,
+                count: 0,
                 multipleSelection: [],
                 //分页
                 isIndeterminate: false,
@@ -213,8 +221,8 @@
                 },
                 //标签业务类型
                 labelBusinessTypes:{
-                    "1":"作品",
-                    "2":"用户",
+                    "1":"资源类型",
+                    "2":"用户类型",
                 },
                 //标签状态
                 labelStatus:{
@@ -225,6 +233,8 @@
                 openAddPage:false,
                 openEditPage:false,
                 curLabelInfo:{},
+                //当前选中父节点
+                curParentTreeCode:'',
             }
 
         },
@@ -233,23 +243,31 @@
             selectArr: Array
         },
         created() {
+            //初始化加载当前业务类型标签树
             this.init();
-            console.log(this.childLabelList)
+            //点击checkbox过后回到一级标签列表，清空labelInfo
+            this.labelInfo = {
+                parentInfo: {},
+                labelBusinessType:this.data.labelBusinessType
+            };
         },
         methods: {
             init(){
-                // 加载表格数据
                 //遍历所有标签，进行标签树组装
-                labelListAll().then(result => {
-                    if(result.code == 200){
+                let data = {
+                    labelBusinessType:this.data.labelBusinessType
+                };
+                //初始化当前业务类型下的树
+                labelListByBusinessType(data).then(result => {
+                    if(result.data.isSuccessful === 'Y'){
                         //将数据转为map，以labelTreeCode为标识
                         let map = {};
-                        result.data.data.list.forEach( item => {
+                        result.data.data.forEach( item => {
                             map[item.labelTreeCode] = item
                        });
                         let labelArr = [];
                         //然后遍历，只要当前item存在父标签parent则一直找，找到就设为其子标签
-                        result.data.data.list.forEach(item => {
+                        result.data.data.forEach(item => {
                             let parent = map[item.labelParentTreeCode];
                             if(parent){
                                 (parent.child || (parent.child = [])).push(item)
@@ -260,12 +278,39 @@
                         });
                         //重组标签树
                         this.labelList = labelArr;
-                        this.childLabelList = this.labelList;
-                        //分页
-                        this.count = this.childLabelList.length;
-                        // console.log(JSON.stringify(this.labelList))
+                        //组装数据
+                        //初始化当前业务类型的一级标签到数据表格
+                        let data = JSON.parse(JSON.stringify(this.data));
+                        data.page --;
+                        data.parentTreeCode= "-1";
+                        //点击checkbox过后回到一级标签列表，清空labelInfo
+                        this.labelInfo = {
+                            parentInfo: {},
+                            labelBusinessType:this.data.labelBusinessType
+                        };
+                        this.getChildList(data);
                     }
                 }).catch(err => {});
+            },
+            //根据当前业务类型，获取子标签数据填充数据表格
+            getChildList(data){
+                labelListByParent(data).then(result => {
+                    if(result.data.isSuccessful === 'Y'){
+                        this.childLabelList = result.data.data.list;
+                        this.count = result.data.data.count;
+                    }
+                }).catch(err => {});
+            },
+            getFirstLabel(labelBusinessType) {
+                //初始化当前业务类型的一级标签到数据表格
+                let data = JSON.parse(JSON.stringify(this.data));
+                data.page = 0;
+                data.parentTreeCode= "-1";
+                //重置当前选择的父节点
+                this.data.labelBusinessType = labelBusinessType;
+                //回到一级标签列表，置空labelinfo
+                this.labelInfo = {};
+                this.getChildList(data);
             },
             //监听选择的内容
             handleSelectionChange(val) {
@@ -276,8 +321,10 @@
             //加载第几页
             handleCurrentChange(val) {
                 this.data.page = val;
-                //修改页数，重新加载
-                this.init();
+                //初始化当前业务类型的标签到数据表格
+                let data = JSON.parse(JSON.stringify(this.data));
+                data.page --;
+                this.getChildList(data);
             },
             //右下按钮全选，切换保证和表格的全选一致
             handleCheckAllChange(val) {
@@ -302,20 +349,17 @@
             },
             //选择树形节点，在表格中显示相应信息
             handleNodeClick(v,e) {
-                //当前节点数据
-                //console.log(v);
-                //当前节点所有相关数据，包括父 子节点的关系和内容
-                //console.log(e);
-                //如果当前选中的是第一级即最顶层节点没有父节点,则显示最顶层节点列表
-                if(v.labelParentTreeCode === "-1"){
-                    this.childLabelList = this.labelList;
-                }else {
-                    //获取父节点;并展示其兄弟节点
-                    this.childLabelList = e.parent.data.child;
-                }
-                //分页
-                this.count = this.childLabelList.length;
-
+                //初始化当前业务类型的所选标签的子标签到数据表格
+                let data = JSON.parse(JSON.stringify(this.data));
+                data.page = 0;
+                //切换了设置当前选中parentTreeCode
+                data.parentTreeCode= v.labelTreeCode;
+                this.getChildList(data);
+                //将当前选中改的信息记录，将要传入到新增标签中做部分添加参数
+                this.labelInfo = {
+                    parentInfo:v,
+                    labelBusinessType:this.data.labelBusinessType
+                };
             },
             //启用禁用：
             setStatus(index,row) {
@@ -451,11 +495,22 @@
             },
             /*打开资源编辑弹出层*/
             openAdd(){
+                //如果labelInfo的parentInfo为false，则是没有父级标签信息，则是处于最顶层，业务区分节点，点击添加则是添加当前业务的一级标签
+                if(!this.labelInfo.parentInfo){
+                    this.labelInfo = {
+                        parentInfo: {},
+                        labelBusinessType:this.data.labelBusinessType
+                    }
+                }
+                // console.log(JSON.stringify(this.labelInfo));
                 this.openAddPage = true;
             },
             edit(labelInfo){
                 this.formData = labelInfo;
                 this.openEditPage =true;
+            },
+            getMsgFormSon(data){
+                this.openAddPage = data;
             },
             editSubmit(){
                 //组装数据
@@ -490,6 +545,9 @@
 <style lang="scss" scoped>
   @import "~@/styles/mixin.scss";
 
+  .moveOn:hover{
+    cursor: pointer;
+  }
   .header {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -511,6 +569,7 @@
     width: 85%;
     float: right;
   }
+
   /*编辑弹出层*/
   .bodyBox >.title {
     margin: 15px 0;

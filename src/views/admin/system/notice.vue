@@ -117,7 +117,7 @@
     <el-dialog
       title="编辑通知信息"
       :visible.sync="openAddPage">
-      <noticeAdd></noticeAdd>
+      <noticeAdd @func="getMsgFormSon"></noticeAdd>
     </el-dialog>
   </div>
 </template>
@@ -230,6 +230,7 @@
             },
             checkState (noticeInfo){
                 console.log(noticeInfo)
+                this.init();
             },
             //批量删除
             delAll(rowKey) {
@@ -260,6 +261,9 @@
             /*打开资源编辑弹出层*/
             openAdd(){
                 this.openAddPage = true;
+            },
+            getMsgFormSon(data){
+                this.openAddPage = data;
             },
         },
     }

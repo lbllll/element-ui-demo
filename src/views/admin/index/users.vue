@@ -3,7 +3,7 @@
     <form  :model="data" >
     </form>
     <div class="header">
-      <el-button type="primary" size="small"  @click="openAdd">新增用户</el-button>
+      <el-button type="primary" size="small"  @click="openAdd">新增账号</el-button>
     </div>
 
     <el-table
@@ -57,7 +57,7 @@
     </el-table>
 
 
-    <!--  底部操作工具栏  -->
+<!--    &lt;!&ndash;  底部操作工具栏  &ndash;&gt;
     <div class="footer flex-between">
       <div>
         <el-checkbox
@@ -75,7 +75,7 @@
         layout="total, prev, pager, next, jumper"
         :total="count"
       ></el-pagination>
-    </div>
+    </div>-->
 
 
     <!--  弹出层设置角色  -->
@@ -103,13 +103,13 @@
     </el-dialog>
 
     <el-dialog
-      title="新增用户信息"
+      title="新增账号"
       :visible.sync="openAddPage">
-      <userAdd :message="this.curUserId" v-if="this.curUserId !== ''"></userAdd>
+      <userAdd :message="this.curUserId" v-if="this.curUserId !== ''" @func="getMsgFormSon"></userAdd>
     </el-dialog>
 
     <el-dialog
-      title="编辑用户信息"
+      title="编辑账号"
       :visible.sync="openEditPage">
       <el-form ref="form" :model="formData" class="formBox" label-width="80px">
         <!--      <p class="title">用户信息</p>-->
@@ -139,6 +139,15 @@
             <el-input class="inputs none imgArea" v-model="formData.userHeadImageUrl"></el-input>
           </el-upload>
         </el-form-item>
+<!--        <el-form-item  label="原始密码" prop="userPassword" verify>
+          <el-input
+            class="formItem"
+            v-model="formData.userPassword"
+            maxlength="30"
+            placeholder="请输入原始密码"
+          ></el-input>
+          <span class="describe">长度不低于6位</span>
+        </el-form-item>-->
         <el-form-item  label="新密码" prop="newPassword" verify>
           <el-input
             class="formItem"
@@ -148,6 +157,25 @@
             type="password"
           ></el-input>
           <span class="describe">长度不低于6位</span>
+        </el-form-item>
+
+        <el-form-item label="选择角色" verify  prop="roleIds">
+          <el-select
+            class="formItem"
+            v-model="checkRoles"
+            prop="roleIds"
+            placeholder="选择角色"
+            size="small"
+            multiple
+            @change="checkRole"
+          >
+            <el-option
+              v-for="item in rolesList"
+              :key="item.roleId"
+              :label="item.roleName"
+              :value="item.roleId"
+            ></el-option>
+          </el-select>
         </el-form-item>
 
         <!--   发布按钮     -->
@@ -168,9 +196,9 @@
         userState,
         roleList,
         userDelete,
-        userDetail,
         userInfo,
-        userUpdate
+        userUpdate,
+        userInfoAndRoles
     } from "@/api/table";
     import userAdd from "./userAdd";
     export default {
@@ -191,76 +219,8 @@
                     userState: "",
                     userType: "",
                     newPassword:"",
-                    roleId:""//测试用的角色id
+                    roleIds:""//测试用的角色id
                 },
-                cardList:[
-                    {
-                        cardId:"1",
-                        categoryId:"1",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"heka",
-                        cardName:"贺卡1",
-                        memberId:"老王id",
-                        nickName:"老王名字",
-                        headPath:"头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"in",
-                        labelIds:"1,2,3",
-                        labels:"1,2,3",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                    {
-                        cardId:"2",
-                        categoryId:"2",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"chahua",
-                        cardName:"贺卡2",
-                        memberId:"老李id",
-                        nickName:"老李",
-                        headPath:"老李头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"out",
-                        labelIds:"1,2,3",
-                        labels:"1,2,3",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                    {
-                        cardId:"3",
-                        categoryId:"1",
-                        createTime:"2020-20-2",
-                        isDeleted:"N",
-                        updateTime:"2020-20-3",
-                        cardType:"heka",
-                        cardName:"贺卡3",
-                        memberId:"老张id",
-                        nickName:"老张",
-                        headPath:"老张头像",
-                        cardImagePath:"贺卡图片地址",
-                        status:"in",
-                        labelIds:"1,2",
-                        labels:"1,2",
-                        authorRemark:"作者备注",
-                        musicId:"音乐关联id",
-                        cardWord:"祝福语",
-                        markerId:"标记图片id",
-                        coverUrl:"封面图地址",
-                        fontId:"字体id"
-                    },
-                ],
                 labelList:[
                     {
                         labelId:"1",
@@ -388,6 +348,7 @@
                 access_token: {
                     access_token: this.$store.getters.token
                 },
+                checkRoles:[],
 
             }
         },
@@ -396,6 +357,7 @@
             selectArr: Array
         },
         created() {
+
             this.init();
         },
         methods: {
@@ -411,10 +373,12 @@
                     }
                 }).catch(err => {});
                 //获取角色列表，用于设置角色
-                roleList().then(result => {
-                    if(result.code == 200){
-                        this.rolesList = result.data.data;
+                roleList().then(res => {
+                    if(res.data.isSuccessful === "Y"){
+                        this.rolesList = res.data.data;
                         // console.log(JSON.stringify(this.rolesList))
+                    }else {
+                        this.$message.error(res.data.message);
                     }
                 }).catch(err => {});
             },
@@ -434,29 +398,6 @@
                     .catch(err => {
                         this.$message.error(err);
                     });
-            },
-            //选择角色
-            checkRoles(uid) {
-                let userInfo = {};
-                //根据用户id查询用户信息，和角色列表
-                userDetail({userId: uid}).then(res => {
-                        if (res.data.isSuccessful === "Y") {
-                            userInfo = res.data.data;
-                            console.log(userInfo);
-                            //todo 处理角色列表 模拟当前用户的角色列表，先将之前残留的checkRolesList清空避免数据污染
-                            this.checkRolesList = [];
-                            this.curUserRolesList.forEach(e => {
-                                this.checkRolesList.push(e.roleId)
-                            });
-                        } else {
-                            this.$message.error(res.data.message);
-                        }
-                    })
-                    .catch(err => {
-                        this.$message.error(err);
-                    });
-                //将弹出框设为显示
-                this.checkRolesShow = true;
             },
             //设置角色
             changeRole() {
@@ -565,11 +506,12 @@
             openEdit(userId){
                 this.curUserId = userId;
                 //查询用户信息,并赋值
-                userInfo({userId:userId}).then(res => {
+                userInfoAndRoles({userId:userId}).then(res => {
                     if(res.code == 200){
                         console.log(JSON.stringify(res));
-                        this.formData = res.data.data;
-                        this.userHeadImageUrl = res.data.data.userHeadImageUrl
+                        this.formData = res.data.data.userInfo;
+                        this.userHeadImageUrl = res.data.data.userInfo.userHeadImageUrl
+                        this.checkRoles = res.data.data.roles
                     }
                 }).catch(err => {});
                 this.openEditPage = true;
@@ -595,6 +537,13 @@
                     this.userHeadImageUrl = response.data.fileUrl;
                 }
             },
+            getMsgFormSon(data){
+                this.openAddPage = data;
+            },
+            checkRole() {
+                this.formData.roleIds = this.checkRoles;
+                console.log(this.formData.roleIds===[]?'':this.formData.roleIds.join(","));
+            },
             edit(){
                 //修改
                 this.formData.userId = this.curUserId;
@@ -604,7 +553,8 @@
                     headPath:this.formData.userHeadImageUrl,
                     userNickName:this.formData.userNickName,
                     password:this.formData.userPassword,
-                    newPassword: this.formData.newPassword
+                    newPassword: this.formData.newPassword,
+                    roleIds:this.checkRoles===[]?'':this.checkRoles.join(","),
                 };
                 console.log(data);
                 // return false;

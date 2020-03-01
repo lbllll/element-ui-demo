@@ -30,7 +30,7 @@
 <template>
     <div class="bodyBox">
       <el-form ref="form" :model="formData" :rules="rules" class="formBox" label-width="80px">
-        <p class="title">发布作品</p>
+        <p class="title">作品基本信息</p>
 
         <el-form-item label="作品类型"  verify prop="resourceType">
           <el-select
@@ -123,20 +123,20 @@
             class="formItem"
             v-model="formData.resourceName"
             maxlength="20"
-            placeholder="请输入作品名，30字内"
+            placeholder="请输入作品名，20字内"
           ></el-input>
-          <span class="describe">长度不超过30</span>
+          <span class="describe">长度不超过20</span>
         </el-form-item>
         <el-form-item label="作品描述" prop="resourceDesc" verify>
           <el-input
             class="formItem"
             v-model="formData.resourceDesc"
-            maxlength="20"
+            maxlength="100"
             placeholder="请输入作品描述"
           ></el-input>
           <span class="describe">长度不超过100</span>
         </el-form-item>
-        <el-form-item label="选择标签" verify prop="resourceLabelTreeCodes">
+<!--        <el-form-item label="选择标签" verify prop="resourceLabelTreeCodes">
           <div class="header">选择标签</div>
           <el-tree
             ref="tree"
@@ -154,7 +154,7 @@
             <el-button type="primary" @click="checkAllTree" size="mini">全选</el-button>
             <el-button @click="cancelAllTree" size="mini">取消全选</el-button>
           </div>
-        </el-form-item>
+        </el-form-item>-->
         <el-form-item label="祝福语" prop="resourceDefaultBlessingText" verify>
           <el-input
             class="formItem"
@@ -165,7 +165,7 @@
           <span class="describe">长度不超过100</span>
         </el-form-item>
 
-        <el-form-item label="添加标记" verify prop="resourceMarkType">
+<!--        <el-form-item label="设置标记" verify prop="resourceMarkType">
           <el-select
             class="formItem"
             v-model="formData.resourceMarkType"
@@ -179,14 +179,14 @@
               :value="item.markerId"
             ></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item>-->
 
         <el-form-item label="选择作者"  prop="resourceAuthorUid" verify>
           <el-select
             class="formItem"
             v-model="formData.resourceAuthorUid"
             placeholder="请选择作者"
-            @change="checkMusic"
+            @change="checkAuthor"
           >
             <el-option
               v-for="item in authorList"
@@ -216,6 +216,7 @@
 <!--   发布按钮     -->
         <div class="footer">
           <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
+          <el-button @click="cancelAndBack">取  消</el-button>
 <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
         </div>
       </el-form>
@@ -229,6 +230,7 @@
         musicList,
         labelListAll,
         memberList,
+        labelListByBusinessType
     } from "@/api/table";
   export default {
       name: "BLESSING_ADD",
@@ -249,6 +251,7 @@
                   resourceType:"",
                   resourceMarkType:"",
               },
+              openAddPage:false,
               labelList:[],
               fontList:[],
               musicList:[],
@@ -339,16 +342,17 @@
           }).catch(err => {});
           //labelList
           //遍历所有标签，进行标签树组装
-          labelListAll().then(result => {
-              if(result.code == 200){
+          //初始化当前业务类型下的树
+          labelListByBusinessType({labelBusinessType:"1"}).then(result => {
+              if(result.data.isSuccessful === 'Y'){
                   //将数据转为map，以labelTreeCode为标识
                   let map = {};
-                  result.data.data.list.forEach( item => {
+                  result.data.data.forEach( item => {
                       map[item.labelTreeCode] = item
                   });
                   let labelArr = [];
                   //然后遍历，只要当前item存在父标签parent则一直找，找到就设为其子标签
-                  result.data.data.list.forEach(item => {
+                  result.data.data.forEach(item => {
                       let parent = map[item.labelParentTreeCode];
                       if(parent){
                           (parent.child || (parent.child = [])).push(item)
@@ -456,6 +460,9 @@
           checkMusic() {
               console.log(this.formData.musicId)
           },
+          checkAuthor(){
+              console.log(this.formData.resourceAuthorUid)
+          },
           //选择标记
           checkMarker() {
               console.log(this.formData.resourceMarkType)
@@ -492,12 +499,12 @@
               }
               else {
                   //处理标签
-                  this.formData.resourceLabelTreeCodes = this.checkedLabels.join(",");
+                  this.formData.resourceLabelTreeCodes = this.checkedLabels.length>0?this.checkedLabels.join(","):'';
                   //删除cardId字段
                   delete this.formData.resourceUid;
                   this.$refs['form'].validate((valid) => {
                       if (valid) {
-                          console.log("验证终于通过！");
+                          // console.log("验证终于通过！");
                           //删除cardId字段
                           delete this.formData.resourceUid;
                           console.log(this.formData);
@@ -520,6 +527,10 @@
                   })
               }
           },
+          cancelAndBack(){
+              this.formData ={};
+              this.$emit('func',this.openAddPage)
+          }
 
       },
   }

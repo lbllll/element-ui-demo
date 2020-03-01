@@ -46,6 +46,7 @@
       <!--   发布按钮     -->
       <div class="footer">
         <el-button type="primary" @click="addNotice">{{$route.query.noticeInfo?'确认修改':'确认添加'}}</el-button>
+        <el-button @click="cancelAndBack">取  消</el-button>
         <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
       </div>
     </el-form>
@@ -67,6 +68,7 @@
                     iconUrl:"",
                     detailUrl:"",
                 },
+                openAddPage:false,
                 cardList:[],
                 labelList:[],
                 fontList:[],
@@ -188,27 +190,31 @@
                     //修改
                 }
                 else {
-                    //组装添加数据
-                    let data = {
-                        noticeTitle:this.formData.noticeTitle,
-                        iconUrl:this.formData.iconUrl,
-                        detailUrl:this.formData.detailUrl,
-                    };
-                    //添加
-                    noticeAdd(data).then(res => {
-                        if (res.code == "200") {
-                            this.$message({
-                                message: "添加成功！",
-                                type: "success"
-                            });
-                            setTimeout(() => {
-                                this.$router.go(0);
-                            }, 2000);
-                            //跳转到列表
-                        } else {
-                            this.$message.error(res.description);
-                        }
-                    });
+                    this.$refs['form'].validate((valid) => {
+                            if (valid) {
+                                //组装添加数据
+                                let data = {
+                                    noticeTitle:this.formData.noticeTitle,
+                                    iconUrl:this.formData.iconUrl,
+                                    detailUrl:this.formData.detailUrl,
+                                };
+                                //添加
+                                noticeAdd(data).then(res => {
+                                    if (res.code == "200") {
+                                        this.$message({
+                                            message: "添加成功！",
+                                            type: "success"
+                                        });
+                                        setTimeout(() => {
+                                            this.$router.go(0);
+                                        }, 2000);
+                                        //跳转到列表
+                                    } else {
+                                        this.$message.error(res.description);
+                                    }
+                                });
+                            }});
+
                 }
 
             },
@@ -235,6 +241,10 @@
                 //赋值
                 this.formData.labelParentTreeCode = this.checkParentLabelId;
             },
+            cancelAndBack(){
+                this.formData ={};
+                this.$emit('func',this.openAddPage)
+            }
         },
     }
 </script>

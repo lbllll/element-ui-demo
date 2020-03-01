@@ -56,7 +56,7 @@
           ></el-option>
         </el-select>
       </div>
-      <!--是否删除-->
+<!--      &lt;!&ndash;是否删除&ndash;&gt;
       <div>
         <el-select
           class="selectStyle"
@@ -74,7 +74,7 @@
             :value="item.isDeleted"
           ></el-option>
         </el-select>
-      </div>
+      </div>-->
       <!--   作品名   -->
       <div class="inputStyle">
         <el-form-item prop="resourceName"  can-be-empty>
@@ -104,8 +104,8 @@
       :row-style="{height:'120px'}"
       :cell-style="{}"
     >
-      <el-table-column align="center" type="selection" reserve-selection width="40"></el-table-column>
-      <el-table-column prop="memberInfo" align="center" label="用户信息" width="170">
+      <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
+      <el-table-column prop="memberInfo" align="left" label="用户信息" width="170">
         <template slot-scope="scope">
           <div>
             <img class="userHeadImg" v-image-preview :src="scope.row.memberHeadImageUrl" width="50" height="50" />
@@ -122,20 +122,20 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="country" align="center" label="城市">
+      <el-table-column prop="country" align="left" label="城市">
         <template slot-scope="scope">
-          <span>{{scope.row.weChatCountry}}</span>
-          <span>{{scope.row.weChatProvince}}</span>
-          <span>{{scope.row.weChatCity}}</span>
+          <span>{{scope.row.weChatCountry===null?'未获取':scope.row.weChatCountry}}</span>
+          <span>{{scope.row.weChatProvince===null?'未获取':scope.row.weChatProvince}}</span>
+          <span>{{scope.row.weChatCity===null?'未获取':scope.row.weChatCity}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column prop="wechatMobile" align="center" label="联系方式">
+      <el-table-column prop="wechatMobile" align="left" label="联系方式">
         <template slot-scope="scope">
           <span>{{scope.row.wechatMobile==null?"用户暂未授权":scope.row.wechatMobile}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="country" align="center" label="用户简介">
+      <el-table-column prop="country" align="left" label="用户简介">
         <template slot-scope="scope">
           <span>类型：{{userTypes[scope.row.userType]}}</span>
           <br>
@@ -145,7 +145,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="sourceInfo" align="center" width="200" label="资源信息">
+      <el-table-column prop="sourceInfo" align="left" width="200" label="资源信息">
         <template slot-scope="scope">
           <span>名字：{{scope.row.resourceName}}</span>
           <br>
@@ -154,20 +154,20 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="receivedInfo" align="center" width="200" label="接收情况">
+      <el-table-column prop="receivedInfo" align="left" width="200" label="接收情况">
         <template slot-scope="scope">
           <span>接收数目：{{scope.row.receivedCount}}</span>
           <br>
 <!--          <span><el-button type="text" @click="checkReceivedDetails(scope.row.resourceUid)" size="small">查看明细</el-button></span>-->
         </template>
       </el-table-column>
-      <el-table-column prop="sendTime" align="center" width="200" label="发送时间">
+      <el-table-column prop="sendTime" align="left" width="200" label="发送时间">
         <template slot-scope="scope">
           <span>{{$timeUtil.getFormatTime(scope.row.sendTime)}}</span>
         </template>
       </el-table-column>
 
-      <el-table-column prop="remark" align="center" label="备注">
+      <el-table-column prop="remark" align="left" label="备注">
         <template slot-scope="scope">
           <el-tooltip :content="scope.row.remark">
             <span>{{scope.row.remark | controlLength}}</span>
@@ -177,7 +177,7 @@
       </el-table-column>
 
       <!--操作列处理-->
-<!--      <el-table-column label="操作" align="center">
+<!--      <el-table-column label="操作" align="left">
         <template slot-scope="scope">
           &lt;!&ndash;          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'cardRelease', query: {id: scope.row.cardId}}">
                       <el-button type="text" size="small">编辑</el-button>
@@ -195,7 +195,7 @@
           v-model="checkAll"
           @change="handleCheckAllChange"
         >全选</el-checkbox>
-        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>
+<!--        <el-button type="primary" v-if="!checkItem" size="mini" @click="delAll">删除</el-button>-->
       </div>
       <el-pagination
         @current-change="handleCurrentChange"
@@ -221,17 +221,17 @@
         :header-cell-style="{background:'#afafaf',color:'#606266'}"
       >
 
-        <el-table-column prop="receivedNickName" align="center" label="接收用户">
+        <el-table-column prop="receivedNickName" align="left" label="接收用户">
           <template slot-scope="scope">
             <span>{{scope.row.receivedNickName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="receivedTime" align="center" label="接收时间">
+        <el-table-column prop="receivedTime" align="left" label="接收时间">
           <template slot-scope="scope">
             <span>{{scope.row.receivedTime}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="thankWords" align="center" label="感谢回复">
+        <el-table-column prop="thankWords" align="left" label="感谢回复">
           <template slot-scope="scope">
             <span>{{scope.row.thankWords}}</span>
           </template>
@@ -275,7 +275,7 @@
                     resourceName:"",//资源名
                     userLabelCode:"",//用户标签
                     userType:"",//用户类型
-                    isDeleted:"",//是否删除
+                    isDeleted:"N",//是否删除
                     page: 1
                 },
                 cardList:[],
@@ -299,45 +299,7 @@
                     },
 
                 ],
-                fontList:[
-                    {
-                        fontId:"1",
-                        fontName:"第一个字体名字",
-                        fontSize:"第一个字体大小",
-                        fontUrl:"第一个字体地址",
-                    },
-                ],
-                categoryList:[
-                    {
-                        categoryId:"1",
-                        prentId:"-1",
-                        name:"第一个种类名字",
-                        icon:"第一个种类图标",
-                        description:"描述",
-                        createTime:"2020-20-3",
-                        updateTime:"2020-20-3",
-                        isDeleted:"N",
-                        sort:"0",
-                    },
-                ],
-                cardTypeList:[
-                    {
-                        cardType:"heka",
-                        name:"贺卡",
-                    },
-                    {
-                        cardType:"chahua",
-                        name:"插画",
-                    },
-                    {
-                        cardType:"tiaoman",
-                        name:"条漫",
-                    }
-                ],
-                cardStatusList:{
-                    in:"上架",
-                    out:"下架",
-                },
+                fontList:[],
                 sendRecordList:[],
                 //分页
                 isIndeterminate: false,
@@ -361,22 +323,22 @@
                 //用户类型
                 userTypeList:[
                     {
-                        userType:"1",
+                        userType:"3",
                         name:"平台签约作者",
                     },
                     {
                         userType:"2",
                         name:"作者",
                     },{
-                        userType:"3",
+                        userType:"1",
                         name:"普通用户",
                     },
 
                 ],
                 userTypes:{
-                    "1":"平台签约作者",
+                    "3":"平台签约作者",
                     "2":"作者",
-                    "3":"普通用户",
+                    "1":"普通用户",
                 },
                 //是否删除
                 delStatusList:[
@@ -491,6 +453,7 @@
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.formData));
                 data.page --;
+                console.log(data)
                 sendRecords(data).then(result => {
                     if(result.code == 200){
                         this.sendRecordList = result.data.data.data;
@@ -513,7 +476,7 @@
             },
             //目前选中用户类型
             checkUserType() {
-                console.log(this.formData.userType)
+                this.init();
             },
             checkIsDel(){
                 console.log(this.formData.isDeleted)

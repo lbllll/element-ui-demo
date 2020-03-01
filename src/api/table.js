@@ -46,8 +46,8 @@ export function userInfo(data) {
 export function userState(data) {
   return http.put('/api/sys/users/state', data, 'formData')
 }
-export function userDetail(data) {
-  return http.get('/api/sys/users/info', data, 'formData')
+export function userInfoAndRoles(data) {
+  return http.get('/api/sys/users/info/roles', data, 'formData')
 }
 //角色相关
 export function roleInfo(data) {
@@ -65,6 +65,9 @@ export function roleDelete(data) {
 export function roleList(data) {
   return http.get('/api/sys/roles/list', data, 'formData')
 }
+export function roleUpdateDetail(data) {
+  return http.put('/api/sys/roles/info/detail', data, 'formData')
+}
 //获取权限列表
 export function moduleList(data) {
   return http.get('/api/sys/modules/list', data, 'formData')
@@ -72,6 +75,9 @@ export function moduleList(data) {
 //系统公共标签设置
 export function labelListByParent(data) {
   return http.get('/api/sys/labels/list', data, 'formData')
+}
+export function labelListByBusinessType(data) {
+  return http.get('/api/sys/labels/labelBusinessType', data, 'formData')
 }
 export function labelListAll(data) {
   return http.get('/api/sys/labels/listAll', data, 'formData')
@@ -152,6 +158,9 @@ export function memberRemark(data) {
 }
 export function memberType(data) {
   return http.put('/api/member/members/info/type', data, 'formData')
+}
+export function memberLabel(data) {
+  return http.put('/api/member/members/info/label', data, 'formData')
 }
 /*export function memberDelete(data) {
   return http.delete('/api/member/members/info/delete?memberId='+ data, 'formData')

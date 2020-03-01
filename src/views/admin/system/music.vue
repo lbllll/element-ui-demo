@@ -15,29 +15,29 @@
       <el-table-column
         type="selection"
         width="50"
-        align="center">
+        align="left">
       </el-table-column>
-      <el-table-column prop="musicName" align="center" label="音乐名"></el-table-column>
-      <el-table-column prop="musicUrl" align="center" width="320" label="音乐">
+      <el-table-column prop="musicName" align="left" label="音乐名"></el-table-column>
+      <el-table-column prop="musicUrl" align="left" width="320" label="音乐">
         <template slot-scope="scope">
           <audio :src="scope.row.musicUrl"  controls>
           </audio>
         </template>
       </el-table-column>
-      <el-table-column prop="musicSinger" align="center" label="歌手"></el-table-column>
-<!--      <el-table-column prop="musicTimeSeconds" align="center" label="音乐时长"></el-table-column>-->
-      <el-table-column prop="musicType" align="center" label="音乐类型">
+      <el-table-column prop="musicSinger" align="left" label="歌手"></el-table-column>
+<!--      <el-table-column prop="musicTimeSeconds" align="left" label="音乐时长"></el-table-column>-->
+      <el-table-column prop="musicType" align="left" label="音乐类型">
         <template slot-scope="scope">{{scope.row.musicType}}</template>
 <!--        <template slot-scope="scope">{{musicTypes[scope.row.musicType]}}</template>-->
       </el-table-column>
-      <el-table-column prop="musicTimeSeconds" align="center" label="音乐时长"></el-table-column>
-      <!--      <el-table-column prop="musicGroup" align="center" label="音乐分组">
+      <el-table-column prop="musicTimeSeconds" align="left" label="音乐时长"></el-table-column>
+      <!--      <el-table-column prop="musicGroup" align="left" label="音乐分组">
               <template slot-scope="scope">{{musicGroups[scope.row.musicGroup]}}</template>
             </el-table-column>-->
-      <el-table-column prop="sourceName" align="center" label="来源名称"></el-table-column>
-      <el-table-column prop="uploadName" align="center" label="上传人"></el-table-column>
-      <el-table-column prop="musicGroup" align="center" label="音乐分组"></el-table-column>
-      <el-table-column label="操作" width="160" align="center">
+      <el-table-column prop="sourceName" align="left" label="来源名称"></el-table-column>
+      <el-table-column prop="uploadName" align="left" label="上传人"></el-table-column>
+      <el-table-column prop="musicGroup" align="left" label="音乐分组"></el-table-column>
+      <el-table-column label="操作" width="160" align="left">
         <template slot-scope="scope">
 <!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'MUSIC_ADD', query: {musicInfo: scope.row}}">
             <el-button type="text" size="small">编辑</el-button>
@@ -101,11 +101,11 @@
     <el-dialog
       title="新增音乐"
       :visible.sync="openAddPage">
-      <musicAdd></musicAdd>
+      <musicAdd @func="getMsgFormSon"></musicAdd>
     </el-dialog>
 
     <el-dialog
-      title="编辑音乐信息"
+      title="编辑音乐"
       :visible.sync="openEditPage">
       <div class="bodyBox">
         <el-form ref="form" :model="formData" class="formBox" label-width="80px">
@@ -159,6 +159,7 @@
               v-model="formData.musicTimeSeconds"
               maxlength="20"
               placeholder="请输入歌曲时长"
+              disabled="disabled"
             ></el-input>
           </el-form-item>
           <el-form-item label="上传者" verify prop="uploadName">
@@ -167,6 +168,7 @@
               v-model="formData.uploadName"
               maxlength="20"
               placeholder="上传者"
+              disabled="disabled"
             ></el-input>
           </el-form-item>
           <el-form-item label="来源" verify prop="sourceName">
@@ -486,6 +488,9 @@
                 this.formData  = musicInfo;
                 console.log(this.curMusicInfo );
                 this.openEditPage = true;
+            },
+            getMsgFormSon(data){
+                this.openAddPage = data;
             },
             editSubmit(){
                 //组装修改参数
