@@ -166,7 +166,7 @@
                 if (!isLt1M) {
                     this.$message.error("上传图片大小不能超过 1MB!");
                 }
-                return isJPG && isLt2M;
+                return isJPG && isLt1M;
             },
             uploadSuccessIcon(response, file, fileList) {
                 if (response.code == "200") {
@@ -221,7 +221,7 @@
             checkLabel() {
                 console.log(this.formData.labelBusinessType)
             },
-            //选则父标签
+            //选则父标签,将树做成单选
             checkParentLabel(item,node,self) {
                 //共三个参数，依次为：item:data属性的数组中该节点所对应的对象、node:节点本身是否被选中、self:节点的子树中是否有被选中的节点(感觉永远为false)
                 //需要两个事件同时作用，才可达到单选

@@ -82,6 +82,37 @@
           <el-input class="inputs" placeholder="请输入用户联系方式" size="mini" v-model="formData.wechatMobile"></el-input>
         </el-form-item>
       </div>
+      <!--标签筛选-->
+      <div class="inputStyle">
+        <el-form-item prop="labelIds"  can-be-empty>
+          <el-popover
+            placement="bottom"
+            title="标签"
+            width="300"
+            trigger="click">
+            <el-tree
+              ref="filterTree"
+              :data="labelList"
+              show-checkbox
+              node-key="labelTreeCode"
+              check-strictly
+              :props="defaultProps"
+              :default-checked-keys="filterLabelsList"
+              :default-expanded-keys="filterLabelsList"
+              @check-change="checkOnlyOneLabel"
+              @node-click-="checkOnlyOneLabel"
+            >
+            </el-tree>
+            <div style="margin-top: 20px">
+              <el-button size="mini" @click="resetFilterQuery()">重 置</el-button>
+              <el-button size="mini" type="primary" @click="filterByLabels">筛 选</el-button>
+<!--              <el-button type="primary" @click="checkAllTree" size="mini">全选</el-button>
+              <el-button @click="cancelAllTree" size="mini">取消全选</el-button>-->
+            </div>
+            <el-button size="small" slot="reference">选择标签</el-button>
+          </el-popover>
+        </el-form-item>
+      </div>
 <!--
       &lt;!&ndash;   备注   &ndash;&gt;
       <div class="inputStyle">
@@ -109,27 +140,28 @@
     >
       <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
 
-      <el-table-column prop="memberInfo" align="left" label="用户信息" >
+      <el-table-column prop="memberInfo" width="200" align="left" label="用户信息" >
         <template slot-scope="scope">
           <div>
             <img class="userHeadImg" v-image-preview :src="scope.row.wechatHeadPath" width="50" height="50" />
             <div class="userNameAndSex">
-              <span class="nickName">{{scope.row.wechatNickName}}</span><br>
+              <span class="nickName">{{deCodes(scope.row.wechatNickName)}}</span><br>
               <span class="sex">性别：{{scope.row.wechatSex==null?"保密":sexGroup[scope.row.wechatSex]}}</span>
             </div>
           </div>
           <div class="userOpenId">
             <el-tooltip :content="scope.row.wechatOpenid">
+<!--              <span>微信号：{{scope.row.wechatOpenid | controlLengthOpenId}}</span>-->
               <span>微信号：{{scope.row.wechatOpenid | controlLengthOpenId}}</span>
             </el-tooltip>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="country" align="left" width="150" label="城市">
+      <el-table-column prop="country" align="left" width="180" label="城市">
         <template slot-scope="scope">
-          <span>{{scope.row.wechatCountry}}</span>
-          <span>{{scope.row.wechatProvince}}</span>
-          <span>{{scope.row.wechatCity}}</span>
+          <span>{{scope.row.wechatCountry===null?'未获取':scope.row.wechatCountry}}</span>
+          <span>{{scope.row.wechatProvince===null?'未获取':scope.row.wechatProvince}}</span>
+          <span>{{scope.row.wechatCity===null?'未获取':scope.row.wechatCity}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="wechatMobile" align="left" width="120" label="联系方式">
@@ -137,7 +169,7 @@
           <span>{{scope.row.wechatMobile==null?"用户暂未授权":scope.row.wechatMobile}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="country" align="left" label="用户简介">
+      <el-table-column prop="country" align="left" width="160" label="用户简介">
         <template slot-scope="scope">
           <span>类型：{{userTypes[scope.row.userType]}}</span>
           <br>
@@ -148,7 +180,7 @@
           <span><el-button type="text" @click="setUserType(scope.row.memberId,scope.row.userType)" size="small">设置用户类型</el-button></span>
         </template>
       </el-table-column>
-      <el-table-column prop="userBehavior" align="left" width="110" label="用户行为">
+      <el-table-column prop="userBehavior" align="left"  width="110" label="用户行为">
         <template slot-scope="scope">
           <span>送出祝福：{{scope.row.userSendGiftsCount}}</span><br>
           <span>收到祝福：{{scope.row.userReceivedGiftsCount}}</span><br>
@@ -176,7 +208,7 @@
           <span>最后登录：{{$timeUtil.getFormatTime(scope.row.lastLoginTime)}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="userRemark" align="left" label="备注">
+      <el-table-column prop="userRemark" width="150" align="left" label="备注">
         <template slot-scope="scope">
           <el-tooltip :content="scope.row.remark">
             <span>{{scope.row.remark | controlLength}}</span>
@@ -185,7 +217,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="labelTreeCodes"  align="left" label="标签" >
+      <el-table-column prop="labelTreeCodes" align="left" label="标签"  >
         <template slot-scope="scope">
           <div class="label-max-height">
             <el-tag class="labelStyle"  v-for="(item,index) in scope.row.curlabels">{{item.labelPathText}}</el-tag>
@@ -435,6 +467,9 @@
                 //控制打开设置标签界面
                 controlOpenSetLabels:false,
                 curUserLabelsList:[],
+                //筛选标签列表
+                filterLabelsList:[],
+                checkLabelId:'',
                 //预存选择的标签
                 checkedLabels:[],
                 //树形所需
@@ -526,6 +561,7 @@
             init() {
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.formData));
+                data.wechatNickName = this.$util.encode(data.wechatNickName);
                 data.page --;
                 memberList(data).then(result => {
                     if(result.code == 200){
@@ -557,6 +593,29 @@
                 console.log(this.formData.userType)
                 this.init();
             },
+/*            //表头添加一个标签按钮
+            renderHeader(h,params) {
+                let a = [h('el-button', {
+                    props: {
+                        size:'mini',
+                        placement:"bottom",
+                        title:"标题",
+                        width:"200",
+                        trigger:"click",
+                        content:"这是一段内容,这是一段内容,这是一段内容,这是一段内容。",
+                    },
+                    on: {
+                        click: () => {
+                            this.openFilterLabels();
+                        }
+                    }
+                }, '标签筛选')];
+                return h('div', a);
+            },*/
+            //打开标签树进行标签选择，筛选过滤
+            openFilterLabels(){
+                console.log("ssss")
+            },
             checkUserState() {
                 console.log(this.formData.isDeleted)
             },
@@ -566,6 +625,10 @@
                 this.controlOpenAccountDetail = true;
                 console.log(accountId)
                 //todo
+            },
+            //用户编码
+            deCodes(str) {
+                return this.$util.decode(str);
             },
             //设置备注弹出
             setRemark(memberUid,remark) {
@@ -685,7 +748,6 @@
             },
             checkLabels(curMemberInfo) {
                 //查询相应标签，并赋值当前便于渲染
-                let curLabels = [];
                 this.curUserLabelsList= curMemberInfo.labelTreeCodes==null?[]:curMemberInfo.labelTreeCodes.split(",");
                 this.curMemberId =  curMemberInfo.memberId;
                 //给当前角色选择树赋值
@@ -743,6 +805,40 @@
                         page: 1,
                 };
                 this.init();
+            },
+            /*标签筛选*/
+            resetFilterQuery(){
+                this.formData = {
+                    userType:"",//用户类型：普通用户，平台签约作者，作者
+                    wechatNickName:"",//卡片名字
+                    wechatMobile:"",//卡片名字
+                    labelIds:"",
+                    remarks:"",
+                    page: 1,
+                };
+                this.init();
+                this.checkLabelId='';
+                this.$refs.filterTree.setCheckedNodes([])
+            },
+            /*标签筛选*/
+            filterByLabels(){
+                // this.data.resourceLabelTreeCodes = this.checkedLabels===''?'':this.checkedLabels.join(",")
+                this.formData.labelIds = this.checkLabelId+"";
+                console.log(this.formData);
+                this.init();
+            },
+            //将标签筛选树树做成单选
+            checkOnlyOneLabel(item,node,self) {
+                //共三个参数，依次为：item:data属性的数组中该节点所对应的对象、node:节点本身是否被选中、self:节点的子树中是否有被选中的节点(感觉永远为false)
+                //需要两个事件同时作用，才可达到单选
+                if(node){
+                    this.$refs.filterTree.setCheckedKeys([item.labelTreeCode]);
+                    this.checkLabelId = this.$refs.filterTree.getCheckedKeys();
+                    this.checkLabelId = item.labelTreeCode;
+                }
+                else {
+                    this.checkLabelId = this.$refs.filterTree.getCheckedKeys();
+                }
             },
         }
     }

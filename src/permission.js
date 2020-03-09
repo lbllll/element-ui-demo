@@ -27,7 +27,21 @@ router.beforeEach(async(to, from, next) => {
       // 如果已登录，重定向到主页
       var route = JSON.parse(window.sessionStorage.getItem('route'))
       try {
-        next({ name: route[0].name })
+        console.log("permission");
+        let menu = [];
+        route.forEach(e => {
+          if(e.moduleType === "MENU"){
+            menu.push(e);
+          }
+        });
+        var name = '';
+        for (let i = 0; i < menu.length; i++) {
+          if(menu[i].routeCode){
+            name = menu[i].routeCode;
+            break;
+          }
+        }
+        next({ name: name })
       } catch (error) {
         next({ path: '/' })
       }

@@ -51,6 +51,11 @@ function timestampToTime(timestamp) {
   return Y+M+D+h+m+s;
 }
 
+function timeGetDate(time){
+
+  let date = me
+}
+
 Vue.directive('time', {
   bind: function(el, binding){
     el.innerHTML = getFormatTime(binding.value);

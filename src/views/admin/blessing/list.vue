@@ -168,6 +168,39 @@
            <el-input class="nickName" placeholder="请输入作者" size="mini" v-model="data.resourceAuthorNickName"></el-input>
          </el-form-item>
        </div>
+
+       <!--标签筛选-->
+       <div class="inputStyle">
+         <el-form-item prop="labelIds"  can-be-empty>
+           <el-popover
+             placement="bottom"
+             title="标签"
+             width="300"
+             trigger="click">
+             <el-tree
+               ref="filterTree"
+               :data="labelList"
+               show-checkbox
+               node-key="labelTreeCode"
+               check-strictly
+               :props="defaultProps"
+               :default-checked-keys="filterLabelsList"
+               :default-expanded-keys="filterLabelsList"
+               @check-change="checkOnlyOneLabel"
+               @node-click="checkOnlyOneLabel"
+             >
+             </el-tree>
+             <div style="margin-top: 20px">
+               <el-button size="mini" @click="resetFilterQuery()">重 置</el-button>
+               <el-button size="mini" type="primary" @click="filterByLabels">筛 选</el-button>
+               <!--              <el-button type="primary" @click="checkAllTree" size="mini">全选</el-button>
+                             <el-button @click="cancelAllTree" size="mini">取消全选</el-button>-->
+             </div>
+             <el-button size="small" slot="reference">选择标签</el-button>
+           </el-popover>
+         </el-form-item>
+       </div>
+
        <div class="searchStyle">
          <el-button type="primary"  size="small" @click="search()">搜 索</el-button>
        </div>
@@ -244,7 +277,7 @@
       <el-table-column prop="memberInfo" align="left" label="创作者信息" width="100">
         <template slot-scope="scope">
           <div><img class="userHeadImg" v-image-preview :src="scope.row.resourceAuthorHeadPicUrl" width="60" height="60" /></div>
-          <span class="nickName">{{scope.row.resourceAuthorNickName}}</span>
+          <span class="nickName">{{deCodes(scope.row.resourceAuthorNickName)}}</span>
         </template>
       </el-table-column>
 
@@ -486,25 +519,6 @@
           ></el-input>
           <span class="describe">长度不超过100</span>
         </el-form-item>
-<!--        <el-form-item label="选择标签" verify prop="resourceLabelTreeCodes">
-          <div class="header">选择标签</div>
-          <el-tree
-            ref="tree"
-            show-checkbox
-            :data="labelList"
-            node-key="labelTreeCode"
-            :props="defaultProps"
-            :default-checked-keys="curLabels"
-            :default-expanded-keys="curLabels"
-            @check-change="checkLabelsForEdit"
-            :accordion="true"
-          >
-          </el-tree>
-          <div style="margin-top: 20px">
-            <el-button type="primary" @click="checkAllTree" size="mini">全选</el-button>
-            <el-button @click="cancelAllTree" size="mini">取消全选</el-button>
-          </div>
-        </el-form-item>-->
         <el-form-item label="祝福语" prop="resourceDefaultBlessingText" verify>
           <el-input
             class="formItem"
@@ -515,21 +529,6 @@
           <span class="describe">长度不超过100</span>
         </el-form-item>
 
-<!--        <el-form-item label="设置标记" verify prop="resourceMarkType">
-          <el-select
-            class="formItem"
-            v-model="formData.resourceMarkType"
-            placeholder="请选择标记内容"
-            @change="checkMarker"
-          >
-            <el-option
-              v-for="item in markerList"
-              :key="item.markerId"
-              :label="item.markerName"
-              :value="item.markerId"
-            ></el-option>
-          </el-select>
-        </el-form-item>-->
 
         <el-form-item label="选择作者"  prop="resourceAuthorUid" verify>
           <el-select
@@ -546,7 +545,6 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
 
         <el-form-item label="绑定音乐"  prop="resourceMusicUid">
           <el-select
@@ -612,6 +610,9 @@ export default {
             isDeleted:"",//资源是否被删除
             page: 1
         },
+        //筛选标签列表
+        filterLabelsList:[],
+        checkLabelId:'',//选中标签id
         formData:{
             resourceUid:"",
             resourceName:"",
@@ -852,6 +853,7 @@ export default {
       init(){
           //获取用户信息，加载表格数据
           let data = JSON.parse(JSON.stringify(this.data));
+          data.resourceAuthorNickName = this.$util.encode(data.resourceAuthorNickName);
           data.page --;
           blessingList(data).then(result => {
               if(result.code == 200){
@@ -861,6 +863,10 @@ export default {
                   // console.log(JSON.stringify( this.blessingList))
               }
           }).catch(err => {});
+      },
+      //用户编码
+      deCodes(str) {
+          return this.$util.decode(str);
       },
         getRowKeys(row) {
             // 给表格每行增加一个唯一 标识，用作切换分页后保留被选中行的信息
@@ -1080,6 +1086,21 @@ export default {
       resetQuery(){
           this.data={
               resourceName:"",//资源名称
+              resourceAuthorNickName:"",//创作者名称
+
+              resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
+              resourceKind:"",//资源类别[1-官方资源, 2-第三方创作者]
+              resourceType:"",//资源类型
+              resourceState:"",//资源状态
+              resourceMarkType:"",//资源标记类型
+              isDeleted:"",//资源是否被删除
+              page: 1
+          };
+          this.init();
+      },
+      resetFilterQuery(){
+          this.data={
+              resourceName:"",//资源名称
                   resourceAuthorNickName:"",//创作者名称
 
                   resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
@@ -1091,6 +1112,29 @@ export default {
                   page: 1
           };
           this.init();
+          this.checkedLabels=[];
+          this.filterLabelsList=[];
+          this.$refs.filterTree.setCheckedNodes([])
+      },
+      /*标签筛选*/
+      filterByLabels(){
+          // this.data.resourceLabelTreeCodes = this.checkedLabels===''?'':this.checkedLabels.join(",")
+          this.data.resourceLabelTreeCodes = this.checkLabelId+"";
+          console.log(this.formData);
+          this.init();
+      },
+      //将标签筛选树树做成单选
+      checkOnlyOneLabel(item,node,self) {
+          //共三个参数，依次为：item:data属性的数组中该节点所对应的对象、node:节点本身是否被选中、self:节点的子树中是否有被选中的节点(感觉永远为false)
+          //需要两个事件同时作用，才可达到单选
+          if(node){
+              this.$refs.filterTree.setCheckedKeys([item.labelTreeCode]);
+              this.checkLabelId = this.$refs.filterTree.getCheckedKeys();
+              this.checkLabelId = item.labelTreeCode;
+          }
+          else {
+              this.checkLabelId = this.$refs.filterTree.getCheckedKeys();
+          }
       },
       /*编辑相关*/
       //选择作品类型

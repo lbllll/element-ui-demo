@@ -100,9 +100,24 @@ export default {
     }
   },
   created(){
-      if(getToken()){
-          var route = JSON.parse(window.sessionStorage.getItem('route'))
-          // console.log(JSON.stringify(route));
+/*      if(getToken()){
+          var route = JSON.parse(window.sessionStorage.getItem('route'));
+          console.log(route);
+          let menu = [];
+          route.forEach(e => {
+              if(e.moduleType === "MENU"){
+                  menu.push(e);
+              }
+          });
+          var name = '';
+          for (let i = 0; i < menu.length; i++) {
+              if(menu[i].routeCode){
+                  name = menu[i].routeCode;
+                  break;
+              }
+          }
+          this.$router.push({ name: name});
+         /!* // console.log(JSON.stringify(route));
           //组装菜单列表
           let menuParentArr = [];
           let menuChildArr = [];
@@ -135,7 +150,7 @@ export default {
                   children: []
               };
               e.child.forEach( (i, index) => {
-                  /*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 */
+                  /!*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 *!/
                   routeItem.children.push(
                       {
                           path: i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1],
@@ -153,16 +168,16 @@ export default {
               menu.push(routeItem);
           });
           console.log(menu);
-          this.$router.push({ name: menu[0].children[0].name});
-/*          var name = '';
-          for (let i = 0; i < route.length; i++) {
-              if(route[i].routeCode){
-                  name = route[i].routeCode;
-                  break;
-              }
-          }
-          this.$router.push({ name: name});*/
-      }
+          this.$router.push({ name: menu[0].children[0].name});*!/
+        /!*          var name = '';
+                  for (let i = 0; i < route.length; i++) {
+                      if(route[i].routeCode){
+                          name = route[i].routeCode;
+                          break;
+                      }
+                  }
+                  this.$router.push({ name: name});*!/
+      }*/
   },
   methods: {
     showPwd() {
@@ -183,7 +198,21 @@ export default {
               try {
               let route = JSON.parse(window.sessionStorage.getItem('route'))
                 try {
-                  // console.log(JSON.stringify(route));
+                    let menu = [];
+                    route.forEach(e => {
+                        if(e.moduleType === "MENU"){
+                            menu.push(e);
+                        }
+                    });
+                    var name = '';
+                    for (let i = 0; i < menu.length; i++) {
+                        if(menu[i].routeCode){
+                            name = menu[i].routeCode;
+                            break;
+                        }
+                    }
+                    this.$router.push({ name: name});
+ /*                 // console.log(JSON.stringify(route));
                   //组装菜单列表
                   let menuParentArr = [];
                   let menuChildArr = [];
@@ -216,7 +245,7 @@ export default {
                           children: []
                       };
                       e.child.forEach( (i, index) => {
-                          /*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 */
+                          /!*添加二级菜单 children component: () => import()   不能使用变量，必须用模板字符串 *!/
                           routeItem.children.push(
                               {
                                   path: i.moduleUrl.split('/')[i.moduleUrl.split('/').length-1],
@@ -234,7 +263,7 @@ export default {
                       menu.push(routeItem);
                   });
                   console.log(menu);
-                  this.$router.push({ name: menu[0].children[0].name});
+                  this.$router.push({ name: menu[0].children[0].name});*/
                   // this.$router.push({ path: menu[0].children[0].path});
               } catch (error) {
                 this.$router.push({ path: this.redirect || '/', query: this.otherQuery })

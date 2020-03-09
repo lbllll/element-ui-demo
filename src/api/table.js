@@ -162,10 +162,97 @@ export function memberType(data) {
 export function memberLabel(data) {
   return http.put('/api/member/members/info/label', data, 'formData')
 }
-/*export function memberDelete(data) {
-  return http.delete('/api/member/members/info/delete?memberId='+ data, 'formData')
-}*/
-/**
- * 商户
- */
+
+//活动基础信息控制类
+export function campaignsList(data) {
+  return http.get('/api/campaigns/list', data, 'formData')
+}
+export function campaignsAdd(data) {
+  return http.post('/api/campaigns/info', data, 'formData')
+}
+export function campaignsUpdate(data) {
+  return http.put('/api/campaigns/info', data, 'formData')
+}
+export function campaignsDelete(data) {
+  return http.post('/api/campaigns/info/delete',data, 'formData')
+}
+export function campaignsState(data) {
+  return http.put('/api/campaigns/info/state', data, 'formData')
+}
+export function campaignsOnline(data) {
+  return http.post('/api/campaigns/info/online', data, 'formData')
+}
+export function campaignsRules(data) {
+  return http.post('/api/campaigns/info/rules', data, 'formData')
+}
+//查询活动规则
+export function campaignsRulesList(data) {
+  return http.get('/api/campaigns/info/rules/list', data, 'formData')
+}
+//活动物资相关
+//追加物资明细
+export function campaignsMaterialAdd(data) {
+  return http.post('/api/campaigns/material/detail', data, 'formData')
+}
+//创建活动物资
+export function campaignsMaterialCreate(data) {
+  return http.post('/api/campaigns/material/info', data, 'formData')
+}
+//修改活动物资
+export function campaignsMaterialUpdate(data) {
+  return http.put('/api/campaigns/material/info', data, 'formData')
+}
+//查询活动物资操作明细
+export function campaignsMaterialDetailList(data) {
+  return http.get('/api/campaigns/material/info/detail/list', data, 'formData')
+}
+//删除活动物资
+export function campaignsMaterialDelete(data) {
+  return http.post('/api/campaigns/material/info/delete',data,'formData')
+}
+//查询活动物资列表
+export function campaignsMaterialList(data) {
+  return http.get('/api/campaigns/material/info/list', data, 'formData')
+}
+
+
+//活动红包相关
+//创建活动红包
+export function campaignsRedPacketAdd(data) {
+  return http.post('/api/campaigns/redPacket/info', data, 'formData')
+}
+//查看活动红包投放记录
+export function campaignsRedPacketList(data) {
+  return http.get('/api/campaigns/redPacket/list', data, 'formData')
+}
+//查看某用户红包领取记录
+export function campaignsRedPacketMemberDetail(data) {
+  return http.get('/api/campaigns/redPacket/member/detail', data, 'formData')
+}
+//查询某用户红包领取汇总信息
+export function campaignsRedPacketMemberTotal(data) {
+  return http.get('/api/campaigns/redPacket/member/total', data, 'formData')
+}
+//活动物资领取记录列表
+//活动物资确认
+export function campaignsMaterialConfirm(data) {
+  return http.post('/api/campaigns/material/manager/info/confirm', data, 'formData')
+}
+//兑换订单物流查询
+export function campaignsMaterialDelivery(data) {
+  return http.get('/api/campaigns/material/manager/info/delivery', data, 'formData')
+}
+//查询活动物资列表
+export function campaignsMaterialInfoList(data) {
+  return http.get('/api/campaigns/material/manager/info/list', data, 'formData')
+}
+//活动物资兑换订单发货
+export function campaignsMaterialSend(data) {
+  return http.post('/api/campaigns/material/manager/info/send', data, 'formData')
+}
+//获取物流公司列表
+export function trackingCompanyList(data) {
+  return http.get('/api/delivery/channel/list', data, 'formData')
+}
+
 
