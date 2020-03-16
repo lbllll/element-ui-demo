@@ -96,7 +96,7 @@
             <span><el-button type="text" @click="campaignDelete(scope.row.campaignUid)" size="small">删除活动</el-button></span>
           </template>
         </el-table-column>
-        <el-table-column prop="sourceInfo" align="left" width="150" label="参与者">
+        <el-table-column prop="sourceInfo" align="left" width="140" label="参与者">
           <template slot-scope="scope">
             <span>参与者：{{campaignParticipantsTypes[scope.row.campaignParticipantsType]}}</span>
             <br>
@@ -105,7 +105,7 @@
             <span>新增用户：{{scope.row.campaignAddedUsersCount}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="sourceInfo" align="left" width="150" label="活动资源">
+        <el-table-column prop="sourceInfo" align="left" width="140" label="活动资源">
           <template slot-scope="scope">
             <span>总发送数：{{scope.row.campaignSentCount}}</span>
             <br>
@@ -118,16 +118,16 @@
           <template slot-scope="scope">
             <span>计划投入：{{$util.prices(scope.row.campaignPlanedTotalAmount)}} 元</span>
             <br>
-            <span>已投入：{{scope.row.campaignTotalAmountOfSupplies+scope.row.campaignTotalAmountOfRedPacket}} 元</span>
+            <span>已投入：{{$util.prices(scope.row.campaignTotalAmountOfRedPacket+scope.row.campaignTotalAmountOfSupplies)}} 元</span>
             <br>
-            <span>已消耗：{{scope.row.campaignTotalAmountOfSupplies+scope.row.campaignTotalAmountOfRedPacket-(scope.row.campaignBalanceAmountOfRedPacket+scope.row.campaignBalanceAmountOfSupplies)}} 元</span>
+            <span>已消耗：{{$util.prices(scope.row.campaignDrawAmountOfSupplies+scope.row.campaignDrawAmountOfRedPacket)}} 元</span>
             <br>
-            <span>还剩余：{{scope.row.campaignBalanceAmountOfRedPacket+scope.row.campaignBalanceAmountOfSupplies}} 元</span>
+            <span>还剩余：{{$util.prices(scope.row.campaignTotalAmountOfRedPacket+scope.row.campaignTotalAmountOfSupplies - (scope.row.campaignDrawAmountOfSupplies+scope.row.campaignDrawAmountOfRedPacket))}} 元</span>
             <br>
             (PS:当前统计仅针对已投入物资和定量定额红包)
           </template>
         </el-table-column>
-        <el-table-column prop="materialPutOnList" align="left" label="活动物资" class="f12">
+        <el-table-column prop="materialPutOn" align="left" width="320" label="活动物资" >
           <template slot-scope="scope">
             <div class="labelStyle"  v-for="(item,index) in scope.row.materialPutOnList">
               <span style="font-weight: bolder">{{item.materialName}}</span>:（{{item.materialDesc}}）
@@ -147,21 +147,21 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="redPacketPutOnList" align="left" label="活动红包" class="f12">
+        <el-table-column prop="redPacketPutOn" align="left" width="320" label="活动红包" >
           <template slot-scope="scope">
-            <div class="labelStyle"  v-for="(item,index) in scope.row.redPacketPutOnList">
+            <div class="labelStyle"  v-for="(item,index) in scope.row.redPacketPutOnList" :key="index">
               <div v-if="item.packetType == 1">
                 <span style="font-weight: bolder">{{item.packetName}}</span>：({{item.packetDesc}})
                 <br>
-                <span>领取数量：{{item.packetDrawnQuantity}}个</span>，金额：<span>{{item.packetDrawnAmount}}；</span>
+                <span>领取数量：{{item.packetDrawnQuantity}}个</span>，金额：<span>{{$util.prices(item.packetDrawnAmount)}} 元；</span>
                 <span v-if="item.packetTotalQuantity == -1">不限量</span>
-                <span v-if="item.packetTotalQuantity != -1">余量：{{item.packetTotalQuantity - item.packetDrawnQuantity }}个</span>
+                <span v-if="item.packetTotalQuantity != -1">余量：{{item.packetTotalQuantity - item.packetDrawnQuantity }} 个</span>
                 <br>
               </div>
               <div v-if="item.packetType == 2">
                 <span style="font-weight: bolder">{{item.packetName}}</span>：({{item.packetDesc}})
                 <br>
-                <span>领取数量：{{item.packetDrawnQuantity}}个</span>，金额：<span>{{item.packetDrawnAmount}}；</span>
+                <span>领取数量：{{item.packetDrawnQuantity}}个</span>，金额：<span>{{$util.prices(item.packetDrawnAmount)}} 元；</span>
                 <span v-if="item.packetTotalQuantity == -1">不限量</span>
                 <span v-if="item.packetTotalQuantity != -1">余量：{{item.packetTotalQuantity - item.packetDrawnQuantity }}个</span>
                 <br>
@@ -176,11 +176,11 @@
             <span><el-button type="text" @click="setPacketPage(scope.row)" size="small">管理活动红包</el-button></span>
           </template>
         </el-table-column>
-        <el-table-column prop="sourceInfo" align="left" width="150" label="指标">
+        <el-table-column prop="sourceInfo" align="left" width="180" label="指标">
           <template slot-scope="scope">
             <span>拉新数：{{scope.row.campaignAddedUsersCount}}</span>
             <br>
-            <span>单拉新成本：{{scope.row.campaignCostOfPerNewUser}}</span>
+            <span>单拉新成本：{{scope.row.campaignAddedUsersCount == 0?0:$util.prices((scope.row.campaignTotalAmountOfRedPacket+scope.row.campaignTotalAmountOfSupplies)/(scope.row.campaignAddedUsersCount))}} 元</span>
           </template>
         </el-table-column>
         <el-table-column prop="sourceInfo" align="left" width="200" label="状态">
@@ -354,18 +354,21 @@
             </el-form-item>
           </div>
           <div>
-            <p class="title">红包领取规则</p>
-            <el-form-item label="兑换个数" prop="pointExchangePacketCounts" verify>
+            <p class="title">红包/物资领取数量规则</p>
+            <el-form-item label="兑换个数" prop="pointExchangeMaterialOrPacketCounts" verify>
               <el-input
                 class="formItem"
                 type="number" min="0"
-                v-model="rulesData.pointExchangePacketCounts"
+                v-model="rulesData.pointExchangeMaterialOrPacketCounts"
                 maxlength="10"
                 placeholder="每日可兑换个数"
               ></el-input>
-              <span class="describe">每个用户，一天内可以兑换多少红包(单值， int)</span>
+              <span class="describe">每个用户，一天内可以兑换多少红包或物资(单值， int)</span>
             </el-form-item>
-            <el-form-item label="兑奖明细" prop="pointExchangePacket" >
+          </div>
+          <div>
+            <p class="title">红包兑换规则</p>
+            <el-form-item label="兑奖明细" prop="pointExchangePacket"  verify>
               <div v-for="(info,index) in this.rulesData.pointExchangePacket" style="margin: 10px">
                 <div>
                   需消耗：
@@ -395,18 +398,8 @@
             </el-form-item>
           </div>
           <div>
-            <p class="title">物资领取规则</p>
-            <el-form-item label="兑换个数" prop="pointExchangeMaterialCounts" verify>
-              <el-input
-                class="formItem"
-                type="number" min="0"
-                v-model="rulesData.pointExchangeMaterialCounts"
-                maxlength="10"
-                placeholder="每日可兑换个数"
-              ></el-input>
-              <span class="describe">每个用户，一天内可以兑换多少物资(单值， int)</span>
-            </el-form-item>
-            <el-form-item label="兑奖明细" prop="pointExchangeMaterial" >
+            <p class="title">物资兑换规则</p>
+            <el-form-item label="兑奖明细" prop="pointExchangeMaterial" verify>
               <div v-for="(info,index) in this.rulesData.pointExchangeMaterial" style="margin: 10px">
                 <div>
                   需消耗：
@@ -437,21 +430,42 @@
           </div>
           <div>
             <p class="title">接收者领取红包规则</p>
-            <el-form-item label="领取次数" prop="receivePacketCounts" verify>
+            <el-form-item label="领取红包" prop="getPacketReceiveBlessing" verify>
+              接收者在收到新的祝福时可以领取：
+              <span  v-for="(info,index) in this.rulesData.getPacketReceiveBlessing" style="margin: 10px" >
+                    <el-select
+                      style="width: 200px"
+                      v-model="info.packetUid"
+                      prop="campaignType"
+                      placeholder="选择红包"
+                      size="small"
+                      @change="checkCampaignType"
+                    >
+                    <el-option
+                      v-for="item in redPacketPutOnList"
+                      :key="item.packetUid"
+                      :label="item.packetName"
+                      :value="item.packetUid"
+                    ></el-option>
+                  </el-select>
+              </span>
+                <!-- <span><el-button type="text" size="mini" @click="deleteThisPacket(index)">删除此项</el-button></span>-->
+<!--              <el-button type="primary" size="mini" @click="addReceivePacket">添加接收祝福领取红包种类</el-button>-->
+            </el-form-item>
+            <el-form-item label="领取个数" prop="receivePacketCounts" verify>
               <el-input
                 class="formItem"
-                type="number"
-                min="0"
+                type="number" min="0"
                 v-model="rulesData.receivePacketCounts"
                 maxlength="10"
-                placeholder="每日可提现次数"
+                placeholder="每日可领取个数"
               ></el-input>
-              <span class="describe">接收者，在同一天内，最多可以领取多少个红包(单值, int)</span>
+              <span class="describe">接收者，在同一天内，最多可以领取多少个红包(单值, int)；</span>
             </el-form-item>
           </div>
           <div>
             <p class="title">参加活动排名奖品规则</p>
-            <el-form-item label="奖品规则" prop="blessingRewards">
+            <el-form-item label="奖品规则" prop="blessingRewards" verify>
               <div v-for="(info,index) in rulesData.blessingRewards" :key="index" style="margin: 10px">
                 <span>第  <el-input style="width: 120px" type="number" min="0" v-model="info.rank"  maxlength="10" placeholder="送祝福排名"></el-input>  名可获得爱心物资：</span>
                 <el-select
@@ -483,6 +497,7 @@
                 type="number"
                 v-model="rulesData.withdrawalTimes"
                 maxlength="10"
+                min="0"
                 placeholder="每日可提现次数"
               ></el-input>
               <span class="describe">活动期间，每用户每天只能提现的次数(单值, int)</span>
@@ -558,7 +573,8 @@
                 <span v-if=""><el-button type="text" @click="delMaterial(scope.row)" size="small">删除</el-button></span>
 <!--                <span v-if="scope.row.materialTotalQuantity != -1"><el-button type="text" @click="setMaterialNoLimit(scope.row)" size="small">设为不限量</el-button></span>-->
               <br>
-              <span v-if="scope.row.materialTotalQuantity != -1"><el-button type="text" @click="addMaterialPageOpen(scope.row)" size="small">添加/追加物资</el-button></span>
+              <span v-if="scope.row.materialTotalQuantity != -1 && curCampaignInfo.campaignState == 1" ><el-button type="text" @click="addMaterialPageOpen(scope.row)" size="small">添加物资</el-button></span>
+              <span v-if="scope.row.materialTotalQuantity != -1 && curCampaignInfo.campaignState != 1"><el-button type="text" @click="addMaterialPageOpen(scope.row)" size="small">追加物资</el-button></span>
 <!--              <span v-if=""><el-button type="text" @click="setMaterialUseRulePageOpen(scope.row)" size="small">设置物资使用明细</el-button></span>-->
             </template>
           </el-table-column>
@@ -599,6 +615,23 @@
             ></el-input>
             <span class="describe">长度不超过50</span>
           </el-form-item>
+
+          <el-form-item verify label="物资图片" prop="materialImageUrl">
+            <p class="describe">提示：本地上传图片大小不能超过1M</p>
+            <el-upload
+              :action="upImgUrl"
+              :data="access_token"
+              :show-file-list="false"
+              :on-change="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+              :on-success="uploadSuccessMaterial"
+            >
+              <img v-if="materialImageUrl" :src="materialImageUrl" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              <el-input class="inputs none imgArea" v-model="materialData.materialImageUrl"></el-input>
+            </el-upload>
+          </el-form-item>
+
           <el-form-item label="规格" prop="materialSpecifications" verify>
             <el-input
               class="formItem"
@@ -719,10 +752,10 @@
             <template slot-scope="scope">
               <span>红包类型：{{packetTypes[scope.row.packetType]}}</span>
               <br>
-              <span v-if="scope.row.packetType==1">单个金额：{{$util.prices(scope.row.packetAmountLow)}}</span>
-              <span v-if="scope.row.packetType==2">随机红包下限：{{$util.prices(scope.row.packetAmountLow)}}</span>
+              <span v-if="scope.row.packetType==1">单个金额：{{$util.prices(scope.row.packetAmountLow)}} 元</span>
+              <span v-if="scope.row.packetType==2">随机红包下限：{{$util.prices(scope.row.packetAmountLow)}} 元</span>
               <br>
-              <span v-if="scope.row.packetType==2">随机红包上限：{{$util.prices(scope.row.packetAmountHigh)}}</span>
+              <span v-if="scope.row.packetType==2">随机红包上限：{{$util.prices(scope.row.packetAmountHigh)}} 元</span>
               <br>
             </template>
           </el-table-column>
@@ -775,7 +808,7 @@
         :destroy-on-close="true"
         @close="nodeCollapse"
       >
-        <el-form ref="packetForm" :model="packetData" class="formBox" label-width="80px">
+        <el-form ref="redPacketForm" :model="packetData" class="formBox" label-width="80px">
           <el-form-item label='红包名' prop="packetName" verify>
             <el-input
               class="formItem"
@@ -793,6 +826,38 @@
               placeholder="请输入红包说明，50字内"
             ></el-input>
             <span class="describe">长度不超过50</span>
+          </el-form-item>
+          <el-form-item label="红包用途" prop="redPacketSource" verify>
+            <el-select
+              class="formItem"
+              v-model="packetData.redPacketSource"
+              prop="campaignType"
+              placeholder="选择红包用途"
+              size="small"
+              @change="checkRedPacketSource"
+            >
+              <el-option
+                v-for="item in redPacketSourceList"
+                :key="item.redPacketSource"
+                :label="item.name"
+                :value="item.redPacketSource"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item verify label="红包图片" prop="packetImageUrl">
+            <p class="describe">提示：本地上传图片大小不能超过1M</p>
+            <el-upload
+              :action="upImgUrl"
+              :data="access_token"
+              :show-file-list="false"
+              :on-change="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+              :on-success="uploadSuccessRedPacket"
+            >
+              <img v-if="packetImageUrl" :src="packetImageUrl" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              <el-input class="inputs none imgArea" v-model="packetData.packetImageUrl"></el-input>
+            </el-upload>
           </el-form-item>
           <el-form-item label="红包类型" prop="packetType" verify>
             <el-select
@@ -908,6 +973,7 @@
         campaignsRedPacketMemberTotal,
         campaignsRulesList,
         campaignsOnline,
+        campaignsSetRules,
     } from "@/api/table";
     export default {
         name: "CAMPAIGN_LIST",
@@ -924,6 +990,7 @@
                     page:1,
                     times:"",
                 },
+                listLoading:false,
                 //编辑活动基本信息
                 campaignData:{
                     campaignUid:'',
@@ -947,6 +1014,7 @@
                     materialCostPrice:'',//物资成本价(分)
                     materialSellPrice:'',//物资销售价(分)
                     materialTotalQuantity:'',//计划投放总量(-1代表不限量)
+                    materialImageUrl:'',
 
 /*                    materialAppendedQuantity:'',//已投放总量
                     materialDrawnQuantity:'',//已领取数量
@@ -994,81 +1062,12 @@
                 //活动列表：
                 campaignList:[
                 ],
+                //活动创建时间
+                createTime:'createTime',
                 materialPutOnList:[],
                 redPacketPutOnList:[],
-                materialList:[
-                    {
-                        materialUid:'1',
-                        campaignUid:'id',//活动id
-                        materialName:'口罩',//物资名
-                        materialDesc:'送祝福积分换口罩',//物资说明
-                        materialSpecifications:'N95',//物资规格
-                        materialMeasurementUnits:'包',//物资计量单位(默认"件")
-                        materialCostPrice:'1',//物资成本价(分)
-                        materialSellPrice:'2',//物资销售价(分)
-                        materialTotalQuantity:'-1',//计划投放总量(-1代表不限量)
-                        materialAppendedQuantity:'100',//已投放总量
-                        materialDrawnQuantity:'66',//已领取数量
-                        materialFreezingQuantity:'10',//冻结中的物资数量
-                        materialLastAppenedTime:'2020-03-03 14:29:13',//物资最后添加日期
-                    },
-                    {
-                        materialUid:'2',
-                        campaignUid:'id',//活动id
-                        materialName:'消毒水',//物资名
-                        materialDesc:'送祝福积分兑消毒水',//物资说明
-                        materialSpecifications:'N95',//物资规格
-                        materialMeasurementUnits:'个',//物资计量单位(默认"件")
-                        materialCostPrice:'10',//物资成本价(分)
-                        materialSellPrice:'15',//物资销售价(分)
-                        materialTotalQuantity:'100',//计划投放总量(-1代表不限量)
-                        materialAppendedQuantity:'100',//已投放总量
-                        materialDrawnQuantity:'66',//已领取数量
-                        materialFreezingQuantity:'20',//冻结中的物资数量
-                        materialLastAppenedTime:'2020-03-03 14:30:56',//物资最后添加日期
-                    },
-                ],
-                redPacketList:[
-                    {
-                        packetUid:'不定量定额红包id',//红包UID
-                        campaignUid:'活动id',//活动UID
-                        packetName:'领取祝福得红包',//红包名称
-                        packetDesc:'每日首次领取祝福得红包',//红包说明
-                        packetType:'1',//红包类型[1-定额红包, 2-随机红包]
-                        packetTotalQuantity:'-1',//红包投放总数[-1表示无总数限制]
-                        packetAmountLow:'32',//单个定额红包金额(或随机红包的下限金额)(分)
-                        packetAmountHigh:'',//随机红包的上限金额(分)
-                        packetTotalAmount:'',//红包总金额[计算得出](分)
-                        packetDrawnQuantity:'10',//已领取红包个数
-                        packetDrawnAmount:'',//已领取红包金额(分)
-                    },
-                    {
-                        packetUid:'不定量随机红包id1',//红包UID
-                        campaignUid:'活动id',//活动UID
-                        packetName:'随机红包',//红包名称
-                        packetDesc:'发送祝福获得随机红包',//红包说明
-                        packetType:'2',//红包类型[1-定额红包, 2-随机红包]
-                        packetTotalQuantity:'-1',//红包投放总数[-1表示无总数限制]
-                        packetAmountLow:'10',//单个定额红包金额(或随机红包的下限金额)(分)
-                        packetAmountHigh:'50',//随机红包的上限金额(分)
-                        packetTotalAmount:'',//红包总金额[计算得出](分)
-                        packetDrawnQuantity:'20',//已领取红包个数
-                        packetDrawnAmount:'',//已领取红包金额(分)
-                    },
-                    {
-                        packetUid:'定量定额爱心基金红包id1',//红包UID
-                        campaignUid:'活动id',//活动UID
-                        packetName:'爱心基金红包',//红包名称
-                        packetDesc:'定量定额爱心基金红包',//红包说明
-                        packetType:'1',//红包类型[1-定额红包, 2-随机红包]
-                        packetTotalQuantity:'100',//红包投放总数[-1表示无总数限制]
-                        packetAmountLow:'120',//单个定额红包金额(或随机红包的下限金额)(分)
-                        packetAmountHigh:'',//随机红包的上限金额(分)
-                        packetTotalAmount:'',//红包总金额[计算得出](分)
-                        packetDrawnQuantity:'30',//已领取红包个数
-                        packetDrawnAmount:'',//已领取红包金额(分)
-                    },
-                ],
+                materialList:[],
+                redPacketList:[],
                 //活动类型
                 campaignTypes:{
                     1:"积分换红包活动",
@@ -1140,6 +1139,16 @@
                 campaignInfo:{},
                 campaignRules:[],
                 curCampaignInfo:[],
+                //活动规则uid
+                pointEffectiveRuleUid:'',//积分是否有效
+                pointsCountsRuleUid:'',//每成功发送一个有效祝福，积多少分(一个值, int)；
+                pointExchangePacketRuleUid:'',//每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)
+                pointExchangeMaterialRuleUid:'',//每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)
+                pointExchangeMaterialOrPacketCountsRuleUid:'',//每个用户，一天内可以兑换多少物资和红包(单值， int)
+                getPacketReceiveBlessingRuleUid:'',//接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；
+                receivePacketCountsRuleUid:'',//接收者，在同一天内，最多可以领取多少个红包(单值, int)；
+                blessingRewardsRuleUid:'',//发送祝福最多的第几名，领什么物资(json数组，每个数组值，有3个值，int, 物资UID，物资数量)
+                withdrawalTimesRuleUid:'',// 活动期间，每用户每天只能提现的次数(单值, int)
                 //物资管理打开得界面，弹出物资管理/建档/添加物资/设置物资使用规则 等页面
                 setMaterialsPageOpen:false,
                 addMaterialsPageOpen:false,
@@ -1150,6 +1159,7 @@
                 setMaterialUseRule:false,
                 controlSetCountLimit:false,//控制物资管理投放是否为无限，true为不限量，false为有限
                 materialCount:'',//物资管理列表数目
+                materialImageUrl:'',//物资图片
                 //红包管理得打开界面，弹出红包管理/添加红包/追加红包/设置红包使用规则 等页面
                 redPacketCount:'',//红包管理列表数目
                 packetTypes:{
@@ -1171,6 +1181,12 @@
                 addPacketCountPage:false,
                 setPacketUsePageRule:false,
                 addPacketCounts:'',//追加红包数目
+                packetImageUrl:'',
+                redPacketImageUid:'',
+                upImgUrl: process.env[this.$base] + "/medias/image/upload",
+                access_token: {
+                    access_token: this.$store.getters.token
+                },
                 packetData:{
                     packetUid:'',//红包UID
                     campaignUid:'',//活动UID
@@ -1180,10 +1196,20 @@
                     packetTotalQuantity:'',//红包投放总数[-1表示无总数限制]
                     packetAmountLow:'',//单个定额红包金额(或随机红包的下限金额)(分)
                     packetAmountHigh:'',//随机红包的上限金额(分)
-/*                    packetTotalAmount:'',//红包总金额[计算得出](分)
-                    packetDrawnQuantity:'',//已领取红包个数
-                    packetDrawnAmount:'',//已领取红包金额(分)*/
+                    packetImageUrl:'',
+                    redPacketSource:'',
                 },
+                //红包用途
+                redPacketSourceList:[
+                    {
+                        redPacketSource:1,
+                        name:'活动收礼获得'
+                    },
+                    {
+                        redPacketSource:2,
+                        name:'活动奖品兑换'
+                    },
+                ],
                 //ruleData,规则设置
                 setCampaignRulePage:false,
                 integralEffective:true,//积分是否有效
@@ -1200,22 +1226,29 @@
                     pointEffective:'',//积分是否有效
                     pointsCounts:'',//每成功发送一个有效祝福，积多少分(一个值, int)；
                     pointExchangePacket:[],// 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
-                    pointExchangePacketCounts:'',//每个用户，一天内可以兑换多少红包(单值， int)；
                     pointExchangeMaterial:[],// 每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
-                    pointExchangeMaterialCounts:'',//每个用户，一天内可以兑换多少物资(单值， int)；
+                    pointExchangeMaterialOrPacketCounts:'',//每个用户，一天内可以兑换多少物资和红包(单值， int)；
+                    getPacketReceiveBlessing:[],//接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；
                     receivePacketCounts:'',//接收者，在同一天内，最多可以领取多少个红包(单值, int)；
                     blessingRewards:[],//发送祝福最多的第几名，领什么物资(json数组，每个数组值，有3个值，int, 物资UID，物资数量)
                     withdrawalTimes:'',// 活动期间，每用户每天只能提现的次数(单值, int)
-                },
+                },//临时存，用于赋值
+                pointExchangePacket:[],// 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
+                pointExchangeMaterial:[],// 每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
+                getPacketReceiveBlessing:[],//接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；
+                blessingRewards:[],//发送祝福最多的第几名，领什么物资(json数组，每个数组值，有3个值，int, 物资UID，物资数量)
             }
         },
         created() {
             //获取当前操作人员
            this.appendUserNickName  = window.sessionStorage.getItem('userName');
+        },
+        mounted() {
             this.init();
         },
         methods: {
             init(){
+                // this.listLoading = true;
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.data));
                 data.page --;
@@ -1226,62 +1259,62 @@
                 // return false;
                 campaignsList(data).then(result => {
                     if(result.data.isSuccessful === "Y"){
-/*                        this.campaignList = result.data.data.campaignsList;
-                        this.count = result.data.data.count;
-                        for(let  i=0;i<this.campaignList.length;i++){
-                            //分别赋值，物资列表和红包列表,物资列表
-                            campaignsMaterialList({campaignUid:this.campaignList[i].campaignUid}).then(res => {
-                                if(res.data.isSuccessful === "Y"){
-                                    //当前活动红包列表
-                                    campaignsRedPacketList({campaignUid:this.campaignList[i].campaignUid}).then(re => {
-                                        if(re.data.isSuccessful === "Y"){
-                                            //赋值
-                                            this.campaignList[i].materialPutOnList = res.data.data;
-                                            this.campaignList[i].redPacketPutOnList = re.data.data;
-                                        }
-                                    }).catch(err => {});
-                                }
-                            }).catch(err => {});
-                        }*/
-                        this.campaignList = [];
+                        //this.campaignList 好像只能赋值一次。
+                        // this.campaignList = result.data.data.campaignsList;
                         this.count = result.data.data.count;
                         for(let  i=0;i<result.data.data.campaignsList.length;i++){
+                            result.data.data.campaignsList[i].materialPutOnList =[];
+                            result.data.data.campaignsList[i].redPacketPutOnList =[];
                             //分别赋值，物资列表和红包列表,物资列表
                             campaignsMaterialList({campaignUid:result.data.data.campaignsList[i].campaignUid}).then(res => {
                                 if(res.data.isSuccessful === "Y"){
-                                    result.data.data.campaignsList[i].materialPutOnList = res.data.data;
                                     //当前活动红包列表
                                     campaignsRedPacketList({campaignUid:result.data.data.campaignsList[i].campaignUid}).then(re => {
                                         if(re.data.isSuccessful === "Y"){
-                                            result.data.data.campaignsList[i].redPacketPutOnList = re.data.data;
                                             //赋值
-                                            this.campaignList.push(result.data.data.campaignsList[i]);
-                                            this.campaignList = this.compare(createTime);
-                                            console.log(i)
+                                            result.data.data.campaignsList[i].materialPutOnList = res.data.data;
+                                            result.data.data.campaignsList[i].redPacketPutOnList = re.data.data;
                                         }
                                     }).catch(err => {});
                                 }
                             }).catch(err => {});
                         }
-/*                        result.data.data.campaignsList.forEach(e => {
-                            //分别赋值，物资列表和红包列表,物资列表
-                            campaignsMaterialList({campaignUid:e.campaignUid}).then(res => {
-                                if(res.data.isSuccessful === "Y"){
-                                    e.materialPutOnList = res.data.data;
-                                    //当前活动红包列表
-                                    campaignsRedPacketList({campaignUid:e.campaignUid}).then(re => {
-                                        if(re.data.isSuccessful === "Y"){
-                                            //赋值
-                                            e.redPacketPutOnList = re.data.data;
-                                            this.campaignList.push(e)
-                                        }
-                                    }).catch(err => {});
-                                }
-                            }).catch(err => {});
-                        });*/
+                        console.log( result.data.data.campaignsList);
+                        this.campaignList  = result.data.data.campaignsList;
+                        // this.listLoading = false
                     }
                 }).catch(err => {});
             },
+            //上传图片
+            handleAvatarSuccess(file, fileList) {},
+            beforeAvatarUpload(file) {
+                var type = "image/jpg,image/jpeg,image/png,image/gif";
+                const isJPG = type.indexOf(file.type) != -1;
+                const isLt1M = file.size / 1024 / 1024 < 1;
+
+                if (!isJPG) {
+                    this.$message.error("上传图片只能是 JPG,JPEG,PNG,GIF 格式!");
+                }
+                if (!isLt1M) {
+                    this.$message.error("上传图片大小不能超过 1MB!");
+                }
+                return isJPG && isLt1M;
+            },
+            //物资图片上传成功
+            uploadSuccessMaterial(response, file, fileList) {
+                if (response.code == "200") {
+                    this.materialData.materialImageUrl = response.data.fileUrl;
+                    this.materialImageUrl = response.data.fileUrl;
+                }
+            },
+            //红包图片上传成功
+            uploadSuccessRedPacket(response, file, fileList) {
+                if (response.code == "200") {
+                    this.packetData.packetImageUrl = response.data.fileUrl;
+                    this.packetImageUrl = response.data.fileUrl;
+                }
+            },
+
             //查询当前资源信息
             findMaterialByCampaignUid(campaignUid){
                 //分别赋值，物资列表和红包列表,物资列表
@@ -1380,7 +1413,7 @@
                         campaignSubject:campaignInfo.campaignSubject,//活动主题
                         campaignContent:campaignInfo.campaignContent,//活动内容
                         campaignType:campaignInfo.campaignType,//活动类型
-                        campaignPlanedTotalAmount:$util.prices(campaignInfo.campaignPlanedTotalAmount),//计划投入资金
+                        campaignPlanedTotalAmount:campaignInfo.campaignPlanedTotalAmount/100,//计划投入资金
                         campaignParticipantsType :campaignInfo.campaignParticipantsType ,//参与者
                         campaignStartTime:campaignInfo.campaignStartTime,//开始时间
                         campaignStopTime:campaignInfo.campaignStopTime,//结束时间
@@ -1407,7 +1440,7 @@
                 //查询相应物资列表和红包列表
                 this.findMaterialByCampaignUid(this.curCampaignInfo.campaignUid);
                 this.findRedPacketCampaignUid(this.curCampaignInfo.campaignUid);
-                //todo 查出规则列表
+                //查出规则列表
                 this.campaignRules = [];
                 let campaignUid =  this.curCampaignInfo.campaignUid;
                 campaignsRulesList({campaignUid:campaignUid}).then(res => {
@@ -1417,76 +1450,102 @@
                             pointEffective:'',//积分是否有效
                             pointsCounts:'',//每成功发送一个有效祝福，积多少分(一个值, int)；
                             pointExchangePacket:[],// 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
-                            pointExchangePacketCounts:'',//每个用户，一天内可以兑换多少红包(单值， int)；
                             pointExchangeMaterial:[],// 每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
-                            pointExchangeMaterialCounts:'',//每个用户，一天内可以兑换多少物资(单值， int)；
+                            pointExchangeMaterialOrPacketCounts:'',//每个用户，一天内可以兑换多少物资和红包(单值， int)；
+                            getPacketReceiveBlessing:[],//接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；//赋值是为了无活动规则也显示下拉
                             receivePacketCounts:'',//接收者，在同一天内，最多可以领取多少个红包(单值, int)；
                             blessingRewards:[],//发送祝福最多的第几名，领什么物资(json数组，每个数组值，有3个值，int, 物资UID，物资数量)
                             withdrawalTimes:'',// 活动期间，每用户每天只能提现的次数(单值, int)
                         };
-                        // console.log(res);
-                        res.data.data.forEach( e => {
+                        //赋值活动规则
+                        this.campaignRules =res.data.data;
+                        //无活动规则.为了显示接收者，在收到新的祝福时，可以领取什么红包 的下拉框；
+                        if(this.campaignRules.length == 0){
+                            this.rulesData.getPacketReceiveBlessing = [{packetUid:''}]
+                        };
+                        //活动规则有值
+                        res.data.data.forEach( (e ,index)=> {
                             //积分是否有效
                             if(e.ruleSearchKey == 'ONE_SEND_VALID'){
                                 let bool = e.ruleValue1;
                                 this.rulesData.pointEffective = bool;
+                                this.pointEffectiveRuleUid = e.ruleUid;
                             }//每成功发送一个有效祝福，积多少分(一个值, int)；
                             if(e.ruleSearchKey == 'ONE_SEND_POINT'){
                                 this.rulesData.pointsCounts = e.ruleValue1;
-                            }//每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
+                                this.pointsCountsRuleUid = e.ruleUid
+                            }//每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)
                             if(e.ruleSearchKey == 'RED_PACKET_RECEIVE_RULE'){
-                                let info = {
-                                    packetUid:'',//红包id
-                                    pointCounts:'',//积分数
-                                };
                                 let arr = JSON.parse(e.ruleValue1);
-                                arr.forEach(e => {
-                                    info.pointCounts = e.pointCounts;
-                                    info.packetUid = e.packetUid;
+                                this.pointExchangePacket = arr;
+                                arr.forEach((item,idea) => {
+                                    let info = {
+                                        packetUid:'',//红包id
+                                        pointCounts:'',//积分数
+                                    };
+                                    info.pointCounts = arr[idea].pointCounts;
+                                    info.packetUid = arr[idea].packetUid;
                                     this.rulesData.pointExchangePacket.push(info);
                                 });
-                            }//每个用户，一天内可以兑换多少红包(单值， int)；
+                                this.pointExchangePacketRuleUid =  e.ruleUid;
+                            }//每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)
                             if(e.ruleSearchKey == 'MATERIAL_RECEIVE_RULE'){
-                                this.rulesData.pointExchangePacketCounts = e.ruleValue1;
-                            }// 每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
-                            if(e.ruleSearchKey == 'USER_RECEIVE_COUNT_RULE'){
-                                let info = {
-                                    materialUid:'',//物资id
-                                    pointCounts:'',//积分数
-                                };
                                 let arr = JSON.parse(e.ruleValue1);
-                                arr.forEach(e => {
-                                    info.pointCounts = e.pointCounts;
-                                    info.materialUid = e.materialUid;
+                                this.pointExchangeMaterial = arr;
+                                arr.forEach((item,idea)  => {
+                                    let info = {
+                                        materialUid:'',//物资id
+                                        pointCounts:'',//积分数
+                                    };
+                                    info.pointCounts = arr[idea].pointCounts;
+                                    info.materialUid = arr[idea].materialUid;
                                     this.rulesData.pointExchangeMaterial.push(info);
+
                                 });
-                            }//每个用户，一天内可以兑换多少物资(单值， int)；
+                                this.pointExchangeMaterialRuleUid = e.ruleUid;
+                            }//每个用户，一天内可以兑换多少物资和红包(单值， int)
+                            if(e.ruleSearchKey == 'USER_RECEIVE_COUNT_RULE'){
+                                let int = e.ruleValue1;
+                                this.rulesData.pointExchangeMaterialOrPacketCounts = int;
+                                this.pointExchangeMaterialOrPacketCountsRuleUid = e.ruleUid;
+                            }//接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；
                             if(e.ruleSearchKey == 'RECEIVE_MEMBER_RED_PACKET_RULE'){
-                                this.rulesData.pointExchangeMaterialCounts = e.ruleValue1;
+
+                                let arr = JSON.parse(e.ruleValue1);
+                                this.getPacketReceiveBlessing = arr;
+                                arr.forEach((item,idea)  => {
+                                    let info = {
+                                        packetUid:'',//红包id
+                                    };
+                                    info.packetUid = arr[idea].packetUid;
+                                    this.rulesData.getPacketReceiveBlessing.push(info);
+                                });
+                                this.getPacketReceiveBlessingRuleUid = e.ruleUid;
                             }//接收者，在同一天内，最多可以领取多少个红包(单值, int)；
                             if(e.ruleSearchKey == 'RECEIVE_MEMBER_RED_PACKET_COUNT_RULE'){
                                 this.rulesData.receivePacketCounts = e.ruleValue1;
+                                this.receivePacketCountsRuleUid = e.ruleUid;
                             }//发送祝福最多的第几名，领什么物资(json数组，每个数组值，有3个值，int, 物资UID，物资数量)
                             if(e.ruleSearchKey == 'CAMPAIGNS_TOP_AWARD_RULE'){
-                                console.log("====+++++++++++======"+e.ruleValue1);
-                                let info = {
-                                    rank:'',
-                                    materialUid:'',
-                                    materialCounts:'',
-                                };
                                 let arr = JSON.parse(e.ruleValue1);
-                                arr.forEach(e => {
-                                    info.rank = e.rank;
-                                    info.materialUid = e.materialUid;
-                                    info.materialCounts = e.materialCounts;
+                                this.blessingRewards = arr;
+                                arr.forEach((item,idea)  => {
+                                    let info = {
+                                        rank:'',
+                                        materialUid:'',
+                                        materialCounts:'',
+                                    };
+                                    info.rank = arr[idea].rank;
+                                    info.materialUid = arr[idea].materialUid;
+                                    info.materialCounts = arr[idea].materialCounts;
                                     this.rulesData.blessingRewards.push(info);
-                                })
+                                });
+                                this.blessingRewardsRuleUid = e.ruleUid;
                             }// 活动期间，每用户每天只能提现的次数(单值, int)
                             if(e.ruleSearchKey == 'MEMBER_WITHDRAW_RULE'){
                                 this.rulesData.withdrawalTimes = e.ruleValue1;
+                                this.withdrawalTimesRuleUid = e.ruleUid;
                             }
-
-
                         });
                     } else {
                         this.$message.error(res.data.message);
@@ -1523,87 +1582,233 @@
             },
             //提交设置活动规则
             setCampaignRule(){
-                console.log(this.rulesData);
-                let rulesList = [
-                    //是否有效祝福规则
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:1,
-                        ruleValue:this.rulesData.pointEffective,
-                    },
-                    //送祝福积分规则
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:2,
-                        ruleValue:this.rulesData.pointsCounts,
-                    },
-                    // 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:3,
-                        ruleValue:JSON.stringify(this.rulesData.pointExchangePacket),
-                    },
-                    //每个用户，一天内可以兑换多少红包(单值， int)；
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:4,
-                        ruleValue:this.rulesData.pointExchangePacketCounts,
-                    },
-                    //每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:5,
-                        ruleValue:JSON.stringify(this.rulesData.pointExchangeMaterial),
-                    },
-                    //物资领取规则；每个用户，一天内可以兑换多少物资和红包(单值， int)
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:6,
-                        ruleValue:this.rulesData.pointExchangeMaterialCounts,
-                    },
-                    //接收者一天最多可以领取红包数量规则
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:7,
-                        ruleValue:this.rulesData.receivePacketCounts,
-                    },
-                    //排名规则
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:8,
-                        ruleValue:JSON.stringify(this.rulesData.blessingRewards),
-                    },
-                    //提现规则
-                    {
-                        campaignUid:this.curCampaignInfo.campaignUid,
-                        ruleUid:9,
-                        ruleValue:this.rulesData.withdrawalTimes,
-                    },
-                ];
-                // return false;
-                rulesList.forEach(e => {
-                    console.log(e)
-                    campaignsRules(e).then(res => {
-                        if (res.data.isSuccessful === "Y") {
-/*                            this.$message({
+                // console.log(this.rulesData);
+                //红包兑换规则：需要选中红包，没有则需新建红包，
+                if(this.rulesData.pointExchangePacket.length ===0){
+                    this.$message.error({
+                        message: "未设置红包兑换规则",
+                        type: "success"
+                    });
+                    return false
+                }else  {
+                    for(let i=0;i<this.rulesData.pointExchangePacket.length;i++){
+                        if(this.rulesData.pointExchangePacket[i].packetUid === ''){
+                            this.$message.error({
+                                message: "红包兑换规则：未选择兑换红包,没有则需新建",
+                                type: "success"
+                            });
+                            return false;
+                        }
+                    }
+                }
+                //物资兑换规则：需要选中物资，没有则需新建物资，
+                if(this.rulesData.pointExchangeMaterial.length === 0){
+                    this.$message.error({
+                        message: "未设置物资兑换规则",
+                        type: "success"
+                    });
+                    return false
+                }else {
+                    for(let i=0;i<this.rulesData.pointExchangeMaterial.length;i++){
+                        if(this.rulesData.pointExchangeMaterial[i].materialUid === ''){
+                            this.$message.error({
+                                message: "物资兑换规则,未选择兑换物资物资,没有则需新建",
+                                type: "success"
+                            });
+                            return false;
+                        }
+                    }
+                }
+                //收到红包领取规则。需要选中红包，没有则需新建红包
+                if(this.rulesData.getPacketReceiveBlessing.length === 0){
+                    this.$message.error({
+                        message: "收到红包领取规则错误，未选择领取红包",
+                        type: "success"
+                    });
+                    return false
+                }
+                //排名规则,需要选中物资，没有物资则先新建物资
+                if(this.rulesData.blessingRewards.length ===0){
+                    this.$message.error({
+                        message: "未设置排名规则",
+                        type: "success"
+                    });
+                    return false
+                }
+                else {
+                    for(let i =0 ;i<this.rulesData.blessingRewards.length;i++){
+                        if(this.rulesData.blessingRewards[i].materialUid ===''){
+                            this.$message.error({
+                                message: "排名规则,未选择排名奖励物资,没有则需新建",
+                                type: "success"
+                            });
+                            return false
+                        }
+                    }
+                }
+                this.$refs['ruleForm'].validate((valid) => {
+                    if (valid) {
+                        if(this.campaignRules.length == 0){
+                            console.log(this.campaignRules);
+                            //组装新增规则
+                            /*组装规则*/
+                            let rulesList = [
+                                //是否有效祝福规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:this.rulesData.pointEffective,
+                                    ruleSearchKey:'ONE_SEND_VALID',
+                                },
+                                //送祝福积分规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:this.rulesData.pointsCounts,
+                                    ruleSearchKey:'ONE_SEND_POINT',
+                                },
+                                // 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:JSON.stringify(this.rulesData.pointExchangePacket),
+                                    ruleSearchKey:'RED_PACKET_RECEIVE_RULE',
+                                },
+                                //每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:JSON.stringify(this.rulesData.pointExchangeMaterial),
+                                    ruleSearchKey:'MATERIAL_RECEIVE_RULE',
+                                },
+                                //每个用户，一天内可以兑换多少物资和红包数量(单值， int)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:this.rulesData.pointExchangeMaterialOrPacketCounts,
+                                    ruleSearchKey:'USER_RECEIVE_COUNT_RULE',
+                                },
+                                //红包领取规则；接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；json
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:JSON.stringify(this.rulesData.getPacketReceiveBlessing),
+                                    ruleSearchKey:'RECEIVE_MEMBER_RED_PACKET_RULE',
+                                },
+                                //接收者一天最多可以领取红包数量规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:this.rulesData.receivePacketCounts,
+                                    ruleSearchKey:'RECEIVE_MEMBER_RED_PACKET_COUNT_RULE',
+                                },
+                                //排名规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:JSON.stringify(this.rulesData.blessingRewards),
+                                    ruleSearchKey:'CAMPAIGNS_TOP_AWARD_RULE',
+                                },
+                                //提现规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleValue:this.rulesData.withdrawalTimes,
+                                    ruleSearchKey:'MEMBER_WITHDRAW_RULE',
+                                },
+                            ];
+                            // console.log(rulesList);
+                            // return  false;
+                            rulesList.forEach(e => {
+                                campaignsSetRules(e).then(res => {
+                                    if (res.data.isSuccessful === "Y") {
+                                    } else {
+                                        this.$message.error(res.data.message);
+                                    }
+                                }).catch(err => {console.log("错误了")});
+                            });
+                            this.$message({
                                 message: "设置成功",
                                 type: "success"
                             });
-                            setTimeout(() => {
-                                this.init();
-                            }, 2000);*/
-                            //跳转到列表
-                        } else {
-                            this.$message.error(res.data.message);
+                            this.setCampaignRulePage = false;
                         }
-                    }).catch(err => {console.log("错误了")});
-                });
-                this.$message({
-                    message: "设置成功",
-                    type: "success"
-                });
-                this.setCampaignRulePage = false;
-                // this.setCampaignRulePage = false;
+                        //修改规则
+                        else {
+                            /*组装规则*/
+                            let rulesList = [
+                                //是否有效祝福规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.pointEffectiveRuleUid,
+                                    ruleValue:this.rulesData.pointEffective,
+                                },
+                                //送祝福积分规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.pointsCountsRuleUid,
+                                    ruleValue:this.rulesData.pointsCounts,
+                                },
+                                // 每多少积分，可以兑换什么红包(json数组，每个数组值，两个值, int, 红包投放UID)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.pointExchangePacketRuleUid,
+                                    ruleValue:JSON.stringify(this.rulesData.pointExchangePacket),
+                                },
+                                //每多少积分，可以兑换什么物资(json数组，每个数组值，有两个值，int, 物资UID)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.pointExchangeMaterialRuleUid,
+                                    ruleValue:JSON.stringify(this.rulesData.pointExchangeMaterial),
+                                },
+                                //每个用户，一天内可以兑换多少物资和红包数量(单值， int)；
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.pointExchangeMaterialOrPacketCountsRuleUid,
+                                    ruleValue:this.rulesData.pointExchangeMaterialOrPacketCounts,
+                                },
+                                //红包领取规则；接收者，在收到新的祝福时，可以领取什么红包(两个值, int, 红包投放UID)；json
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.getPacketReceiveBlessingRuleUid,
+                                    ruleValue:JSON.stringify(this.rulesData.getPacketReceiveBlessing),
+                                },
+                                //接收者一天最多可以领取红包数量规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.receivePacketCountsRuleUid,
+                                    ruleValue:this.rulesData.receivePacketCounts,
+                                },
+                                //排名规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.blessingRewardsRuleUid,
+                                    ruleValue:JSON.stringify(this.rulesData.blessingRewards),
+                                },
+                                //提现规则
+                                {
+                                    campaignUid:this.curCampaignInfo.campaignUid,
+                                    ruleUid:this.withdrawalTimesRuleUid,
+                                    ruleValue:this.rulesData.withdrawalTimes,
+                                },
+                            ];
+                            rulesList.forEach(e => {
+                                console.log(e);
+                                campaignsRules(e).then(res => {
+                                    if (res.data.isSuccessful === "Y") {
+                                        /*                            this.$message({
+                                                                        message: "设置成功",
+                                                                        type: "success"
+                                                                    });
+                                                                    setTimeout(() => {
+                                                                        this.init();
+                                                                    }, 2000);*/
+                                        //跳转到列表
+                                    } else {
+                                        this.$message.error(res.data.message);
+                                    }
+                                }).catch(err => {console.log("错误了")});
+                            });
+                            this.$message({
+                                message: "设置成功",
+                                type: "success"
+                            });
+                            this.setCampaignRulePage = false;
+                        }
+                    }});
+                //加上这个就进验证了不知到为毛！可能是执行顺序问题
+                return false;
             },
             //设置是否一天发一次有效
             changeEffective(){
@@ -1633,6 +1838,12 @@
                     pointCounts:'',//积分数
                 };
                 this.rulesData.pointExchangePacket.push(info);
+            },
+            addReceivePacket(){
+                let info = {
+                    packetUid:'',//红包id
+                };
+                this.rulesData.getPacketReceiveBlessing[0] = info;
             },
             //删除添加物资兑换规则
             //删除/添加红包兑换规则，
@@ -1778,10 +1989,13 @@
                         materialDesc: materialInfo.materialDesc,//物资说明
                         materialSpecifications: materialInfo.materialSpecifications,//物资规格
                         materialMeasurementUnits: materialInfo.materialMeasurementUnits,//物资计量单位(默认"件")
-                        materialCostPrice: $util.prices(materialInfo.materialCostPrice),//物资成本价(分)
-                        materialSellPrice: $util.prices(materialInfo.materialSellPrice),//物资销售价(分)
+                        materialCostPrice: materialInfo.materialCostPrice/100,//物资成本价(分)
+                        materialSellPrice: materialInfo.materialSellPrice/100,//物资销售价(分)
                         materialTotalQuantity: materialInfo.materialTotalQuantity,//计划投放总量(-1代表不限量)
+                        materialImageUrl:materialInfo.materialImageUrl,
                     };
+                    this.materialImageUrl = materialInfo.materialImageUrl;
+                    console.log(materialInfo);
                     //判断投放量展示效果
                     if(this.materialData.materialTotalQuantity == -1){
                         this.controlSetCountLimit = true;
@@ -1796,8 +2010,10 @@
                         materialCostPrice:'',//物资成本价(分)
                         materialSellPrice:'',//物资销售价(分)
                         materialTotalQuantity:'',//计划投放总量(-1代表不限量)
+                        materialImageUrl:'',
                     };
                    this.materialData.materialTotalQuantity = 0;
+                    this.materialImageUrl = "";
                 }
 
                 this.addMaterialsPageOpen = true;
@@ -1817,6 +2033,7 @@
                                 materialCostPrice:this.materialData.materialCostPrice *100,//物资成本价(分)
                                 materialSellPrice:this.materialData.materialSellPrice *100,//物资销售价(分)
                                 materialTotalQuantity:this.materialData.materialTotalQuantity,//计划投放总量(-1代表不限量)
+                                materialImageUrl:this.materialData.materialImageUrl,
                             };
                             // return false;
                             campaignsMaterialUpdate(data).then(res => {
@@ -1848,6 +2065,7 @@
                                 materialCostPrice:this.materialData.materialCostPrice *100,//物资成本价(分)
                                 materialSellPrice:this.materialData.materialSellPrice *100,//物资销售价(分)
                                 materialTotalQuantity:this.materialData.materialTotalQuantity,//计划投放总量(-1代表不限量)
+                                materialImageUrl:this.materialData.materialImageUrl,
                             };
                              // return false;
                             campaignsMaterialCreate(data).then(res => {
@@ -1856,6 +2074,8 @@
                                         message: "新增成功！",
                                         type: "success"
                                     });
+                                    this.init();
+                                    this.addMaterialsPageOpen  = false;
                                     this.setMaterialsPageOpen  = false;
                                     //跳转到列表
                                 } else {
@@ -1891,10 +2111,13 @@
                                 message: "删除成功",
                                 type: "success"
                             });
+                            //关闭弹窗
                             setTimeout(() => {
                                 this.init();
                             }, 2000);
                             //跳转到列表
+                            this.init();
+                            this.addMaterialsPageOpen  = false;
                         } else {
                             this.$message.error(res.data.message);
                         }
@@ -1926,17 +2149,15 @@
                             message: "添加成功",
                             type: "success"
                         });
-                        setTimeout(() => {
-                            this.init();
-                        }, 2000);
-                        //跳转到列表
                     } else {
                         this.$message.error(res.data.message);
                     }
                 }).catch(err => {console.log("错误了")});
 
                 console.log(data);
-                this.addMaterialPage = true;
+                this.init();
+                this.addMaterialPage = false;
+                this.setMaterialsPageOpen  = false;
             },
             //设为不限量
             setMaterialNoLimit(materialInfo){},
@@ -1967,10 +2188,10 @@
                         packetTotalQuantity:packetInfo.packetTotalQuantity,//红包投放总数[-1表示无总数限制]
                         packetAmountLow:packetInfo.packetAmountLow,//单个定额红包金额(或随机红包的下限金额)(分)
                         packetAmountHigh:packetInfo.packetAmountHigh,//随机红包的上限金额(分)
-/*                        packetTotalAmount:packetInfo.packetTotalAmount,//红包总金额[计算得出](分)
-                        packetDrawnQuantity:packetInfo.packetDrawnQuantity,//已领取红包个数
-                        packetDrawnAmount:packetInfo.packetDrawnAmount,//已领取红包金额(分)*/
-                    }
+                        packetImageUrl: packetInfo.packetImageUrl,
+                        redPacketSource: packetInfo.redPacketSource
+                    };
+                    this.packetImageUrl = packetInfo.packetImageUrl;
                 }else{
                     this.packetData = {
                         campaignUid:this.curCampaignInfo.campaignUid,//活动UID
@@ -1980,11 +2201,11 @@
                         packetTotalQuantity:'',//红包投放总数[-1表示无总数限制]
                         packetAmountLow:'',//单个定额红包金额(或随机红包的下限金额)(分)
                         packetAmountHigh:'',//随机红包的上限金额(分)
-/*                        packetTotalAmount:'',//红包总金额[计算得出](分)
-                        packetDrawnQuantity:'',//已领取红包个数
-                        packetDrawnAmount:'',//已领取红包金额(分)*/
+                        packetImageUrl:'',
+                        redPacketSource:'',
                     };
                     this.packetData.packetTotalQuantity = 0;
+                    this.packetImageUrl='';
                 }
                 this.addPacketInfoPageOpen = true;
             },
@@ -2001,12 +2222,13 @@
                 }
                 console.log(this.packetData.packetTotalQuantity)
             },
+            checkRedPacketSource(){},
             setPacket(){
                 if(this.packetData.packetUid != null){
                     console.log("编辑");
-                    this.$refs['packetForm'].validate((valid) => {
+                    this.$refs['redPacketForm'].validate((valid) => {
                         if (valid) {
-                            //todo 编辑
+                            // 编辑
                             let data ={
                                 packetUid:this.packetData.packetUid,
                                 campaignUid:this.packetData.campaignUid,//活动UID
@@ -2016,41 +2238,47 @@
                                 packetTotalQuantity:this.packetData.packetTotalQuantity,//红包投放总数[-1表示无总数限制]
                                 packetAmountLow:this.packetData.packetAmountLow*100,//单个定额红包金额(或随机红包的下限金额)(分)
                                 packetAmountHigh:this.packetData.packetAmountHigh*100,//随机红包的上限金额(分)
+                                packetImageUrl:this.packetData.packetImageUrl,
+                                redPacketSource:this.packetData.redPacketSource
                             };
                             console.log(data)
                         }});
                 }else {
                     console.log("添加");
-                    this.$refs['packetForm'].validate((valid) => {
-                        if (valid) {
-                            //todo 新增
-                            let data ={
-                                campaignUid:this.packetData.campaignUid,//活动UID
-                                packetName:this.packetData.packetName,//红包名称
-                                packetDesc:this.packetData.packetDesc,//红包说明
-                                packetType:this.packetData.packetType,//红包类型[1-定额红包, 2-随机红包]
-                                packetTotalQuantity:this.packetData.packetTotalQuantity,//红包投放总数[-1表示无总数限制]
-                                packetAmountLow:this.packetData.packetAmountLow*100,//单个定额红包金额(或随机红包的下限金额)(分)
-                                packetAmountHigh:this.packetData.packetAmountHigh*100,//随机红包的上限金额(分)
-                            };
-                            console.log(data);
-                            // return false;
-                            campaignsRedPacketAdd(data).then(res => {
-                                if (res.data.isSuccessful === "Y") {
-                                    this.$message({
-                                        message: "新增成功！",
-                                        type: "success"
-                                    });
-                                    setTimeout(() => {
-                                        this.$router.go(0);
-                                    }, 2000);
-                                    //跳转到列表
-                                } else {
-                                    this.$message.error(res.data.message);
-                                }
-                            });
-                        }});
+                    // 新增
+                    this.$refs['redPacketForm'].validate((valid) => {
+                            if (valid) {
+                                console.log("不知道为毛进来不到！！");
+                                let data ={
+                                    campaignUid:this.packetData.campaignUid,//活动UID
+                                    packetName:this.packetData.packetName,//红包名称
+                                    packetDesc:this.packetData.packetDesc,//红包说明
+                                    packetType:this.packetData.packetType,//红包类型[1-定额红包, 2-随机红包]
+                                    packetTotalQuantity:this.packetData.packetTotalQuantity,//红包投放总数[-1表示无总数限制]
+                                    packetAmountLow:this.packetData.packetAmountLow*100,//单个定额红包金额(或随机红包的下限金额)(分)
+                                    packetAmountHigh:this.packetData.packetAmountHigh*100,//随机红包的上限金额(分)
+                                    packetImageUrl:this.packetData.packetImageUrl,
+                                    redPacketSource:this.packetData.redPacketSource
+                                };
+                                console.log(data);
+                                // return false;
+                                campaignsRedPacketAdd(data).then(res => {
+                                    if (res.data.isSuccessful === "Y") {
+                                        this.$message({
+                                            message: "新增成功！",
+                                            type: "success"
+                                        });
+                                        setTimeout(() => {
+                                            this.$router.go(0);
+                                        }, 2000);
+                                        //跳转到列表
+                                    } else {
+                                        this.$message.error(res.data.message);
+                                    }
+                                });
+                            }});
                 }
+                return false;
                 this.addPacketInfoPageOpen  = false;
             },
             //设为不限量；

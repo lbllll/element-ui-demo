@@ -93,7 +93,7 @@
       <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
       <el-table-column prop="drawOrder" align="left" width="150" label="领取顺序号">
         <template slot-scope="scope">
-          <span><span style="font-weight: bolder">领取顺序号：</span>{{scope.row.drawOrder}}</span>
+          <span><span style="font-weight: bolder"></span>{{scope.row.drawOrder}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="memberInfo" align="left" width="220" label="用户信息"  >
@@ -112,8 +112,8 @@
           <span><span style="font-weight: bolder">物资名称：</span>{{scope.row.materialName}}</span>；
           <span><span style="font-weight: bolder">物资规格：</span>{{scope.row.materialSpecifications}}</span>
           <br>
-          <span><span style="font-weight: bolder">价格：</span>{{$util.prices(scope.row.materialCostPrice)}} 元</span>；
-<!--          <span><span style="font-weight: bolder">销售价：</span>{{scope.row.materialSellPrice/100}}</span>-->
+          <span><span style="font-weight: bolder">原价：</span>{{$util.prices(scope.row.materialCostPrice)}} 元</span>；
+          <span><span style="font-weight: bolder">销售价：</span>{{$util.prices(scope.row.materialSellPrice)}} 元</span>
           <br>
         </template>
       </el-table-column>
@@ -213,9 +213,15 @@
       :destroy-on-close="true"
       @close="nodeCollapse"
     >
-      <div v-for="(item, index) in query.Traces" :key="index">
-        <span>{{item.AcceptTime}}</span>
-        <span>{{item.AcceptStation}}</span>
+      <div v-if="traces.length > 0" v-for="(item, index) in traces" :key="index">
+        <div style="margin:10px">
+          <div style="margin:10px"><span>{{item.Location}}</span>：<span>{{item.AcceptTime}}</span></div>
+          <div style="margin:10px">{{item.AcceptStation}}</div>
+          <hr>
+        </div>
+      </div>
+      <div v-if="traces.length === 0">
+        <span>暂未查到物流信息，请确认物流公司和订单号！</span>
       </div>
 
       <span slot="footer" class="dialog-footer">
@@ -354,7 +360,9 @@
                 channelList:[
                 ],
                 queryCode: false,
-                query:[],
+                query:{},
+                traces:[],
+
             }
         },
         created() {
@@ -401,14 +409,23 @@
                         this.count = res.data.data.count;
                         // console.log(this.materialIssueList)
                     } else {
+                        this.materialIssueList = [];
                         this.$message.error(res.data.message);
                     }
                 }).catch(err => {console.log("错误了")});
             },
             //搜索
             search(){this.init();},
-            //重置搜索框
             resetQuery(){
+                this.data = {
+                    materialName:'',
+                    campaignUid:'',
+                    memberNickName:'',
+                    userType:'',
+                    memberLabelTreeCode:'',
+                    page:1,
+                };
+                this.data.campaignUid = this.curCampaignList.length>0?this.curCampaignList[0].campaignUid:'';
                 this.init();
             },
             //用户类型
@@ -542,8 +559,11 @@
             checkLogisticsPageOpen(recordUid){
                 campaignsMaterialDelivery({recordUid:recordUid}).then(res => {
                     if (res.data.isSuccessful === "Y") {
-                        console.log(this.deCodes(res.data.data))
-                        this.query = res.data.data;
+                        // console.log(this.deCodes(res.data.data));
+                        this.query = JSON.parse(this.deCodes(res.data.data));
+                        console.log(this.query);
+                        console.log(this.query.Traces);
+                        this.traces = this.query.Traces.reverse();
                     } else {
                         this.$message.error(res.data.message);
                     }
@@ -555,7 +575,6 @@
         }
     }
 </script>
-
 <style lang="scss" scoped>
   @import "~@/styles/mixin.scss";
   /*查询框*/

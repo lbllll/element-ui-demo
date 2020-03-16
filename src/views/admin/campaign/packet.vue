@@ -14,7 +14,7 @@
             @change="checkCampaign"
           >
             <el-option
-              v-for="item in campaignList"
+              v-for="item in curCampaignList"
               :key="item.campaignUid"
               :label="item.campaignSubject"
               :value="item.campaignUid"
@@ -56,44 +56,49 @@
         </div>
       </div>
     </el-form>
-    <!--  表格数据  -->
-    <el-table
-      class="tableStyle"
-      :data="packetRecordList"
-      border
-      :row-key="getRowKeys"
-      :header-cell-style="{background:'#afafaf',color:'#606266'}"
-      ref="multipleTable"
-      @selection-change="handleSelectionChange">
-      <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
-      <el-table-column prop="memberInfo" align="left" width="220" label="用户信息"  >
+
+      <!--  表格数据  -->
+      <el-table
+        class="tableStyle"
+        :data="packetRecordList"
+        border
+        :row-key="getRowKeys"
+        :header-cell-style="{background:'#afafaf',color:'#606266'}"
+        ref="multipleTable"
+        @selection-change="handleSelectionChange">
+        <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
+
+      <el-table-column prop="memberInfo" align="left" width="240" label="用户信息"  >
         <template slot-scope="scope">
           <div>
-            <img class="userHeadImg" v-image-preview  :src="scope.row.memberHeadPicUrl==''?' ':scope.row.memberHeadPicUrl"  width="50" height="50" />
+            <img class="userHeadImg" v-image-preview  :src="scope.row.memberHeadImageUrl==''?' ':scope.row.memberHeadImageUrl"  width="50" height="50" />
             <div class="userNameAndSex">
-              <span class="nickName">昵称：{{scope.row.memberNickName}}</span><br>
+              <span class="nickName">昵称：{{deCodes(scope.row.memberNickName)}}</span><br>
               <span class="sex">性别：{{scope.row.memberSex==null?"保密":sexGroup[scope.row.memberSex]}}</span>
             </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="redPacketAmount" align="left" width="200"  label="红包信息">
+
+      <el-table-column prop="redPacketAmount" align="left" width="220"  label="获得红包信息">
         <template slot-scope="scope">
-          <span><span style="font-weight: bolder">红包个数：</span>{{scope.row.packetCounts}}</span>
+          <span><span style="font-weight: bolder">获得红包总个数：</span>{{scope.row.getPacketCounts}} 个</span>
           <br>
-          <span><span style="font-weight: bolder">红包金额：</span>{{scope.row.redPacketAmount}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="sourceInfo" align="left"  width="300" label="祝福发送情况">
-        <template slot-scope="scope">
-          <span><span style="font-weight: bolder">已发送祝福：</span>{{scope.row.sendBlessingCounts}}</span>
-          <br>
-          <span><span style="font-weight: bolder">有效发送祝福：</span>{{scope.row.sendBlessingCountsEffective}}</span>
-          <br>
-          <span><span style="font-weight: bolder">有效接收祝福：</span>{{scope.row.receivedCount}}</span>
+          <span><span style="font-weight: bolder">红包金额：</span>{{$util.prices(scope.row.getPacketAmount)}} 元</span>
           <br>
         </template>
       </el-table-column>
+
+      <el-table-column prop="redPacketAmount" align="left" width="220"  label="祝福发送情况">
+        <template slot-scope="scope">
+          <span><span style="font-weight: bolder">已发送祝福总数：</span>{{scope.row.sendBlessingCounts}} 次</span>
+          <br>
+          <span><span style="font-weight: bolder">有效发送总数：</span>{{scope.row.effectiveSendBlessingCounts}} 次</span>
+          <br>
+          <span><span style="font-weight: bolder">接收总数：</span>{{scope.row.receiveBlessingCounts}} 次</span>
+        </template>
+      </el-table-column>
+
     </el-table>
     <!--  底部操作工具栏  -->
     <div class="footer flex-between">
@@ -118,6 +123,28 @@
 </template>
 
 <script>
+    import {
+        campaignsList,
+        campaignsAdd,
+        campaignsUpdate,
+        campaignsDelete,
+        campaignsState,
+        campaignsRules,
+        campaignsMaterialAdd,
+        campaignsMaterialCreate,
+        campaignsMaterialUpdate,
+        campaignsMaterialDetailList,
+        campaignsMaterialDelete,
+        campaignsMaterialList,
+        campaignsRedPacketAdd,
+        campaignsRedPacketList,
+        campaignsRedPacketMemberDetail,
+        campaignsRedPacketMemberTotal,
+        campaignsRulesList,
+        campaignsOnline,
+
+        userPacketRecordList,
+    } from "@/api/table";
     export default {
         name: "PACKET",
         components: {},
@@ -127,8 +154,10 @@
                     campaignUid:'',
                     memberNickName:'',
                     userType:'',
+                    memberLabelTreeCode:'',
                     page:1,
                 },
+                curCampaignList:[],
                 //用户类型
                 userTypeList:[
                     {
@@ -164,49 +193,58 @@
                 multipleSelection: [],
                 //活动列表：
                 campaignList:[],
-                packetRecordList:[
-                    {
-                        campaignUid:'1',//活动id
-                        packetUid:'2',//红包id
-                        memberUid:'3',//用户id
-                        memberNickName:'sss',//用户昵称
-                        memberSex:'MAN',
-                        memberHeadPicUrl: '',//用户头像
-                        redPacketAmount:'10',//红包金额
-                        drawTime: '20202022',//领取时间
-                        //可能会加：
-                        sendBlessingCounts:'21',//已发送祝福
-                        sendBlessingCountsEffective:'21',//有效发送祝福
-                        receivedCount:'2',//祝福接收总数
-                        packetCounts:'1',//红包个数
-                    },
-                    {
-                        campaignUid:'1',//活动id
-                        packetUid:'3',//红包id
-                        memberUid:'3',//用户id
-                        memberNickName:'昵称qq',//用户昵称
-                        memberSex:'NONE',
-                        memberHeadPicUrl: '',//用户头像
-                        redPacketAmount:'123',//红包金额
-                        drawTime: '20200406',//领取时间
-                        //可能会加：
-                        sendBlessingCounts:'12',//已发送祝福
-                        sendBlessingCountsEffective:'10',//有效发送祝福
-                        receivedCount:'2',//祝福接收总数
-                        packetCounts:'1',//红包个数
-                    },
-                ],
+                packetRecordList:[],
             }
         },
         created() {
-            this.init();
+            //加载活动列表
+            let data = {
+                campaignType:'',//活动类型[见UML图备注]
+                campaignState:'',//活动状态[1-策划中, 2-公示中, 3-进行中,4-已暂停,  5-已停止]
+                campaignSubject:'',//活动主题
+                campaignStartTime:'',//活动开始时间
+                campaignStopTime:'',//活动结束时间
+                page:0,
+            };
+            //初始加载活动列表，并将最近的，进行中的活动赋值
+            campaignsList(data).then(res => {
+                if (res.data.isSuccessful === "Y") {
+                    this.curCampaignList = res.data.data.campaignsList;
+                    this.data.campaignUid = this.curCampaignList.length>0?this.curCampaignList[0].campaignUid:'';
+                    this.init();
+                } else {
+                    this.$message.error(res.data.message);
+                }
+            }).catch(err => {console.log("错误了")});
         },
         methods: {
             init(){
-                console.log("init")
+                //获取用户信息，加载表格数据
+                let data = JSON.parse(JSON.stringify(this.data));
+                data.memberNickName = this.$util.encode(data.memberNickName);
+                data.page --;
+                userPacketRecordList(data).then(result => {
+                    if(result.data.isSuccessful === 'Y'){
+                        console.log(result);
+                        this.packetRecordList = result.data.data.data;
+                        //分页的话还需初始化count
+                        this.count = result.data.data.count;
+                        console.log(JSON.stringify( this.packetRecordList))
+                    }
+                    else {
+                        this.packetRecordList =[]
+                        this.$message.error(result.data.message);
+                    }
+                }).catch(err => {});
+            },
+            //用户编码
+            deCodes(str) {
+                return this.$util.decode(str);
             },
             //搜索
-            search(){},
+            search(){
+                this.init();
+            },
             //加载第几页
             handleCurrentChange(val) {
                 this.data.page = val;
@@ -239,17 +277,20 @@
             },
             //目前选中用户类型
             checkUserType() {
-                console.log(this.formData.userType)
+                console.log(this.data.userType)
                 this.init();
             },
             //重置搜索框
             resetQuery(){
-                this.data ={
+                this.data = {
                     campaignUid:'',
                     memberNickName:'',
                     userType:'',
+                    memberLabelTreeCode:'',
                     page:1,
                 };
+                this.data.campaignUid = this.curCampaignList.length>0?this.curCampaignList[0].campaignUid:'';
+                console.log("xxx")
                 this.init();
             },
         }

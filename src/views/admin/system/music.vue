@@ -20,7 +20,7 @@
       <el-table-column prop="musicName" align="left" label="音乐名"></el-table-column>
       <el-table-column prop="musicUrl" align="left" width="320" label="音乐">
         <template slot-scope="scope">
-          <audio :src="scope.row.musicUrl"  controls>
+          <audio :src="scope.row.musicUrl"  controls @click="onlyOneAudioPlay">
           </audio>
         </template>
       </el-table-column>
@@ -523,6 +523,21 @@
                         this.$message.error(res.data.message);
                     }
                 });
+            },
+            onlyOneAudioPlay(){
+                var audios = document.getElementsByTagName("audio");
+                  // 暂停函数
+                function pauseAll() {
+                    var self = this;
+                    [].forEach.call(audios, function (i) {
+                        // 将audios中其他的audio全部暂停
+                        i !== self && i.pause();
+                    })
+                }
+                // 给play事件绑定暂停函数
+                [].forEach.call(audios, function (i) {
+                    i.addEventListener("play", pauseAll.bind(i));
+                })
             },
         },
     }

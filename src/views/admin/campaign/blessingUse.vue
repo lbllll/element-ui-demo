@@ -233,7 +233,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="resourceCoverImageUrl" align="left" label="封面图" width="80">
+      <el-table-column prop="resourceCoverImageUrl" align="left" label="封面图" width="90">
         <template slot-scope="scope">
           <img v-image-preview :src="scope.row.resourceCoverImageUrl" width="60" height="60" />
         </template>
@@ -241,7 +241,7 @@
 
       <el-table-column prop="resourceMarkType" align="left" label="标记" width="100">
         <template slot-scope="scope">
-          <el-tag>{{markerTypes[scope.row.resourceMarkType]}}</el-tag>
+          <el-tag v-if="scope.row.resourceMarkType != ''">{{markerTypes[scope.row.resourceMarkType]}}</el-tag>
           <br>
           <span><el-button type="text" @click="setRescourceMarkerType(scope.row.resourceUid,scope.row.resourceMarkType)" size="small">打标记</el-button></span>
         </template>
@@ -277,7 +277,7 @@
       <el-table-column prop="memberInfo" align="left" label="创作者信息" width="100">
         <template slot-scope="scope">
           <div><img class="userHeadImg" v-image-preview :src="scope.row.resourceAuthorHeadPicUrl" width="60" height="60" /></div>
-          <span class="nickName">{{scope.row.resourceAuthorNickName}}</span>
+          <span class="nickName">{{deCodes(scope.row.resourceAuthorNickName)}}</span>
         </template>
       </el-table-column>
 
@@ -296,7 +296,7 @@
           <span>下载:{{scope.row.resourceDownloadCount}}次</span><br>
           <span>评论:{{scope.row.resourceCommentsCount}}条 </span>
           <span>收藏:{{scope.row.resourceFavoritesCount}}次</span><br>
-          <span>红包:{{scope.row.resourceAmountOfRedPacket}}</span><br>
+<!--          <span>红包:{{scope.row.resourceAmountOfRedPacket}}</span><br>-->
         </template>
       </el-table-column>
       <el-table-column prop="memberInfo" align="left" label="创建信息" width="150" >
@@ -617,7 +617,7 @@
         created() {
             //遍历所有标签，进行标签树组装
             //初始化当前业务资源类型下的树
-            labelListByBusinessType({labelBusinessType:"1"}).then(result => {
+            labelListByBusinessType({labelBusinessType:"2"}).then(result => {
                 if(result.data.isSuccessful === 'Y'){
                     //将数据转为map，以labelTreeCode为标识
                     let map = {};
@@ -675,6 +675,7 @@
             init(){
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.data));
+                data.resourceAuthorNickName = this.$util.encode(data.resourceAuthorNickName);
                 data.page --;
                 blessingList(data).then(result => {
                     if(result.code == 200){
@@ -1067,6 +1068,9 @@
                 console.log(resourceInfo);
                 console.log(this.formData);
                 this.openEditPage = true;
+            },
+            deCodes(str) {
+                return this.$util.decode(str);
             },
             updateSubmit(){
                 this.$refs['form'].validate((valid) => {

@@ -8,8 +8,9 @@
           @change="init"
           size="small"
         >
-          <el-radio label="1" border>资源标签</el-radio>
-          <el-radio label="2" border>用户标签</el-radio>
+          <el-radio label="1" border>分类标签</el-radio>
+          <el-radio label="2" border>作品标签</el-radio>
+          <el-radio label="3" border>用户标签</el-radio>
         </el-radio-group>
       </div>
     </el-form>
@@ -17,7 +18,7 @@
 <!--  树形标签结构  -->
 
     <div class="treeStyle">
-      <h3 class="header"><div class="moveOn" v-if="data.labelBusinessType==='1'" @click="getFirstLabel('1')">资源标签</div><div class="moveOn" v-if="data.labelBusinessType==='2'"  @click="getFirstLabel('2')">用户标签</div></h3>
+      <h3 class="header"><div class="moveOn" v-if="data.labelBusinessType==='1'" @click="getFirstLabel('1')">分类标签</div><div class="moveOn" v-if="data.labelBusinessType==='2'"  @click="getFirstLabel('2')">作品标签</div><div class="moveOn" v-if="data.labelBusinessType==='3'"  @click="getFirstLabel('3')">用户标签</div></h3>
       <el-tree
         class="el-tree--highlight-current "
         ref="tree"
@@ -221,8 +222,9 @@
                 },
                 //标签业务类型
                 labelBusinessTypes:{
-                    "1":"资源类型",
-                    "2":"用户类型",
+                    "1":"分类类型",
+                    "2":"作品类型",
+                    "3":"用户类型",
                 },
                 //标签状态
                 labelStatus:{

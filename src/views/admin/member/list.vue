@@ -159,8 +159,8 @@
       </el-table-column>
       <el-table-column prop="country" align="left" width="180" label="城市">
         <template slot-scope="scope">
-          <span>{{scope.row.wechatCountry===null?'未获取':scope.row.wechatCountry}}</span>
-          <span>{{scope.row.wechatProvince===null?'未获取':scope.row.wechatProvince}}</span>
+          <span>{{scope.row.wechatCountry===null?'':scope.row.wechatCountry}}</span>
+          <span>{{scope.row.wechatProvince===null?'':scope.row.wechatProvince}}</span>
           <span>{{scope.row.wechatCity===null?'未获取':scope.row.wechatCity}}</span>
         </template>
       </el-table-column>
@@ -177,7 +177,7 @@
             <span>简介：{{scope.row.userIntroduction == null?'用户懒，暂无简介':scope.row.userIntroduction | controlLength}}</span>
           </el-tooltip>
           <br>
-          <span><el-button type="text" @click="setUserType(scope.row.memberId,scope.row.userType)" size="small">设置用户类型</el-button></span>
+          <span><el-button type="text" @click="setUserType(scope.row.memberUid,scope.row.userType)" size="small">设置用户类型</el-button></span>
         </template>
       </el-table-column>
       <el-table-column prop="userBehavior" align="left"  width="110" label="用户行为">
@@ -195,9 +195,9 @@
       </el-table-column>
       <el-table-column prop="userCount" align="left" width="110" label="资金信息">
         <template slot-scope="scope">
-          <span>收入：{{scope.row.grossIncome}}</span><br>
-          <span>冻结：{{scope.row.lockedBalance}}</span><br>
-          <span>余额：{{scope.row.usableBalance}}</span><br>
+          <span>收入：{{$util.prices(scope.row.grossIncome)}} 元</span><br>
+          <span>冻结：{{$util.prices(scope.row.lockedBalance)}} 元</span><br>
+          <span>余额：{{$util.prices(scope.row.usableBalance)}} 元</span><br>
 <!--          <span><el-button type="text" @click="checkAccountDetails(scope.row.userAccountId)" size="small">查看详情</el-button></span>-->
         </template>
       </el-table-column>
@@ -213,7 +213,7 @@
           <el-tooltip :content="scope.row.remark">
             <span>{{scope.row.remark | controlLength}}</span>
           </el-tooltip>
-          <span class="editRemark"><el-button type="text" @click="setRemark(scope.row.memberId,scope.row.remark)" size="small">编辑</el-button></span>
+          <span class="editRemark"><el-button type="text" @click="setRemark(scope.row.memberUid,scope.row.remark)" size="small">编辑</el-button></span>
         </template>
       </el-table-column>
 
@@ -505,7 +505,7 @@
         },
         created() {
             //遍历所有用户标签，进行标签树组装
-            labelListByBusinessType({labelBusinessType:"2"}).then(result => {
+            labelListByBusinessType({labelBusinessType:"3"}).then(result => {
                 if(result.data.isSuccessful === "Y"){
                     //附一个没有树结构的标签列表,便于遍历，展示
                    this.labelListNoTree =  result.data.data;
@@ -635,7 +635,7 @@
                 this.curMemberId = memberUid;
                 this.curRemark = remark;
                 let data = {
-                    memberId:this.curMemberId,
+                    memberUid:this.curMemberId,
                     remarks:this.curRemark
                 };
                 console.log(data);
@@ -644,7 +644,7 @@
             //提交备注修改
             setRemarkSubmit(){
                 let data = {
-                    memberId:this.curMemberId,
+                    memberUid:this.curMemberId,
                     remarks:this.curRemark
                 };
                 memberRemark(data).then(res => {
@@ -687,8 +687,8 @@
             checkUserTypeNew(){
               console.log(this.userType);
             },
-            setUserType(memberId,userType){
-                this.curMemberId = memberId;
+            setUserType(memberUid,userType){
+                this.curMemberId = memberUid;
                 this.userType = userType;
                 console.log(this.curMemberId);
                 console.log(this.userType);
@@ -697,7 +697,7 @@
             },
             setUserTypeSubmit(){
                 let data = {
-                    memberId:this.curMemberId,
+                    memberUid:this.curMemberId,
                     memberType:this.userType
                 };
                 memberType(data).then(res => {
@@ -749,7 +749,7 @@
             checkLabels(curMemberInfo) {
                 //查询相应标签，并赋值当前便于渲染
                 this.curUserLabelsList= curMemberInfo.labelTreeCodes==null?[]:curMemberInfo.labelTreeCodes.split(",");
-                this.curMemberId =  curMemberInfo.memberId;
+                this.curMemberId =  curMemberInfo.memberUid;
                 //给当前角色选择树赋值
                 this.checkedLabels = this.curUserLabelsList;
                 //弹出
@@ -758,7 +758,7 @@
             //提交标签设置
             checkLabelsSubmit(){
                 let data = {
-                    memberId:this.curMemberId,
+                    memberUid:this.curMemberId,
                     labelTreeCodes:this.checkedLabels===''?'':this.checkedLabels.join(",")
                 };
                 memberLabel(data).then(res => {

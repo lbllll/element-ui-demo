@@ -159,7 +159,7 @@
           <el-input
             class="formItem"
             v-model="formData.resourceDefaultBlessingText"
-            maxlength="20"
+            maxlength="100"
             placeholder="请输入默认祝福语"
           ></el-input>
           <span class="describe">长度不超过100</span>
@@ -190,9 +190,9 @@
           >
             <el-option
               v-for="item in authorList"
-              :key="item.memberId"
-              :label="item.wechatNickName"
-              :value="item.memberId"
+              :key="item.memberUid"
+              :label="deCodes(item.wechatNickName)"
+              :value="item.memberUid"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -257,21 +257,17 @@
               musicList:[],
               markerList:[
                   {
-                      markerId:"1",
+                      markerId:1,
                       markerName:"无标记",
                   },
                   {
-                      markerId:"2",
-                      markerName:"推荐",
+                      markerId:2,
+                      markerName:"最新",
                   },
                   {
-                      markerId:"3",
-                      markerName:"火热",
-                  },
-                  {
-                      markerId:"4",
+                      markerId:3,
                       markerName:"人气",
-                  },
+                  }
 
               ],
               labels:[],
@@ -311,11 +307,11 @@
                   },
                   {
                       resourceType:2,
-                      name:"条漫"
+                      name:"插画"
                   },
                   {
                       resourceType:3,
-                      name:"插画" ,
+                      name:"漫画" ,
                   },
                   {
                       resourceType:4,
@@ -343,7 +339,7 @@
           //labelList
           //遍历所有标签，进行标签树组装
           //初始化当前业务类型下的树
-          labelListByBusinessType({labelBusinessType:"1"}).then(result => {
+          labelListByBusinessType({labelBusinessType:"2"}).then(result => {
               if(result.data.isSuccessful === 'Y'){
                   //将数据转为map，以labelTreeCode为标识
                   let map = {};
@@ -396,15 +392,15 @@
           beforeAvatarUpload(file) {
               var type = "image/jpg,image/jpeg,image/png,image/gif";
               const isJPG = type.indexOf(file.type) != -1;
-              const isLt2M = file.size / 1024 / 1024 < 1;
+              const isLt1M = file.size / 1024 / 1024 < 1;
 
               if (!isJPG) {
                   this.$message.error("上传图片只能是 JPG,JPEG,PNG,GIF 格式!");
               }
-              if (!isLt2M) {
+              if (!isLt1M) {
                   this.$message.error("上传图片大小不能超过 1MB!");
               }
-              return isJPG && isLt2M;
+              return isJPG && isLt1M;
           },
           //封面图上传成功
           uploadSuccessCover(response, file, fileList) {
@@ -447,6 +443,10 @@
                   this.formData.resourceFileUid = response.data.fileUid;
                   this.resourceUrl= response.data.fileUrl;
               }
+          },
+          //用户编码
+          deCodes(str) {
+              return this.$util.decode(str);
           },
           //选择作品类型
           checkCardType() {

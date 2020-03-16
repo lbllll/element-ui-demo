@@ -41,6 +41,7 @@ router.beforeEach(async(to, from, next) => {
             break;
           }
         }
+        // debugger
         next({ name: name })
       } catch (error) {
         next({ path: '/' })

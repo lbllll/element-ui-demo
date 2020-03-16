@@ -189,6 +189,9 @@ export function campaignsRules(data) {
 export function campaignsRulesList(data) {
   return http.get('/api/campaigns/info/rules/list', data, 'formData')
 }
+export function campaignsSetRules(data) {
+  return http.post('/api/campaigns/info/setRules', data, 'formData')
+}
 //活动物资相关
 //追加物资明细
 export function campaignsMaterialAdd(data) {
@@ -253,6 +256,22 @@ export function campaignsMaterialSend(data) {
 //获取物流公司列表
 export function trackingCompanyList(data) {
   return http.get('/api/delivery/channel/list', data, 'formData')
+}
+//活动查询用户发送祝福列表
+export function sendBlessingRecordList(data) {
+  return http.get('/api/campaigns/blessing/sendRecord', data, 'formData')
+}
+//用户积分查询
+export function userPointList(data) {
+  return http.get('/api/campaigns/points/list', data, 'formData')
+}
+//获取用户领取物资记录
+export function userGetMaterialList(data) {
+  return http.get('/api/campaigns/points/materials/detail', data, 'formData')
+}
+//红包领取记录查询
+export function userPacketRecordList(data) {
+  return http.get('/api/campaigns/packet/record', data, 'formData')
 }
 
 

@@ -233,7 +233,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="resourceCoverImageUrl" align="left" label="封面图" width="80">
+      <el-table-column prop="resourceCoverImageUrl" align="left"  label="封面图" width="85">
         <template slot-scope="scope">
           <img v-image-preview :src="scope.row.resourceCoverImageUrl" width="60" height="60" />
         </template>
@@ -241,7 +241,7 @@
 
       <el-table-column prop="resourceMarkType" align="left" label="标记" width="100">
         <template slot-scope="scope">
-          <el-tag>{{markerTypes[scope.row.resourceMarkType]}}</el-tag>
+          <el-tag v-if="scope.row.resourceMarkType != ''">{{markerTypes[scope.row.resourceMarkType]}}</el-tag>
           <br>
           <span><el-button type="text" @click="setRescourceMarkerType(scope.row.resourceUid,scope.row.resourceMarkType)" size="small">打标记</el-button></span>
         </template>
@@ -296,7 +296,7 @@
           <span>下载:{{scope.row.resourceDownloadCount}}次</span><br>
           <span>评论:{{scope.row.resourceCommentsCount}}条 </span>
           <span>收藏:{{scope.row.resourceFavoritesCount}}次</span><br>
-          <span>红包:{{scope.row.resourceAmountOfRedPacket}}</span><br>
+<!--          <span>红包:{{scope.row.resourceAmountOfRedPacket}}</span><br>-->
         </template>
       </el-table-column>
       <el-table-column prop="memberInfo" align="left" label="创建信息" width="150" >
@@ -535,13 +535,13 @@
             class="formItem"
             v-model="formData.resourceAuthorUid"
             placeholder="请选择作者"
-            @change="checkAuthorForEdit"
+            @change="checkAuthor"
           >
             <el-option
               v-for="item in authorList"
-              :key="item.memberId"
-              :label="item.wechatNickName"
-              :value="item.memberId"
+              :key="item.memberUid"
+              :label="deCodes(item.wechatNickName)"
+              :value="item.memberUid"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -636,23 +636,18 @@ export default {
             },
             {
                 markerId:2,
-                markerName:"推荐",
+                markerName:"最新",
             },
             {
                 markerId:3,
-                markerName:"火热",
-            },
-            {
-                markerId:4,
                 markerName:"人气",
-            },
+            }
 
         ],
         markerTypes:{
             1:"无标记",
-            2:"推荐",
-            3:"火热",
-            4:"人气",
+            2:"最新",
+            3:"人气",
         },
         fontList:[
             {
@@ -709,11 +704,11 @@ export default {
             },
             {
                 resourceType:2,
-                name:"条漫"
+                name:"插画"
             },
             {
                 resourceType:3,
-                name:"插画" ,
+                name:"漫画" ,
             },
             {
                 resourceType:4,
@@ -795,7 +790,7 @@ export default {
   created() {
       //遍历所有标签，进行标签树组装
       //初始化当前业务资源类型下的树
-      labelListByBusinessType({labelBusinessType:"1"}).then(result => {
+      labelListByBusinessType({labelBusinessType:"2"}).then(result => {
           if(result.data.isSuccessful === 'Y'){
               //将数据转为map，以labelTreeCode为标识
               let map = {};
@@ -867,6 +862,9 @@ export default {
       //用户编码
       deCodes(str) {
           return this.$util.decode(str);
+      },
+      checkAuthor(){
+          console.log(this.formData.resourceAuthorUid)
       },
         getRowKeys(row) {
             // 给表格每行增加一个唯一 标识，用作切换分页后保留被选中行的信息

@@ -250,14 +250,12 @@
                     });
                     //重组标签树
                     this.permissionList = menuArr;
-/*
                     //拼sql添加权限的语句
-                    let str = '';
+/*                    let str = '';
                     result.data.data.forEach(e => {
                          str += "("+e.moduleId+",1),"
                     });
-                    console.log(str);
-*/
+                    console.log(str);*/
 
 /*                    result.data.data.forEach(e => {
                         //组装一级菜单
