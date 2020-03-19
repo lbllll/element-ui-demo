@@ -1,7 +1,7 @@
 <template>
   <div class="bodyBox">
     <el-form ref="form" :model="formData" class="formBox" label-width="80px">
-      <p class="title">当前父节点标签：{{this.parentInfo.labelBusinessType==="1"?"资源管理":"用户管理"}}
+      <p class="title">当前父节点标签：{{this.parentInfo.labelBusinessType==="1"?"分类标签":this.parentInfo.labelBusinessType==="2"?"作品标签":"用户标签"}}
         \{{this.parentInfo.parentInfo ==={}?"":this.parentInfo.parentInfo.labelPathText }}</p>
       <el-form-item label="标签名" prop="labelText" verify>
         <el-input
@@ -299,9 +299,7 @@
                                             message: "添加成功！",
                                             type: "success"
                                         });
-                                        setTimeout(() => {
-                                            this.$router.go(0);
-                                        }, 2000);
+                                        this.$emit('handleFun');
                                         //跳转到列表
                                     } else {
                                         this.$message.error(res.data.message);

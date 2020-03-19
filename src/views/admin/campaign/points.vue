@@ -135,7 +135,7 @@
         :total="count"
       ></el-pagination>
     </div>
-
+    <!--领取物资详情-->
     <el-dialog
       title="活动物资管理"
       :visible.sync="materialDetailPage"

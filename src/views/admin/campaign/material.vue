@@ -91,7 +91,7 @@
       ref="multipleTable"
       @selection-change="handleSelectionChange">
       <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
-      <el-table-column prop="drawOrder" align="left" width="150" label="领取顺序号">
+      <el-table-column prop="drawOrder" align="left" width="80" label="领取顺序号">
         <template slot-scope="scope">
           <span><span style="font-weight: bolder"></span>{{scope.row.drawOrder}}</span>
         </template>
@@ -124,6 +124,18 @@
           <span><span style="font-weight: bolder">领取数量：</span>{{scope.row.drawQuantity}}</span>
           <br>
           <span><span style="font-weight: bolder">消耗积分：</span>{{scope.row.spentPoints}}</span>
+          <br>
+        </template>
+      </el-table-column>
+      <el-table-column prop="sourceInfo" align="left"  label="客户收获信息">
+        <template slot-scope="scope">
+          <span><span style="font-weight: bolder">地址：</span>{{scope.row.deliveryAddress==null?'用户还未填写':scope.row.deliveryAddress}}</span>
+          <br>
+          <span><span style="font-weight: bolder">详细地址：</span>{{scope.row.deliveryAddressDetail==null?'用户还未填写':scope.row.deliveryAddressDetail}}</span>
+          <br>
+          <span><span style="font-weight: bolder">联系客户：</span>{{scope.row.deliveryUserName==null?'用户还未填写':scope.row.deliveryUserName}}</span>
+          <br>
+          <span><span style="font-weight: bolder">联系电话：</span>{{scope.row.deliveryMobile==null?'用户还未填写':scope.row.deliveryMobile}}</span>
           <br>
         </template>
       </el-table-column>

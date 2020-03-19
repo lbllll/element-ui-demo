@@ -286,7 +286,7 @@
                 // 限制上传文件大小 2M
                 const isLt1M = file.size / 1024 / 1024 < 1;
                 this.getTimes(file);
-                const isTime60S = this.audioDuration >= 60 ? true : '';
+                const musicSeconds = this.audioDuration <= 25;
                 console.log("时间是："+this.audioDuration);
                 if (!isAudio) {
                     this.$message.error("上传文件只能是Mp3格式!");
@@ -295,9 +295,13 @@
                     if (!isLt1M) {
                         this.$message.error("上传文件大小不能超过 1MB!");
                         this.fileList = [];
+                    }else {
+                        if(!musicSeconds){
+                            this.$message.error("上传音乐时长不能超过25秒!");
+                        }
                     }
                 }
-                return isAudio && isLt1M
+                return isAudio && isLt1M && musicSeconds
             },
             getTimes(file) {
                 var content = file;

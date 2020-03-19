@@ -80,6 +80,7 @@
       <el-table
         :data="campaignList"
         border
+        :row-style="{height:'322px'}"
         :row-key="getRowKeys"
         :header-cell-style="{background:'#afafaf',color:'#606266'}"
         ref="multipleTable"
@@ -1242,10 +1243,20 @@
         created() {
             //获取当前操作人员
            this.appendUserNickName  = window.sessionStorage.getItem('userName');
+            this.myInterval = window.setInterval(() => {
+                setTimeout(() => {
+                    this.init() //调用接口的方法
+                }, 1)
+            }, 30000);
         },
         mounted() {
             this.init();
         },
+        destroyed(){
+            clearInterval(this.myInterval);
+        },
+/*        beforeDestroy(){
+        },*/
         methods: {
             init(){
                 // this.listLoading = true;
@@ -1314,7 +1325,6 @@
                     this.packetImageUrl = response.data.fileUrl;
                 }
             },
-
             //查询当前资源信息
             findMaterialByCampaignUid(campaignUid){
                 //分别赋值，物资列表和红包列表,物资列表
@@ -1373,20 +1383,6 @@
                 }
                 this.isIndeterminate = false;
             },
-            //数组排序
-            compare  (prop) {
-                return function (obj1, obj2) {
-                    var val1 = obj1[prop];
-                    var val2 = obj2[prop];
-                    if (val1 > val2) {
-                        return -1;
-                    } else if (val1 < val2) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                }
-            },
             //监听选择的内容
             handleSelectionChange(val) {
                 //val 为选中数据的集合
@@ -1405,6 +1401,7 @@
                 console.log("选择活动");
                 this.init();
             },
+/*==========================活动管理================================*/
             //打开新增或者编辑活动页面
             addCampaignPageOpen(campaignInfo){
                 if(campaignInfo.campaignUid != null){
@@ -1970,6 +1967,7 @@
                     }
                 }).catch(err => {console.log("错误了")});
             },
+/*====================活动物资管理===================================*/
             //活动物资管理
             setMaterialsPage(campaignInfo){
                 this.curCampaignInfo = campaignInfo;
@@ -2170,7 +2168,7 @@
                 this.setMaterialUseRule = false;
             },
 
-            //红包管理
+/*====================红包管理===================================*/
             setPacketPage(campaignInfo){
                 console.log(campaignInfo)
                 this.curCampaignInfo = campaignInfo;

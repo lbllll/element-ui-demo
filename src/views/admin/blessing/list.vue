@@ -158,17 +158,10 @@
      <div class="row-two">
        <!--   作品名   -->
        <div class="inputStyle">
-         <el-form-item prop="resourceAuthorNickName"  can-be-empty>
-           <el-input class="inputs" placeholder="请输入作品名" size="mini" v-model="data.resourceName"></el-input>
+         <el-form-item prop="resourceAuthorNickNameOrResourceName"  can-be-empty>
+           <el-input class="inputs" placeholder="作者名/作品名" size="mini" v-model="data.resourceAuthorNickNameOrResourceName"></el-input>
          </el-form-item>
        </div>
-       <!--   作者名   -->
-       <div class="inputStyle">
-         <el-form-item prop="nickName"  can-be-empty>
-           <el-input class="nickName" placeholder="请输入作者" size="mini" v-model="data.resourceAuthorNickName"></el-input>
-         </el-form-item>
-       </div>
-
        <!--标签筛选-->
        <div class="inputStyle">
          <el-form-item prop="labelIds"  can-be-empty>
@@ -223,7 +216,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
-      <el-table-column prop="sourceInfo" align="left" width="200" label="资源信息">
+      <el-table-column prop="sourceInfo" align="left" width="160" label="资源信息">
         <template slot-scope="scope">
           <span>名字：{{scope.row.resourceName}}</span>
           <br>
@@ -264,7 +257,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="labelsModelList"  align="left" label="标签" >
+      <el-table-column prop="labelsModelList"  width="200" align="left" label="标签" >
         <template slot-scope="scope">
           <div class="label-max-height">
             <el-tag class="labelStyle"  v-for="(item,index) in scope.row.labelsModelList">{{item.labelPathText}}</el-tag>
@@ -281,11 +274,15 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="memberInfo" align="left" label="状态" width="150">
+      <el-table-column prop="memberInfo" align="left" label="状态" width="160">
         <template slot-scope="scope">
-          <span>状态：{{resourceStates[scope.row.resourceState]}}</span><br>
-          <span>更新时间：{{$timeUtil.getFormatTime(scope.row.resourceStateLastChangeTime)}}</span><br>
-          <span>操作：<el-button @click="checkResourceState(scope.row)" type="text" size="small">{{scope.row.resourceState != '2'?'上线':'下线'}}</el-button></span>
+          <div v-if="scope.row.isDeleted === 'N'">
+            <span>{{resourceStates[scope.row.resourceState]}}</span><br>
+            <span v-if="scope.row.timingRelease!== null && scope.row.resourceState == '1'">(已定时:{{scope.row.timingRelease}})</span>
+          </div>
+          <div v-if="scope.row.isDeleted === 'Y'">
+            <span>已删除</span>
+          </div>
           <!--(状态变更历史)-->
 <!--          <span><el-button type="text" @click="checkStatus(scope.row.cardId)" size="small">查看明细</el-button></span>-->
         </template>
@@ -308,13 +305,15 @@
 
 
       <!--操作列处理-->
-      <el-table-column label="操作" align="left" width="100">
+      <el-table-column label="操作" align="left" width="150">
         <template slot-scope="scope">
 <!--          <router-link  type="primary" round icon="el-icon-edit" :to="{name: 'BLESSING_ADD', query: {id: scope.row.cardId}}">
             <el-button type="text" size="small">编辑</el-button>
           </router-link>-->
-          <el-button @click="delAll(scope.row.resourceUid)" type="text" size="small">删除</el-button>
+          <span>更新时间：{{$timeUtil.getFormatTime(scope.row.resourceStateLastChangeTime)}}</span><br>
           <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="delAll(scope.row.resourceUid)" type="text" size="small">删除</el-button>
+          <el-button @click="checkResourceState(scope.row)" type="text" size="small">{{scope.row.resourceState != '2'?'发布':'下线'}}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -545,13 +544,13 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="绑定音乐"  prop="resourceMusicUid">
           <el-select
             class="formItem"
             v-model="formData.resourceMusicUid"
             placeholder="请选择音乐"
             @change="checkMusicForEdit"
+            filterable
           >
             <el-option
               v-for="item in musicList"
@@ -560,6 +559,17 @@
               :value="item.musicId"
             ></el-option>
           </el-select>
+          <span class="describe">(可选)</span>
+        </el-form-item>
+        <el-form-item  label="定时发布"  prop="timingRelease">
+          <el-date-picker
+            class="formItem"
+            v-model="formData.timingRelease"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="选择日期时间">
+          </el-date-picker>
+          <span class="describe">(可选)</span>
         </el-form-item>
 <!--        &lt;!&ndash;   发布按钮     &ndash;&gt;
         <div class="footer">
@@ -599,10 +609,8 @@ export default {
   data() {
     return {
         data:{
-            resourceName:"",//资源名称
-            resourceAuthorNickName:"",//创作者名称
-
-            resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
+            resourceAuthorNickNameOrResourceName:"",//创作者名称
+            resourceLabelTreeCodes:"",//
             resourceKind:"",//资源类别[1-官方资源, 2-第三方创作者]
             resourceType:"",//资源类型
             resourceState:"",//资源状态
@@ -626,6 +634,7 @@ export default {
             resourceAuthorUid:"",//后端接口名字需要修改
             resourceType:"",
             resourceMarkType:"",
+            timingRelease:"",
         },
         cardList:[],
         labelList:[],
@@ -636,18 +645,18 @@ export default {
             },
             {
                 markerId:2,
-                markerName:"最新",
+                markerName:"NEW",
             },
             {
                 markerId:3,
-                markerName:"人气",
+                markerName:"HOT",
             }
 
         ],
         markerTypes:{
             1:"无标记",
-            2:"最新",
-            3:"人气",
+            2:"NEW",
+            3:"HOT",
         },
         fontList:[
             {
@@ -664,13 +673,13 @@ export default {
         //分页
         isIndeterminate: false,
         checkAll: false,
-        count: 6,
+        count: 0,
         multipleSelection: [],
         //控制打开设置标签界面
         controlOpenSetLabels:false,
         //控制打开标记设置界面
         controlOpenMarker:false,
-        markerType:'',
+        markerType:'1',
         curRescourceUid:'',
         curLabelsList:[],
         //预存选择的标签
@@ -718,7 +727,7 @@ export default {
         //资源状态
         resourceStates:{
             1:"草稿",
-            2:"上线",
+            2:"已发布",
             3:"已下线",
         },
         resourceStateList:[
@@ -728,7 +737,7 @@ export default {
             },
             {
                 resourceState:2,
-                name:"发布上线"
+                name:"已发布"
             },
             {
                 resourceState:3,
@@ -773,7 +782,23 @@ export default {
     //多选配置
     props: {
         checkItem: Boolean,
-        selectArr: Array
+        selectArr: Array,
+        messageLabelTreeCode:{
+            type:String,
+            default:'',
+        }
+    },
+    watch: {
+        messageLabelTreeCode:{
+            immediate: true,
+            handler: function (newValue, oldValue) {
+                // console.log(newValue);
+                this.data.resourceLabelTreeCodes = newValue;
+                this.blessingList= [];
+                // this.init();
+                // console.log("watch=="+this.data.resourceLabelTreeCodes);
+            }
+        },
     },
   filters: {
       //控制字符串长度，过长显示...
@@ -787,6 +812,9 @@ export default {
           return curStr;
       },
   },
+    beforeCreate(){
+        // this.data.resourceLabelTreeCodes = this.labelTreeCode;
+    },
   created() {
       //遍历所有标签，进行标签树组装
       //初始化当前业务资源类型下的树
@@ -836,19 +864,27 @@ export default {
           if(result.code == 200){
               this.musicList = result.data.data.list;
               //页的话还需初始化count
-              this.count = result.data.data.count;
               // console.log(JSON.stringify(this.musicList))
           }
       }).catch(err => {});
       //表格数据初始化
       this.init();
     },
+    mounted(){
+      // console.log("mounted");
+      // this.init();
+    },
   methods: {
       //初始化列表数据
       init(){
+          //如果是标签页面过来完全跳转
+          if(this.$route.params.resourceLabelTreeCodes){
+              console.log("blessingTreeCode==="+this.$route.params.resourceLabelTreeCodes);
+              this.data.resourceLabelTreeCodes = this.$route.params.resourceLabelTreeCodes;
+          }
           //获取用户信息，加载表格数据
           let data = JSON.parse(JSON.stringify(this.data));
-          data.resourceAuthorNickName = this.$util.encode(data.resourceAuthorNickName);
+          // data.resourceAuthorNickNameOrResourceName = this.$util.encode(data.resourceAuthorNickNameOrResourceName);
           data.page --;
           blessingList(data).then(result => {
               if(result.code == 200){
@@ -1083,8 +1119,7 @@ export default {
       },
       resetQuery(){
           this.data={
-              resourceName:"",//资源名称
-              resourceAuthorNickName:"",//创作者名称
+              resourceAuthorNickNameOrResourceName:"",//创作者名称
 
               resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
               resourceKind:"",//资源类别[1-官方资源, 2-第三方创作者]
@@ -1098,8 +1133,7 @@ export default {
       },
       resetFilterQuery(){
           this.data={
-              resourceName:"",//资源名称
-                  resourceAuthorNickName:"",//创作者名称
+              resourceAuthorNickNameOrResourceName:"",//创作者名称
 
                   resourceLabelTreeCodes:"",//todo 资源标签,筛选暂时还没加
                   resourceKind:"",//资源类别[1-官方资源, 2-第三方创作者]
@@ -1244,6 +1278,7 @@ export default {
                   resourceAuthorUid:resourceInfo.resourceAuthorUid,//后端接口名字需要修改
                   resourceType:resourceInfo.resourceType,
                   resourceMarkType:resourceInfo.resourceMarkType,
+                  timingRelease:resourceInfo.timingRelease,
           };
           console.log(resourceInfo);
           console.log(this.formData);

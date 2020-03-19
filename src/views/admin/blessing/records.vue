@@ -110,7 +110,7 @@
           <div>
             <img class="userHeadImg" v-image-preview :src="scope.row.memberHeadImageUrl" width="50" height="50" />
             <div class="userNameAndSex">
-              <span class="nickName">{{scope.row.memberNickName}}</span><br>
+              <span class="nickName">{{deCodes(scope.row.memberNickName)}}</span><br>
               <span class="sex">性别：{{scope.row.wechatSex==null?"保密":sexGroup[scope.row.wechatSex]}}</span>
             </div>
           </div>
@@ -452,6 +452,7 @@
             init(){
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.formData));
+                data.userNickName = this.$util.encode(data.userNickName);
                 data.page --;
                 console.log(data)
                 sendRecords(data).then(result => {
@@ -473,6 +474,10 @@
 
                     }
                 });
+            },
+            //用户编码
+            deCodes(str) {
+                return this.$util.decode(str);
             },
             //目前选中用户类型
             checkUserType() {

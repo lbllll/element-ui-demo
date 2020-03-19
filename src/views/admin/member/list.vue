@@ -383,7 +383,7 @@
         labelListByBusinessType
     } from "@/api/table";
     export default {
-        name: 'MEMBERS_LIST',
+        name: 'MEMBER_LIST',
         components: {},
         data() {
             return {
@@ -559,6 +559,11 @@
                 return row.cardId;
             },
             init() {
+                //如果是标签页面过来完全跳转
+                if(this.$route.params.memberLabelTreeCodes){
+                    console.log("memberTreeCode==="+this.$route.params.memberLabelTreeCodes);
+                    this.formData.labelIds = this.$route.params.memberLabelTreeCodes;
+                }
                 //获取用户信息，加载表格数据
                 let data = JSON.parse(JSON.stringify(this.formData));
                 data.wechatNickName = this.$util.encode(data.wechatNickName);

@@ -1,24 +1,35 @@
 <template>
   <div class="bodyBox">
 
-    <el-form :model="data" ref="searchs" class="searchBox">
-      <div class="radio">
-        <el-radio-group
-          v-model="data.labelBusinessType"
-          @change="init"
-          size="small"
-        >
-          <el-radio label="1" border>分类标签</el-radio>
-          <el-radio label="2" border>作品标签</el-radio>
-          <el-radio label="3" border>用户标签</el-radio>
-        </el-radio-group>
+    <div>
+<!--      <el-form :model="data" ref="searchs" class="searchBox">
+        <div class="radio">
+          <el-radio-group
+            v-model="data.labelBusinessType"
+            @change="init"
+            size="small"
+          >
+            <el-radio label="1" border>分类标签</el-radio>
+            <el-radio label="2" border>作品标签</el-radio>
+            <el-radio label="3" border>用户标签</el-radio>
+          </el-radio-group>
+        </div>
+      </el-form>-->
+      <div class="header">
+        <ul class="headUlStyle">
+<!--          <li class="boxPosition" :class="{'checkResourceTypeBox':data.labelBusinessType=='1'}"><el-button class="checkItem"  type="primary" size="small" @click="checkResourceType('1')">分类标签</el-button></li>-->
+          <li class="boxPosition" :class="{'checkResourceTypeBox':data.labelBusinessType=='2'}"><el-button class="checkItem" type="primary" size="small" @click="checkResourceType('2')">作品标签</el-button></li>
+          <li class="boxPosition" :class="{'checkResourceTypeBox':data.labelBusinessType=='3'}"><el-button class="checkItem"  type="primary" size="small" @click="checkResourceType('3')">用户标签</el-button></li>
+          <li class="boxPosition" ><el-button  class="checkItem" size="small" @click="openAdd()">新增标签</el-button></li>
+        </ul>
       </div>
-    </el-form>
+    </div>
+
 
 <!--  树形标签结构  -->
 
     <div class="treeStyle">
-      <h3 class="header"><div class="moveOn" v-if="data.labelBusinessType==='1'" @click="getFirstLabel('1')">分类标签</div><div class="moveOn" v-if="data.labelBusinessType==='2'"  @click="getFirstLabel('2')">作品标签</div><div class="moveOn" v-if="data.labelBusinessType==='3'"  @click="getFirstLabel('3')">用户标签</div></h3>
+<!--      <h3 class=""><div class="moveOn" v-if="data.labelBusinessType==='1'" @click="getFirstLabel('1')">分类标签</div><div class="moveOn" v-if="data.labelBusinessType==='2'"  @click="getFirstLabel('2')">作品标签</div><div class="moveOn" v-if="data.labelBusinessType==='3'"  @click="getFirstLabel('3')">用户标签</div></h3>-->
       <el-tree
         class="el-tree--highlight-current "
         ref="tree"
@@ -32,15 +43,11 @@
     </div>
     <!--  数据表格  -->
     <div class="tableStyle">
-      <div class="header">
-        <el-button type="primary" size="small" @click="openAdd()">新增标签</el-button>
-      </div>
-
       <el-table
         :data="childLabelList"
         border
         style="width: 100%"
-        :header-cell-style="{background:'#afafaf',color:'#606266'}"
+        :header-cell-style="{color:'#606266'}"
         ref="multipleTable"
         @selection-change="handleSelectionChange">
         <el-table-column
@@ -68,12 +75,34 @@
 <!--        <el-table-column prop="labelDisplayIndex" align="left" label="标签排序"></el-table-column>-->
         <el-table-column prop="labelStatus" align="left" label="标签状态">
           <template slot-scope="scope">
-            <el-switch
+            <div v-if="scope.row.isDeleted === 'N'">
+              <span>{{labelStatus[scope.row.labelStatus]}}</span>
+            </div>
+            <div v-if="scope.row.isDeleted === 'Y'">
+              <span>已删除</span>
+            </div>
+<!--            <el-switch
               v-model="scope.row.labelStatus"
               active-value="GROUNDED"
               inactive-value="UNGROUNDED"
               @change="setStatus(scope.$index,scope.row)"
-            ></el-switch>
+            ></el-switch>-->
+          </template>
+        </el-table-column>
+        <el-table-column prop="bindResourceCounts" align="left" label="关联数量">
+          <template slot-scope="scope">
+            <!--完全跳到资源列表-->
+            <div v-if="scope.row.labelBusinessType == '2' && scope.row.isDeleted === 'N'">
+              <span>关联数量：{{scope.row.bindResourceCounts}}</span><br>
+              <el-button type="text" size="small" @click="$router.push({name:'BLESSING_LIST', params: { resourceLabelTreeCodes: scope.row.labelTreeCode}})">查看关联作品</el-button>
+            </div>
+            <div v-if="scope.row.labelBusinessType == '3' && scope.row.isDeleted === 'N' ">
+              <span>关联数量：{{scope.row.bindResourceCounts}}</span><br>
+              <el-button type="text" size="small" @click="$router.push({name:'MEMBER_LIST', params: { memberLabelTreeCodes: scope.row.labelTreeCode}})">查看关联用户</el-button>
+            </div>
+            <!--标签页跳子组件-->
+            <!--当前页面弹窗，但是有点问题-->
+<!--            <el-button type="text" size="small" @click="openBindResource(scope.row.labelTreeCode)">查看绑定详情</el-button>-->
           </template>
         </el-table-column>
         <el-table-column label="操作" width="150" align="left">
@@ -81,21 +110,30 @@
 <!--            <router-link  type="primary" round  :to="{name: 'LABEL_ADD', query: {labelInfo: scope.row}}">
               <el-button type="text" size="small">编辑</el-button>
             </router-link>-->
-            <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
-<!--            <el-button @click="delAll(scope.row.labelId)" type="text" size="small">删除</el-button>-->
-<!--            <br>-->
-            <el-button
-              :disabled="scope.$index===0"
-              @click="moveUp(scope.$index,scope.row)"
-              type="text"
-              size="small"
-              style="margin: 0">上移</el-button>
-            <el-button
-              :disabled="scope.$index===(childLabelList.length-1)"
-              @click="moveDown(scope.$index,scope.row)"
-              type="text"
-              size="small"
-              style="margin: 0">下移</el-button>
+            <div v-if="scope.row.isDeleted === 'N'">
+              <el-button @click="edit(scope.row)" type="text" size="small">编辑</el-button>
+              <el-button @click="delAll(scope.row.labelId)" type="text" size="small">删除</el-button>
+              <span v-if="scope.row.labelStatus === 'UNGROUNDED'">
+                <el-button @click="setStatus(scope.row.labelId,'GROUNDED')" type="text" size="small">启用</el-button>
+              </span>
+              <span v-if="scope.row.labelStatus === 'GROUNDED'">
+                <el-button @click="setStatus(scope.row.labelId,'UNGROUNDED')" type="text" size="small">禁用</el-button>
+              </span>
+  <!--            <br>-->
+              <el-button
+                :disabled="scope.$index===0"
+                @click="moveUp(scope.$index,scope.row)"
+                type="text"
+                size="small"
+                style="margin: 0">上移</el-button>
+              <el-button
+                :disabled="scope.$index===(childLabelList.length-1)"
+                @click="moveDown(scope.$index,scope.row)"
+                type="text"
+                size="small"
+                style="margin: 0">下移</el-button>
+            </div>
+            <div v-if="scope.row.isDeleted === 'Y'"></div>
           </template>
         </el-table-column>
       </el-table>
@@ -125,7 +163,20 @@
     <el-dialog
       title="新增标签"
       :visible.sync="openAddPage">
-      <labelAdd :message="this.labelInfo" @func="getMsgFormSon"></labelAdd>
+      <labelAdd :message="this.labelInfo" @func="getMsgFormSon" @handleFun="reloadAndCloseAddPage"></labelAdd>
+    </el-dialog>
+
+    <el-dialog
+      title="标签相关作品"
+      width="80%"
+      :destroy-on-close="true"
+      :visible.sync="openBindResourcePage"
+      @open="openBindResourcePagePage"
+      @close="clearCheckResource">
+      <blessingList :messageLabelTreeCode = 'this.curLabelTreeCode' v-if="curLabelTreeCode"></blessingList>
+      <div class="checkBindLabelFooter">
+        <el-button type="primary" @click="openBindResourcePage = false ">返回</el-button>
+      </div>
     </el-dialog>
 
     <el-dialog
@@ -151,7 +202,6 @@
         <!--   发布按钮     -->
         <div class="footer">
           <el-button type="primary" @click="editSubmit()">确认修改</el-button>
-          <!--          <el-button type="primary" @click="previewData()">预览</el-button>-->
         </div>
       </el-form>
     </el-dialog>
@@ -166,19 +216,22 @@
         setLabelState,
         changeSort,
         labelUpdateText,
-        labelListByBusinessType
+        labelListByBusinessType,
+        labelDelete,
     } from "@/api/table";
     import labelAdd from "./labelAdd";
+    import blessingList from "../blessing/list";
     export default {
         name: "LABEL_LIST",
-        components: {labelAdd},
+        components: {labelAdd,blessingList},
         data() {
             return {
                 data:{
-                    labelBusinessType:'1',
+                    labelBusinessType:'2',
                     parentTreeCode:'',
                     page:1,
                 },
+                labelBusinessType:'',
                 //暂存当前选中标签的信息
                 labelInfo:{},
                 formData:{
@@ -237,6 +290,10 @@
                 curLabelInfo:{},
                 //当前选中父节点
                 curParentTreeCode:'',
+                //弹出资源列表
+                openBindResourcePage:false,
+                //当前label码
+                curLabelTreeCode:'',
             }
 
         },
@@ -247,14 +304,19 @@
         created() {
             //初始化加载当前业务类型标签树
             this.init();
-            //点击checkbox过后回到一级标签列表，清空labelInfo
-            this.labelInfo = {
-                parentInfo: {},
-                labelBusinessType:this.data.labelBusinessType
-            };
         },
         methods: {
             init(){
+                this.getLabelTree();
+                this.getChildList();
+            },
+            reloadAndCloseAddPage(){
+                console.log("ssssssss");
+                this.openAddPage = false;
+                this.init()
+            },
+            //组装标签树
+            getLabelTree(){
                 //遍历所有标签，进行标签树组装
                 let data = {
                     labelBusinessType:this.data.labelBusinessType
@@ -266,7 +328,7 @@
                         let map = {};
                         result.data.data.forEach( item => {
                             map[item.labelTreeCode] = item
-                       });
+                        });
                         let labelArr = [];
                         //然后遍历，只要当前item存在父标签parent则一直找，找到就设为其子标签
                         result.data.data.forEach(item => {
@@ -280,22 +342,27 @@
                         });
                         //重组标签树
                         this.labelList = labelArr;
-                        //组装数据
-                        //初始化当前业务类型的一级标签到数据表格
-                        let data = JSON.parse(JSON.stringify(this.data));
-                        data.page --;
-                        data.parentTreeCode= "-1";
-                        //点击checkbox过后回到一级标签列表，清空labelInfo
-                        this.labelInfo = {
-                            parentInfo: {},
-                            labelBusinessType:this.data.labelBusinessType
-                        };
-                        this.getChildList(data);
                     }
                 }).catch(err => {});
             },
+            //切换标签类型
+            checkResourceType(resourceType){
+                this.data.labelBusinessType = resourceType;
+                this.data.parentTreeCode = '-1';
+                this.parentInfo = {};
+                this.labelInfo = {
+                    parentInfo:{},
+                    labelBusinessType:this.data.labelBusinessType
+                };
+                this.init();
+            },
             //根据当前业务类型，获取子标签数据填充数据表格
-            getChildList(data){
+            getChildList(){
+                let data = {
+                    labelBusinessType:this.data.labelBusinessType,
+                    parentTreeCode:this.data.parentTreeCode,
+                    page:0,
+                };
                 labelListByParent(data).then(result => {
                     if(result.data.isSuccessful === 'Y'){
                         this.childLabelList = result.data.data.list;
@@ -341,22 +408,35 @@
             delAll(rowKey) {
                 //是字符串类型则就是 rowKey
                 if(typeof(rowKey) =='string'){
+                    //编辑
+                    labelDelete(rowKey).then(res => {
+                        if (res.data.isSuccessful === "Y") {
+                            this.$message({
+                                message: "删除成功！",
+                                type: "success"
+                            });
+                            this.init();
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                    });
                     console.log(rowKey);
                 }else {
                     //不是字符串类型是对象类型
                     console.log(this.multipleSelection);
-
                 }
                 //todo 组装keys，调用删除接口
             },
             //选择树形节点，在表格中显示相应信息
             handleNodeClick(v,e) {
-                //初始化当前业务类型的所选标签的子标签到数据表格
-                let data = JSON.parse(JSON.stringify(this.data));
-                data.page = 0;
-                //切换了设置当前选中parentTreeCode
-                data.parentTreeCode= v.labelTreeCode;
-                this.getChildList(data);
+                //表单数据赋值
+                // console.log(v);
+                this.data = {
+                    labelBusinessType:v.labelBusinessType,
+                    parentTreeCode:v.labelTreeCode,
+                    page:1
+                };
+                this.getChildList();
                 //将当前选中改的信息记录，将要传入到新增标签中做部分添加参数
                 this.labelInfo = {
                     parentInfo:v,
@@ -364,8 +444,19 @@
                 };
             },
             //启用禁用：
-            setStatus(index,row) {
-                //手动切换值
+            setStatus(labelId,labelStatus) {
+                //按钮切换，状态
+                setLabelState({ labelId: labelId,status:labelStatus })
+                    .then(res => {
+                        this.$message({
+                            type: "success",
+                            message: "操作成功"
+                        });
+                        this.init();
+                    })
+                    .catch(err => {});
+                //raido的切换状态
+               /* //手动切换值
                 if(row.labelStatus === "UNGROUNDED"){
                     row.labelStatus = "GROUNDED"
                 }else {
@@ -398,7 +489,19 @@
                             type: "info",
                             message: "已取消"
                         });
-                    });
+                    });*/
+            },
+            //跳资源列表子组件
+            openBindResource(labelTreeCode){
+                this.openBindResourcePage = true;
+                this.curLabelTreeCode = labelTreeCode;
+            },
+            //打开，关闭绑定资源详情
+            openBindResourcePagePage(){
+                // this.curLabelTreeCode = '';
+            },
+            clearCheckResource(){
+                // this.curLabelTreeCode = '';
             },
             //上移
             moveUp(index,row){
@@ -551,19 +654,26 @@
     cursor: pointer;
   }
   .header {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    .inputs {
-      width: 260px;
-      margin-right: 20px;
+    background-color: #D7D7D7;
+    .headUlStyle > li{
+      display: inline-block;
+      margin: 10px 10px 0 0;
     }
-    .times {
-      width: 320px;
-      margin-right: 20px;
+    .boxPosition{
+      position: relative;
+      width: 100px;
+      height: 50px;
+    }
+    .checkResourceTypeBox {
+      background-color: white;
+    }
+    .checkItem{
+      position: relative;
+      top: 15%;
+      left: 10%;
     }
   }
   .treeStyle{
-    margin-top: 100px;
     width: 15%;
     float: left;
   }
@@ -596,5 +706,9 @@
   .footer {
     margin-top: 20px;
     @include flex-center;
+  }
+  .checkBindLabelFooter{
+    right: 20px;
+    top: 20px;
   }
 </style>

@@ -204,6 +204,7 @@
             v-model="formData.resourceMusicUid"
             placeholder="请选择音乐"
             @change="checkMusic"
+            filterable
           >
             <el-option
               v-for="item in musicList"
@@ -212,7 +213,20 @@
               :value="item.musicId"
             ></el-option>
           </el-select>
+          <span class="describe">(可选)</span>
         </el-form-item>
+        <el-form-item  label="定时发布"  prop="timingRelease">
+          <el-date-picker
+            class="formItem"
+            v-model="formData.timingRelease"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="选择日期时间">
+          </el-date-picker>
+          <span class="describe">(可选)</span>
+        </el-form-item>
+
+
 <!--   发布按钮     -->
         <div class="footer">
           <el-button type="primary" @click="releaseData">{{$route.query.id?'确认修改':'确认发布'}}</el-button>
@@ -250,6 +264,7 @@
                   resourceAuthorUid:"",//后端接口名字需要修改
                   resourceType:"",
                   resourceMarkType:"",
+                  timingRelease:'',
               },
               openAddPage:false,
               labelList:[],
@@ -508,6 +523,7 @@
                           //删除cardId字段
                           delete this.formData.resourceUid;
                           console.log(this.formData);
+                          // return false;
                           //增加
                           blessingAdd(this.formData).then(res => {
                               if (res.data.isSuccessful === "Y") {

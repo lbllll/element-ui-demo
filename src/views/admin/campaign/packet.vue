@@ -99,6 +99,12 @@
         </template>
       </el-table-column>
 
+      <el-table-column prop="redPacketAmount" align="left" width="220"  label="查看红包领取详情">
+        <template slot-scope="scope">
+          <el-button @click="checkGetRedPacketDetailsPage(scope.row)" type="text" size="small">查看红包领取详情</el-button>
+        </template>
+      </el-table-column>
+
     </el-table>
     <!--  底部操作工具栏  -->
     <div class="footer flex-between">
@@ -119,6 +125,46 @@
         :total="count"
       ></el-pagination>
     </div>
+
+    <!--用户领取红包详情-->
+    <el-dialog
+      title="红包领取详情"
+      :visible.sync="openCheckRedPacketDetail"
+      width="50%"
+      :destroy-on-close="true"
+      @close="nodeCollapse"
+    >
+      <el-table
+        :data="getRedPacketDetailsList"
+        border
+        :row-key="getRowKeysForRedPacket"
+        :header-cell-style="{background:'#afafaf',color:'#606266'}"
+        ref="multipleTable"
+      >
+        <el-table-column align="left" type="selection" reserve-selection width="40"></el-table-column>
+        <el-table-column prop="sourceInfo" align="left"  label="红包信息">
+          <template slot-scope="scope">
+            <span><span style="font-weight: bolder">红包名称：</span>{{scope.row.packetName}}</span>；
+            <br>
+            <span><span style="font-weight: bolder">红包金额：</span>{{$util.prices(scope.row.redPacketAmount)}} 元</span>；
+            <br>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sourceInfo" align="left"  label="领取信息">
+          <template slot-scope="scope">
+            <span><span style="font-weight: bolder">领取时间：</span>{{scope.row.drawTime}}</span>
+            <br>
+            <span><span style="font-weight: bolder">红包来源：</span>{{drawSources[scope.row.drawSource]}}</span>
+            <br>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+          <!-- todo  选择物资，输入数量，上线前可以编辑，删除，上线后不能动-->
+          <el-button size="small" @click="openCheckRedPacketDetail = false">返 回</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -194,6 +240,15 @@
                 //活动列表：
                 campaignList:[],
                 packetRecordList:[],
+                //打开查看红包领取详情
+                openCheckRedPacketDetail:false,
+                curUserInfo:'',
+                getRedPacketDetailsList:[],
+                //红包来源
+                drawSources:{
+                    1:'活动收礼获得',
+                    2:'活动奖品兑换'
+                },
             }
         },
         created() {
@@ -225,11 +280,11 @@
                 data.page --;
                 userPacketRecordList(data).then(result => {
                     if(result.data.isSuccessful === 'Y'){
-                        console.log(result);
+                        // console.log(result);
                         this.packetRecordList = result.data.data.data;
                         //分页的话还需初始化count
                         this.count = result.data.data.count;
-                        console.log(JSON.stringify( this.packetRecordList))
+                        // console.log(JSON.stringify( this.packetRecordList))
                     }
                     else {
                         this.packetRecordList =[]
@@ -293,6 +348,34 @@
                 console.log("xxx")
                 this.init();
             },
+            //打开领取红包详情
+            checkGetRedPacketDetailsPage(userInfo){
+                this.curUserInfo = userInfo;
+                let data = {
+                    campaignUid:userInfo.campaignUid,
+                    memberUid:userInfo.memberUid,
+                };
+                campaignsRedPacketMemberDetail(data).then(result => {
+                    if(result.data.isSuccessful === 'Y'){
+                        console.log(result);
+                        this.getRedPacketDetailsList = result.data.data;
+                    }
+                    else {
+                        this.getRedPacketDetailsList =[]
+                        this.$message.error(result.data.message);
+                    }
+                }).catch(err => {});
+                this.openCheckRedPacketDetail = true;
+            },
+            getRowKeysForRedPacket(row){
+                return row.redPacketUid;
+            },
+            checkGetRedPacketDetails(){
+
+                return false;
+            },
+            nodeCollapse(){},
+
         }
     }
 </script>

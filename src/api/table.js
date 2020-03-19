@@ -94,6 +94,9 @@ export function labelAdd(data) {
 export function labelUpdateText(data) {
   return http.put('/api/sys/labels/info/labelText', data, 'formData')
 }
+export function labelDelete(data) {
+  return http.delete('/api/sys/labels/info?labelId='+data, 'formData')
+}
 //音乐管理设置
 export function musicAdd(data) {
   return http.post('/api/sys/musics/info', data, 'formData')
@@ -147,6 +150,10 @@ export function blessingDelete(data) {
 }
 export function sendRecords(data) {
   return http.get('/api/blessing/resources/sendRecords', data, 'formData')
+}
+export function sendRecordCounts(data) {
+
+  return http.get('/api/blessing/resources/sendRecordCounts', data, 'formData')
 }
 
 //用户档案管理中心
