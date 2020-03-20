@@ -355,6 +355,7 @@
         :props="defaultProps"
         :default-checked-keys="curLabelsList"
         :default-expanded-keys="curLabelsList"
+        :check-strictly="true"
         @check-change="handleCheckChange"
       >
       </el-tree>

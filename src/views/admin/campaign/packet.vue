@@ -101,6 +101,10 @@
 
       <el-table-column prop="redPacketAmount" align="left" width="220"  label="查看红包领取详情">
         <template slot-scope="scope">
+          <span><span style="font-weight: bolder">领取红包数：</span>{{scope.row.getPacketCounts}} 个</span>
+          <br>
+          <span><span style="font-weight: bolder">红包金额：</span>{{$util.prices(scope.row.getPacketAmount)}} 元</span>
+          <br>
           <el-button @click="checkGetRedPacketDetailsPage(scope.row)" type="text" size="small">查看红包领取详情</el-button>
         </template>
       </el-table-column>

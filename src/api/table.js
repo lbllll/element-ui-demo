@@ -281,4 +281,26 @@ export function userPacketRecordList(data) {
   return http.get('/api/campaigns/packet/record', data, 'formData')
 }
 
+/**
+ * 系统配置
+ */
+//获取系统配置列表
+//用户积分查询
+export function systemConfigList(data) {
+  return http.get('/api/sys/setting/list', data, 'formData')
+}
+//修改系统配置参数
+export function systemConfigUpdate(data) {
+  return http.post('/api/sys/setting/update', data, 'formData')
+}
 
+/**
+ * 用户反馈信息
+ */
+export function opinionsList(data) {
+  return http.get('/api/sys/opinions/list', data, 'formData')
+}
+//阅读反馈信息
+export function opinionsIsRead(data) {
+  return http.put('/api/sys/opinions/isRead', data, 'formData')
+}

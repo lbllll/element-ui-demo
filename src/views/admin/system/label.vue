@@ -183,7 +183,7 @@
       title="编辑标签信息"
       :visible.sync="openEditPage">
       <el-form ref="form" :model="formData" class="formBox" label-width="80px">
-
+        <p class="title">当前节点标签：{{this.curParentLabelText}}</p>
         <el-form-item label="标签名" prop="labelText" verify>
           <el-input
             class="formItem"
@@ -294,6 +294,8 @@
                 openBindResourcePage:false,
                 //当前label码
                 curLabelTreeCode:'',
+                //编辑时，当前父节点：
+                curParentLabelText:'',
             }
 
         },
@@ -569,7 +571,7 @@
                     };
                     //当前数据
                     let dataCur = {
-                        labelId:this.childLabelList[index].labelId,
+                        labelId:this.childLabel1List[index].labelId,
                         sort:this.childLabelList[index+1].labelDisplayIndex
                     };
                     changeSort(dataCur).then(res => {
@@ -612,6 +614,7 @@
             },
             edit(labelInfo){
                 this.formData = labelInfo;
+                this.curParentLabelText = labelInfo.labelPathText
                 this.openEditPage =true;
             },
             getMsgFormSon(data){

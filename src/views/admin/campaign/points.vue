@@ -105,13 +105,10 @@
 
       <el-table-column prop="sourceInfo" align="left"  width="300" label="领取物资奖品数">
         <template slot-scope="scope">
-          <template slot-scope="scope">
             <span><span style="font-weight: bolder">领取物资奖品数：</span>{{scope.row.getMaterialCount}} 件</span>
             <br>
             <span><span style="font-weight: bolder">物资金额：</span>{{$util.prices(scope.row.getMaterialAmount)}} 元</span>
             <br>
-          </template>
-          <br>
           <el-button type="text" ize="mini" @click="checkMaterialDetails(scope.row)">查看领取物资详情</el-button>
         </template>
       </el-table-column>
